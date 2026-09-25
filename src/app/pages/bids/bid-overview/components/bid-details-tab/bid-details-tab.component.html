@@ -1,0 +1,268 @@
+@if (!bidRecord) {
+  <p>Loading...</p>
+} @else {
+  @if (!isClosed) {
+    <div class="header-actions">
+      <button class="btn btn-warning" (click)="saveBidData()" [disabled]="isSaving">Save Project</button>
+      <button class="btn btn-danger" (click)="getBidLost()" [disabled]="isClosingLost">Bid Lost</button>
+      <button class="btn btn-success" (click)="getBidWon()" [disabled]="isConverting">{{ isConverting ? 'Creating Project...' : 'Bid Won' }}</button>
+    </div>
+  }
+
+  @if (message) {
+    <div class="message">{{ message }}</div>
+  }
+
+  <form [formGroup]="form">
+    <div class="form-group row header-fields">
+      <div class="field">
+        <label>Bid Id</label>
+        <input type="text" [value]="bidRecord.displayBidID" readonly />
+      </div>
+      <div class="field">
+        <label>Bid Name</label>
+        <input type="text" [value]="bidRecord.bidName" readonly />
+      </div>
+      <a class="doc-link" [routerLink]="['/bids/documents', bidId]"><i class="fas fa-folder"></i> Bid Document Library</a>
+    </div>
+
+     <div class="section-header">
+        <h2>Bid Access</h2>
+
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          [disabled]="isClosed"
+          (click)="openAddAccess()">
+          Add Access
+        </button>
+    </div>
+    <div class="hr-line-dashed"></div>
+
+    <!-- See bid-summary-tab's header comment re: conditionally including the Action e-column
+         with @if - isClosed is fixed for this tab's lifetime, same flag applies here. -->
+    <ejs-grid [dataSource]="bidAccessSummary" width="auto">
+      <e-columns>
+        @if (!isClosed) {
+          <e-column headerText="Action" width="90">
+            <ng-template #template let-data>
+              <button class="btn btn-danger btn-sm" (click)="deleteAccess(data)">Delete</button>
+            </ng-template>
+          </e-column>
+        }
+        <e-column field="roleName" headerText="Role" width="150"></e-column>
+        <e-column field="employeeName" headerText="Employee" width="180"></e-column>
+      </e-columns>
+    </ejs-grid>
+
+    <div class="two-col">
+      <div class="col">
+        <h2>Property Address</h2>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group row">
+          <label>Jobsite</label>
+          <input type="text" placeholder="Enter jobsite" formControlName="jobsite" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>Address</label>
+          <input type="text" placeholder="Enter address" formControlName="address1" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>Address 2</label>
+          <input type="text" placeholder="Enter address 2" formControlName="address2" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>City</label>
+          <input type="text" placeholder="Enter city" formControlName="city" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>State</label>
+          <input type="text" placeholder="Enter state" formControlName="state" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>Sales Tax District</label>
+          <input type="text" placeholder="Enter sales tax district" formControlName="salesTaxDistrict" [readonly]="isClosed" />
+        </div>
+      </div>
+
+      <div class="col">
+        <h2>General Contractor</h2>
+        <div class="hr-line-dashed"></div>
+        <div class="form-group row">
+          <label>Client</label>
+          <select formControlName="clientName" [disabled]="isClosed" class="form-control" (change)="onClientChange($any($event.target).value)">
+            <option value="">Select Client</option>
+            @for (c of contractorClients; track c.id) {
+              <option [value]="c.name">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+        <!-- FIX (2026-09-17, Mike Smith - "General contractor address not saving") - these were
+             hardcoded readonly, so a user could never type a GC address directly - only ever set
+             indirectly by picking a matching Client from the dropdown above. Now editable (same
+             [readonly]="isClosed" pattern as every other field on this tab), while still
+             auto-filling on Client selection via onClientChange(). -->
+        <div class="form-group row">
+          <label>Address</label>
+          <input type="text" placeholder="Enter address" formControlName="GC_Address1" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>Address 2</label>
+          <input type="text" placeholder="Enter address 2" formControlName="GC_Address2" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>City</label>
+          <input type="text" placeholder="Enter city" formControlName="GC_City" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>State</label>
+          <input type="text" placeholder="Enter state" formControlName="GC_State" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>Sales Tax District</label>
+          <input type="text" placeholder="Enter sales tax district" formControlName="GC_SalesTaxDistrict" [readonly]="isClosed" />
+        </div>
+      </div>
+    </div>
+
+    <h2>Project Information</h2>
+    <div class="hr-line-dashed"></div>
+    <div class="two-col">
+      <div class="col">
+        <div class="form-group row">
+          <label>Insurance Type</label>
+          <select formControlName="insuranceType" [disabled]="isClosed">
+            <option value="0">Select insurance type</option>
+            <option value="1">OCIP</option>
+            <option value="2">CCIP</option>
+          </select>
+        </div>
+        <div class="form-group row">
+          <label>Bonded</label>
+          <select formControlName="bonded" [disabled]="isClosed">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group row">
+          <label>Tax Exempt</label>
+          <select formControlName="taxExempt" [disabled]="isClosed">
+            <option value="0">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div class="form-group row">
+          <label>Invoice Submittal</label>
+          <select formControlName="invoiceSubmittal" [disabled]="isClosed">
+            <option value="0">Select</option>
+            <option value="1">Email</option>
+            <option value="2">Portal</option>
+            <option value="3">Mail</option>
+          </select>
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group row">
+          <label>Certified Payroll</label>
+          <select formControlName="certifiedPayroll" [disabled]="isClosed">
+            <option value="0">Select</option>
+            <option value="1">Yes</option>
+            <option value="2">No</option>
+          </select>
+        </div>
+        <div class="form-group row">
+          <label>Net Terms Date</label>
+          <input type="date" formControlName="netTermsDate" [readonly]="isClosed" />
+        </div>
+        <div class="form-group row">
+          <label>Retainage %</label>
+          <input type="number" placeholder="Enter retainage percentage" formControlName="retainagePercentage" [readonly]="isClosed" />
+        </div>
+      </div>
+    </div>
+  </form>
+
+@if (showAddAccess) {
+  <div
+    class="add-access-overlay"
+    (click)="closeAddAccess()">
+
+    <div
+      class="add-access-modal"
+      (click)="$event.stopPropagation()">
+
+      <div class="add-access-header">
+        <h4>Add Access</h4>
+
+        <button
+          type="button"
+          class="add-access-close"
+          (click)="closeAddAccess()">
+          &times;
+        </button>
+      </div>
+
+      <div class="add-access-body">
+
+        <div class="add-access-form-group">
+          <label>Role</label>
+
+          <select
+            class="add-access-control"
+            [(ngModel)]="selectedRoleName"
+            [ngModelOptions]="{ standalone: true }">
+
+            <option value="">Select Role</option>
+
+            @for (r of roles; track r) {
+              <option [value]="r">
+                {{ r }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="add-access-form-group">
+          <label>Employee</label>
+
+          <select
+            class="add-access-control"
+            [(ngModel)]="selectedEmployeeName"
+            [ngModelOptions]="{ standalone: true }">
+
+            <option value="">Select Employee</option>
+
+            @for (e of employees; track e.id) {
+              <option [value]="e.displayName">
+                {{ e.displayName }}
+              </option>
+            }
+          </select>
+        </div>
+
+      </div>
+
+      <div class="add-access-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="closeAddAccess()">
+          Close
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="saveAccess()">
+          Save Changes
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+}
+}

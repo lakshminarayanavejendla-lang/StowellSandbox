@@ -1,0 +1,87 @@
+<h3>Cash Flow To Date - Multiple</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Status</label>
+    <select [(ngModel)]="selectedStatusId" (ngModelChange)="onStatusChanged($event)">
+      <option value="">Select Status</option>
+      @for (s of statusModels; track s.id) {
+        <option [value]="s.id">{{ s.status }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Job Number</label>
+    <select multiple [(ngModel)]="selectedJobIds">
+      @for (job of jobsModel; track job.recNum) {
+        <option [value]="recNumber(job)">{{ recJobNumber(job) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="field">
+    <label>Start Date</label>
+    <input type="date" [(ngModel)]="startDate" />
+  </div>
+  <div class="field">
+    <label>End Date</label>
+    <input type="date" [(ngModel)]="endDate" />
+  </div>
+  <button type="button" class="btn-primary" (click)="getReportData()">Get Data</button>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredRecords` data source. -->
+@if (filteredRecords.length > 0) {
+  <ejs-grid #cashFlowToDateGrid [dataSource]="filteredRecords" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="recNum" headerText="Rec Num" width="100"></e-column>
+      <e-column field="jobNumber" headerText="Job Number" width="120"></e-column>
+      <e-column field="cashCollected" headerText="Cash Collected" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.cashCollected | currency }}</ng-template>
+      </e-column>
+      <e-column field="cashPaid" headerText="Cash Paid" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.cashPaid | currency }}</ng-template>
+      </e-column>
+      <e-column field="netCash" headerText="Net Cash" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.netCash | currency }}</ng-template>
+      </e-column>
+      <e-column field="invoiceJ2D" headerText="Invoice J2D" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.invoiceJ2D | currency }}</ng-template>
+      </e-column>
+      <e-column field="a_REndBal_Today" headerText="A/R End Balance Today" width="180" textAlign="Right">
+        <ng-template #template let-data>{{ data.a_REndBal_Today | currency }}</ng-template>
+      </e-column>
+      <e-column field="jobcoststodate" headerText="Job Costs To Date" width="160" textAlign="Right">
+        <ng-template #template let-data>{{ data.jobcoststodate | currency }}</ng-template>
+      </e-column>
+      <e-column field="a_PEndBal_Today" headerText="A/P End Balance Today" width="180" textAlign="Right">
+        <ng-template #template let-data>{{ data.a_PEndBal_Today | currency }}</ng-template>
+      </e-column>
+      <e-column field="cashPaidOut" headerText="Cash Paid Out" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.cashPaidOut | currency }}</ng-template>
+      </e-column>
+      <e-column field="netCashInOut" headerText="Net Cash In/Out" width="150" textAlign="Right">
+        <ng-template #template let-data>{{ data.netCashInOut | currency }}</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">Select job(s), a date range, and click "Get Data".</p>
+}

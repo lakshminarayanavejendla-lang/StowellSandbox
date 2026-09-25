@@ -1,0 +1,77 @@
+<h4 class="section-title">Cash Flow Budget</h4>
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTermBudget" (ngModelChange)="onSearchChangeBudget($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyBudgetToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportBudgetCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportBudgetPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportBudgetExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportBudgetWord()">Export Word</button>
+  </div>
+</div>
+
+<!-- Syncfusion GridComponent replaces the plain <table> - see component header comment re: why
+     month columns use a template + monthValue() instead of a dot-path field string. -->
+@if (filteredBudgetForecast.length > 0) {
+  <ejs-grid #budgetForecastGrid [dataSource]="filteredBudgetForecast" [allowSorting]="true" height="360" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="jobNumber" headerText="Job Number" width="130"></e-column>
+      <e-column field="jobName" headerText="Job Name" width="180"></e-column>
+      <e-column field="totalAmount" headerText="Budget Amount" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.totalAmount | currency }}</ng-template>
+      </e-column>
+      <e-column field="currentAmount" headerText="Costs As Of" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.currentAmount | currency }}</ng-template>
+      </e-column>
+      <e-column field="remaining" headerText="Remaining" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.remaining | currency }}</ng-template>
+      </e-column>
+      @for (m of monthColumnsBudget; track m) {
+        <e-column [headerText]="m" width="120" textAlign="Right">
+          <ng-template #template let-data>{{ monthValue(data, m) | currency }}</ng-template>
+        </e-column>
+      }
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">No budget forecast data.</p>
+}
+
+<h4 class="section-title">Cash Flow Contract</h4>
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTermContract" (ngModelChange)="onSearchChangeContract($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyContractToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportContractCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportContractPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportContractExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportContractWord()">Export Word</button>
+  </div>
+</div>
+
+@if (filteredContractForecast.length > 0) {
+  <ejs-grid #contractForecastGrid [dataSource]="filteredContractForecast" [allowSorting]="true" height="360" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="jobNumber" headerText="Job Number" width="130"></e-column>
+      <e-column field="jobName" headerText="Job Name" width="180"></e-column>
+      <e-column field="totalAmount" headerText="Total Contract Amount" width="170" textAlign="Right">
+        <ng-template #template let-data>{{ data.totalAmount | currency }}</ng-template>
+      </e-column>
+      <e-column field="currentAmount" headerText="Billed As Of" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.currentAmount | currency }}</ng-template>
+      </e-column>
+      <e-column field="remaining" headerText="Remaining" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.remaining | currency }}</ng-template>
+      </e-column>
+      @for (m of monthColumnsContract; track m) {
+        <e-column [headerText]="m" width="120" textAlign="Right">
+          <ng-template #template let-data>{{ monthValue(data, m) | currency }}</ng-template>
+        </e-column>
+      }
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">No contract forecast data.</p>
+}

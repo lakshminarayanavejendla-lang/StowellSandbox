@@ -1,0 +1,64 @@
+<div class="form-row">
+  <div class="field">
+    <label>Job Id</label>
+    <input type="text" [value]="model?.selectedJobId" readonly />
+  </div>
+  <div class="field">
+    <label>Job Name</label>
+    <input type="text" [value]="model?.selectedJobName" readonly />
+  </div>
+  <!-- NEW (2026-09-24, Mike Smith): all phases together (default) or one phase at a time. -->
+  <div class="field">
+    <label>Phase</label>
+    <select [ngModel]="selectedPhaseId" (ngModelChange)="onPhaseChange($event)">
+      <option value="">All phases</option>
+      @for (p of phases; track p.phaseNum) {
+        <option [value]="p.phaseNum">{{ p.phaseNum }} - {{ p.phaseName }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="summary-row">
+  <table class="summary-table">
+    <tbody>
+      <tr>
+        <td class="label">Total Budget</td>
+        <td class="value">{{ totalBudget() | currency }}</td>
+        <td rowspan="3" class="set-budget-cell">
+          <a class="btn-primary" [routerLink]="['/project-budget-configuration', 'ModifyBudget', projectId]">Set Budget</a>
+        </td>
+      </tr>
+      <tr>
+        <td class="label">Total Paid</td>
+        <td class="value">{{ totalPaid() | currency }}</td>
+      </tr>
+      <tr>
+        <td class="label">Total Remaining</td>
+        <td class="value">{{ totalRemaining() | currency }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Budget Log</h2>
+<hr class="dashed" />
+<table class="table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Log Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (entry of logEntries; track $index) {
+      <tr>
+        <td>{{ entry.date | date: 'MM/dd/yyyy' }}</td>
+        <td>{{ entry.logNote }}</td>
+      </tr>
+    }
+    @if (!logEntries.length) {
+      <tr><td colspan="2" class="empty-row">No budget log entries yet.</td></tr>
+    }
+  </tbody>
+</table>

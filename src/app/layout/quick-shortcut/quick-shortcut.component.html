@@ -1,0 +1,35 @@
+<button class="icon-btn" title="More Apps" aria-label="More Apps" (click)="toggle($event)">
+  <i class="bi bi-download"></i>
+</button>
+
+<div class="quick-shortcut" [class.show]="isOpen">
+  <div class="quick-shortcut-header">
+    <h4>Quick Shortcut</h4>
+    <small>User Applications & Addons</small>
+  </div>
+
+  <div class="quick-shortcut-body">
+    <ul class="quick-shortcut-list">
+      <li>
+        <a class="quick-shortcut-item" href="https://myaccount.microsoft.com/" target="_blank">
+          <div class="quick-shortcut-icon"><i class="fa fa-user" style="color:#4f80c0"></i></div>
+          <div class="quick-shortcut-label">Account</div>
+        </a>
+      </li>
+      <li>
+        <a class="quick-shortcut-item" href="https://outlook.office.com/mail/" target="_blank">
+          <div class="quick-shortcut-icon">
+            <img src="assets/images/outlook-icon-ComIkiQ6.jpeg" alt="Outlook" />
+          </div>
+          <div class="quick-shortcut-label">Outlook</div>
+        </a>
+      </li>
+      <li>
+        <a class="quick-shortcut-item" href="https://outlook.office.com/calendar/view/workweek/" target="_blank">
+          <div class="quick-shortcut-icon"><i class="fa fa-calendar" style="color:#4f80c0"></i></div>
+          <div class="quick-shortcut-label">Calendar</div>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

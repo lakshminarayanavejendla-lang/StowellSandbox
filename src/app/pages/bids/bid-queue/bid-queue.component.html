@@ -1,0 +1,77 @@
+<div class="card-header">
+  <h3 class="m-0">Current Bids</h3>
+  <a class="btn btn-primary" routerLink="/bids/new-bid">New Bid</a>
+</div>
+<hr />
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input
+      type="text"
+      placeholder="Search bids..."
+      [value]="currentSearchTerm"
+      (input)="onCurrentSearchChange($any($event.target).value)"
+    />
+  </div>
+</div>
+
+<ejs-grid
+class="black-grid"
+  [dataSource]="filteredCurrentBids"
+  [allowPaging]="true"
+  [allowSorting]="true"
+  [allowFiltering]="true"
+  [pageSettings]="currentPageSettings"
+>
+  <e-columns>
+    <e-column field="bidId" headerText="Bid ID" width="130">
+      <ng-template #template let-data>
+        <a [routerLink]="['/bids/bid-overview', data.bidId, 'current']" class="opportunity-link">{{ data.bidId }}</a>
+      </ng-template>
+    </e-column>
+    <e-column field="bidName" headerText="Bid Name" width="200"></e-column>
+    <e-column field="bidManager" headerText="Bid Manager" width="180"></e-column>
+    <e-column field="status" headerText="Status" width="120"></e-column>
+  </e-columns>
+</ejs-grid>
+
+<div class="card-header">
+  <h3 class="m-0">Closed Bids</h3>
+</div>
+<hr />
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input
+      type="text"
+      placeholder="Search bids..."
+      [value]="closedSearchTerm"
+      (input)="onClosedSearchChange($any($event.target).value)"
+    />
+  </div>
+</div>
+
+<ejs-grid
+class="black-grid"
+  [dataSource]="filteredClosedBids"
+  [allowPaging]="true"
+  [allowSorting]="true"
+  [allowFiltering]="true"
+  [pageSettings]="closedPageSettings"
+>
+  <e-columns>
+    <!-- Type="Closed" here matches BidQueue.razor's link exactly - IsClosed downstream
+         checks Type === "Closed" (case-sensitive), vs. "current" (any non-"Closed" value)
+         used by the current-bids grid above. -->
+    <e-column field="bidId" headerText="Bid ID" width="130">
+      <ng-template #template let-data>
+        <a [routerLink]="['/bids/bid-overview', data.bidId, 'Closed']" class="opportunity-link">{{ data.bidId }}</a>
+      </ng-template>
+    </e-column>
+    <e-column field="bidName" headerText="Bid Name" width="200"></e-column>
+    <e-column field="bidManager" headerText="Bid Manager" width="180"></e-column>
+    <e-column field="status" headerText="Status" width="120"></e-column>
+  </e-columns>
+</ejs-grid>

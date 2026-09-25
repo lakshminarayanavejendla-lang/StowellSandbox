@@ -1,0 +1,74 @@
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.calendar-widget,
+.jobs-widget {
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-widget,
+  .calendar-widget,
+  .jobs-widget {
+    grid-column: span 1;
+  }
+}
+
+.widget {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-top: 3px solid #00355f;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.jobs-widget {
+  border-top-color: #00355f;
+
+  h4 {
+    color: #00355f;
+    margin-top: 0;
+  }
+}
+
+.chart-widget:nth-of-type(3) {
+  border-top-color: #1c84c6;
+}
+
+.chart-widget:nth-of-type(4) {
+  border-top-color: #02bc9c;
+}
+
+.chart-widget:nth-of-type(5) {
+  border-top-color: #f8ac59;
+}
+
+.chart-widget:nth-of-type(6) {
+  border-top-color: #783bff;
+}
+
+// Real Syncfusion widgets (Schedule/Grid/Chart) want explicit room, unlike the free
+// stand-ins they replaced (a hand-rolled agenda list, a plain <table>, Chart.js canvases that
+// were already height-constrained by their own wrapper divs) - give the calendar and jobs
+// widgets a floor so `ejs-schedule`/`ejs-grid` don't render cramped inside the grid cell.
+.calendar-widget {
+  min-height: 460px;
+}
+
+.jobs-widget {
+  min-height: 400px;
+}
+// .e-schedule .e-month-view .e-appointment{
+//   background: #ff4601;
+// }
+// .e-schedule .e-month-view .e-current-date .e-date-header{
+//     background: rgb(217, 50, 21);
+// }

@@ -1,0 +1,303 @@
+// Colors/typography matched against the live stowelldashboard.proserv360.tech reference (actual
+// computed styles pulled from that site 2026-09-13, same pass as new-po-form/new-co-form's
+// matching comment): Segoe UI font, h2/h3 text #28363C, regular-weight #212529 labels (NOT the
+// bold #555 this previously had), primary button/table header #0479CC with white text, text
+// inputs #ced4da border / 4px radius (NOT 8px this previously had).
+.wrapper {
+  background: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
+}
+
+h2 {
+  color: #28363c;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.dashed {
+  border-top: 1px dashed #e7eaec;
+  margin: 15px 0 25px 0;
+}
+
+// NEW - solid blue banner (matches the Budget Update table header's #0479cc), not plain dark
+// text - per direction/screenshot, section headers on this page should read as a banner bar.
+// flex: 1 makes it span full width when it's the sole child of the flex .section-header-row
+// below (a plain block h3 already spans full width on its own, so this has no effect there).
+.section-header {
+  flex: 1;
+  margin: 25px 0 0;
+  padding: 8px 12px;
+  background-color: #0479cc;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  // FIX (2026-09-22, alignment sweep) - grid items default to min-width: auto (their content's
+  // own min-content size), which overrides the header-grid column's minmax(0, 1fr) track: at
+  // narrower widths the value cell's content (the CO Type radio group; the Phase row's
+  // select+ADD button) was wider than its column and visually overflowed into the next
+  // header-grid column ("Internal" running into "CO Reason", the phase dropdown into "Budget
+  // Change Total") - CSS Grid doesn't clip that overflow, so the two columns' text overlapped
+  // instead of the field simply getting narrower/wrapping. min-width: 0 lets this field shrink
+  // to its track's actual width like the surrounding grids already assume it will.
+  min-width: 0;
+
+  label {
+    font-weight: 400;
+    color: #212529;
+  }
+
+  input,
+  select,
+  textarea {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  input[readonly] {
+    background: #f7f7f7;
+    color: #212529;
+  }
+
+  // NEW - Change Order Amount fields when CO Type isn't Prime.
+  input:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; // FIX (2026-09-22) - see .field's min-width:0 comment; wraps onto a second
+  // line inside its own cell at narrow widths instead of overflowing into the next column.
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+    color: #212529;
+  }
+}
+
+.header-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 40px;
+  margin-bottom: 10px;
+}
+
+.phase-entry {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap; // FIX (2026-09-22) - same reasoning as .radio-group above.
+
+  input,
+  select {
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+.phase-list {
+  list-style: none;
+  margin: 0 0 10px 170px;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+}
+
+.budget-update-grid {
+  margin-bottom: 20px;
+}
+
+// FIX (2026-09-22, alignment sweep) - was `display: flex; flex-wrap: wrap`. Its 5 children
+// (the Cost Code/Remaining Budget/Debit/Credit `.field`s + the Add Line button) have no fixed
+// width, so at ordinary content-panel widths flex-wrap breaks the row wherever it runs out of
+// space - here, after Debit - dropping Credit and Add Line to a second line that starts back at
+// the left edge, not lined up under anything above it. CSS Grid's `repeat(auto-fit, ...)` fixes
+// this because every row shares the SAME column tracks: wherever a row breaks, the next row's
+// items still land in the same columns as the row above, instead of flex's independent per-line
+// packing.
+.entry-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  gap: 16px;
+  background: #f7f7f7;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  padding: 14px;
+
+  .field {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-bottom: 0;
+  }
+
+  .btn-add {
+    justify-self: start;
+  }
+}
+
+.pie-panel {
+  max-width: 480px;
+  margin: 10px 0 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+
+  th {
+    background-color: #0479cc;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 10px;
+    text-align: left;
+  }
+
+  td {
+    padding: 8px 10px;
+    border: 1px solid #dee2e6;
+  }
+
+  // NEW - inline Debit/Credit editing on each auto-populated Budget Update row.
+  .line-amount {
+    width: 100px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+}
+
+.empty-row {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-primary {
+  background-color: #0479cc;
+  color: #fff;
+  border: 1px solid #0479cc;
+  border-radius: 3.2px;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  border: 1px solid #6c757d;
+  border-radius: 4px;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+.btn-add {
+  background-color: #0479cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-sm {
+  background: none;
+  color: #0479cc;
+  border: 1px solid #0479cc;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+// Pre-submit phase check (see phaseIssues in the component).
+.phase-warning {
+  margin: 8px 0 12px;
+  padding: 10px 14px;
+  border: 1px solid #e0a39c;
+  border-left: 5px solid #c0392b;
+  border-radius: 4px;
+  background: #fdf1ef;
+  color: #611a15;
+
+  ul {
+    margin: 6px 0 8px 18px;
+    padding: 0;
+  }
+
+  .btn-fix {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #00355f;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}
+
+.phase-note {
+  margin: 4px 0 0;
+  color: #8a5a00;
+  font-size: 0.85rem;
+}
+
+// Minus amounts are red, 0 or more stay normal (Mike Smith, 2026-09-23) - see also
+// shared/usd-input/usd-input.directive.ts for the editable dollar fields.
+.neg,
+.wrapper input.neg,
+.wrapper td.neg {
+  color: #c0392b !important;
+}
+
+.status-message {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.status-message.error {
+  color: #c62828;
+}

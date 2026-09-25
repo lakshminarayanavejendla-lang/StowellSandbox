@@ -1,0 +1,68 @@
+@if (!model) {
+  <p>Loading...</p>
+} @else {
+  <div class="form-row">
+    <label>Job Id</label>
+    <input type="text" [value]="model.selectedJobId" readonly />
+    <label>Job Name</label>
+    <input type="text" [value]="model.selectedJobName" readonly />
+  </div>
+
+  <h2>Reporting</h2>
+  <hr class="dashed" />
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><h4>Cost Summary</h4></div>
+      <div class="card-body">
+        <a [routerLink]="['/project-management/cost-code-summary', projectId]" target="_blank" class="progress-circle">
+          {{ percentage }}%
+        </a>
+        <div class="summary">
+          <h5>Current Cost Summary - Overall</h5>
+          <table class="table-borderless">
+            <tr><td>Budget + Change</td><td>{{ model.costCodeSummaryModel?.sumOfBudgetAndChanges | currency }}</td></tr>
+            <tr><td>To Date</td><td>{{ model.costCodeSummaryModel?.sumOfToDate | currency }}</td></tr>
+            <tr><td>This Period</td><td>{{ model.costCodeSummaryModel?.sumOfThisPeriod | currency }}</td></tr>
+            <tr><td>Remaining</td><td>{{ model.costCodeSummaryModel?.sumOfRemaining | currency }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h4>Cash Flow Summary</h4></div>
+      <div class="card-body">
+        <a [routerLink]="['/project-management/cash-flow-report', projectId]" target="_blank" class="chart-wrap">
+          <ejs-accumulationchart [legendSettings]="legendSettings" [tooltip]="{ enable: tooltipEnabled }" height="220px">
+            <e-accumulation-series-collection>
+              <e-accumulation-series
+                [dataSource]="pieData"
+                xName="label"
+                yName="value"
+                type="Pie"
+                [palettes]="pieColors"
+              ></e-accumulation-series>
+            </e-accumulation-series-collection>
+          </ejs-accumulationchart>
+        </a>
+        <div class="summary">
+          <h5>Cash Flow Summary</h5>
+          <table class="table-borderless">
+            <tr><td>Cash Collected</td><td>{{ model.cashFlowRecord?.cashCollected | currency }}</td></tr>
+            <tr><td>Cash Paid</td><td>{{ model.cashFlowRecord?.cashPaid | currency }}</td></tr>
+            <tr><td>Net Cash</td><td>{{ model.cashFlowRecord?.netCash | currency }}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Project Management</h2>
+  <hr class="dashed" />
+  <div class="job-summary-link">
+    <i class="bi bi-file-earmark-text" style="font-size: 2.5rem;"></i>
+    <br />
+    <a [routerLink]="['/project-management/job-summary', projectId]" target="_blank">Job Summary Report</a>
+  </div>
+}

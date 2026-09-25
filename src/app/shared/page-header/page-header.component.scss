@@ -1,0 +1,27 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.page-header-logo {
+  height: 40px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.page-header-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #00355f;
+  text-align: right;
+}
+
+.page-header-rule {
+  margin: 0 0 20px;
+  border: none;
+  border-top: 1px solid #333;
+}

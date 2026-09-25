@@ -1,0 +1,122 @@
+@if (!model) {
+  <p>Loading...</p>
+} @else {
+  <div class="form-row">
+    <div class="field">
+      <label>Job Id</label>
+      <input type="text" [value]="bidModel?.jobID" readonly />
+    </div>
+    <div class="field">
+      <label>Job Name</label>
+      <input type="text" [value]="bidModel?.jobName" readonly />
+    </div>
+    @if (projectFolderLibraryUrl) {
+      <a [href]="projectFolderLibraryUrl" target="_blank"><i class="bi bi-folder"></i> Project Folder Library</a>
+    }
+    <!-- FIX (2026-09-16) - was '/Estimation/EditBidForm/' + jobId, the dead Blazor route (404).
+         BidFormComponent at estimation/edit-bid/:jobId is the real, already-built, already-routed
+         Angular port of that page (see its header comment) - just never linked to. Also fixed a
+         real bug found while testing this: Bids_Update had no insert fallback, so a project
+         created via Win Bid (which never touches dbo.Bids) silently failed to save every
+         top-level field here (Bidder/Phase/BidStatus/Division/Department/etc.) - now upserts. -->
+    <a [routerLink]="['/estimation/edit-bid', model.selectedJobId]" class="btn-link">Update</a>
+  </div>
+
+  <h2>Project Overview</h2>
+  <hr class="dashed" />
+
+  <div class="form-row">
+    <div class="field">
+      <label>Job Id</label>
+      <input type="text" [value]="bidModel?.jobID" readonly />
+    </div>
+    <div class="field">
+      <label>Division</label>
+      <!-- <input type="text" [value]="bidModel?.division?? ''" readonly /> -->
+      <select
+  id="ddlDivision"
+  class="form-control"
+  [(ngModel)]="selectedDivision"
+  disabled>
+
+  <option value="selectDivision">Select Division</option>
+  <option value="BlockConcreteGroupId">BlockConcrete</option>
+  <option value="a539add2-52ab-4545-acb6-5d23c703403f">Jacksonville</option>
+  <option value="0a6836b5-aa1f-4c7e-b1e9-77be7b5a85d1">Naples</option>
+  <option value="3d76dbfb-27c8-4c95-836e-e5caed001a0b">Orlando</option>
+  <option value="b222364a-0ca8-4415-ac9e-36ba0bfcabe1">Tampa</option>
+  <option value="1446eb90-6189-47cf-b242-b6f84f9f1d56">Texas</option>
+</select>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <!-- <input type="text" [value]="bidModel?.bidStatus?? ''" readonly /> -->
+       <select
+  type="text"
+  class="form-control"
+  id="ddlBidStatus"
+  [(ngModel)]="selectedBidStatus"
+  disabled>
+
+  <option value="">Select status</option>
+  <option value="Open Bid">Open Bid</option>
+  <option value="Won">Won</option>
+  <option value="Lost">Lost</option>
+  <option value="Pending">Pending</option>
+</select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <label>Address</label>
+      <input type="text" [value]="bidModel?.projectLocation?.address?? ''" readonly />
+    </div>
+    <div class="field">
+      <label>Start Date</label>
+      <input type="text" [value]="bidModel?.estStartDate?? ''" readonly />
+    </div>
+    <div class="field">
+      <label>Project Completion</label>
+      <input type="text" [value]="bidModel?.estCompletionDate?? ''" readonly />
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <label>Address 2</label>
+      <input type="text" [value]="bidModel?.projectLocation?.address2?? ''" readonly />
+    </div>
+    <div class="field">
+      <label>City</label>
+      <input type="text" [value]="bidModel?.projectLocation?.city?? ''" readonly />
+    </div>
+    <div class="field">
+      <label>State</label>
+      <input type="text" [value]="bidModel?.projectLocation?.state?? ''" readonly />
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <label>Contract Number</label>
+      <input type="text" [value]="bidModel?.contractNumber?? ''" readonly />
+    </div>
+    <div class="field">
+      <label>Contract Date</label>
+      <input type="text" [value]="bidModel?.contractDate?? ''" readonly />
+    </div>
+    <div class="field">
+      <label>Contract Amount</label>
+      <input type="text" [value]="bidModel?.contractAmount | currency" readonly />
+    </div>
+  </div>
+
+  <h2>Additional Phases</h2>
+  <ejs-grid [dataSource]="bidPhases">
+    <e-columns>
+      <e-column field="phase" headerText="Phase" width="140"></e-column>
+      <e-column field="description" headerText="Description" width="240"></e-column>
+    </e-columns>
+  </ejs-grid>
+}

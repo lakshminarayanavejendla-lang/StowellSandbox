@@ -1,0 +1,108 @@
+@if (isLoading) {
+  <div class="spinner">Loading...</div>
+} @else {
+  <div class="card-header">
+    <h4>Open Queue</h4>
+  </div>
+  <div class="gridcard">
+    <div class="toolbar">
+      <input
+        type="text"
+        placeholder="Search open bids..."
+        [value]="openSearchTerm"
+        (input)="onOpenSearchChange($any($event.target).value)"
+      />
+    </div>
+    <ejs-grid
+    class="black-grid"
+      [dataSource]="filteredOpenBids"
+      [allowPaging]="true"
+      [allowSorting]="true"
+      [allowFiltering]="true"
+      [pageSettings]="pageSettings"
+    >
+      <e-columns>
+        <e-column field="jobID" headerText="Project Number" width="140">
+          <ng-template #template let-data>
+            <a [routerLink]="['/estimation/edit-bid', data.jobID]">{{ data.jobID }}</a>
+          </ng-template>
+        </e-column>
+        <e-column field="bidDate" headerText="Bid Date" width="120">
+          <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
+        </e-column>
+        <e-column field="address" headerText="Project" width="200"></e-column>
+        <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+      </e-columns>
+    </ejs-grid>
+  </div>
+
+  <div class="card-header">
+    <h4>Closed Bid</h4>
+  </div>
+  <div class="gridcard">
+    <div class="toolbar">
+      <input
+        type="text"
+        placeholder="Search closed bids..."
+        [value]="closedSearchTerm"
+        (input)="onClosedSearchChange($any($event.target).value)"
+      />
+    </div>
+    <ejs-grid
+        class="black-grid"
+      [dataSource]="filteredClosedBids"
+      [allowPaging]="true"
+      [allowSorting]="true"
+      [allowFiltering]="true"
+      [pageSettings]="pageSettings"
+    >
+      <e-columns>
+        <e-column field="jobID" headerText="Project Number" width="140">
+          <ng-template #template let-data>
+            <a [routerLink]="['/estimation/edit-bid', data.jobID]">{{ data.jobID }}</a>
+          </ng-template>
+        </e-column>
+        <e-column field="bidDate" headerText="Bid Date" width="120">
+          <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
+        </e-column>
+        <e-column field="address" headerText="Project" width="200"></e-column>
+        <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+      </e-columns>
+    </ejs-grid>
+  </div>
+
+  <div class="card-header">
+    <h4>Pending Project</h4>
+  </div>
+  <div class="gridcard">
+    <div class="toolbar">
+      <input
+        type="text"
+        placeholder="Search pending projects..."
+        [value]="pendingSearchTerm"
+        (input)="onPendingSearchChange($any($event.target).value)"
+      />
+    </div>
+    <ejs-grid
+        class="black-grid"
+      [dataSource]="filteredPendingBids"
+      [allowPaging]="true"
+      [allowSorting]="true"
+      [allowFiltering]="true"
+      [pageSettings]="pageSettings"
+    >
+      <e-columns>
+        <e-column field="jobID" headerText="Project Number" width="140">
+          <ng-template #template let-data>
+            <a [routerLink]="['/estimation/edit-bid', data.jobID]">{{ data.jobID }}</a>
+          </ng-template>
+        </e-column>
+        <e-column field="bidDate" headerText="Bid Date" width="120">
+          <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
+        </e-column>
+        <e-column field="address" headerText="Project" width="200"></e-column>
+        <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+      </e-columns>
+    </ejs-grid>
+  </div>
+}

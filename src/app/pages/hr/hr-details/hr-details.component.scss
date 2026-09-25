@@ -1,0 +1,108 @@
+/* ------------------------------
+           GENERAL FORM LAYOUT
+        --------------------------------*/
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+        .form-group.row {
+            align-items: center;
+        }
+
+    /* Make labels cleaner */
+    .col-form-label {
+        font-weight: 600;
+        color: #777;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    /* Read-only field styling */
+    .form-control[readonly] {
+        background-color: #f7f7f7;
+        opacity: 1;
+        border-color: #dcdcdc;
+        cursor: not-allowed;
+    }
+
+    /* Optional hover effect for editable form controls */
+    .form-control:not([readonly]):hover {
+        border-color: #999;
+    }
+
+    /* Add spacing between inline form groups */
+    .form-group.row > div {
+        margin-bottom: 8px;
+    }
+
+    /* ------------------------------
+           SECTION HEADERS & DIVIDERS
+        --------------------------------*/
+
+    h2 {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-top: 20px;
+    }
+
+    .hr-line-dashed {
+        border-top: 1px dashed #c7c7c7;
+        margin: 15px 0 25px 0;
+    }
+
+    /* ------------------------------
+           TABLE STYLING
+        --------------------------------*/
+
+    .table {
+        background-color: #fff;
+        margin-top: 10px;
+    }
+
+        .table th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .table td,
+        .table th {
+            border-color: #dcdcdc;
+            vertical-align: middle;
+            padding: 8px 12px;
+        }
+
+    .table-bordered tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* ------------------------------
+           BUTTONS (optional)
+        --------------------------------*/
+
+    .btn-primary {
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 4px;
+    }
+
+    .hide {
+        display: none !important;
+    }
+
+    /* ------------------------------
+           RESPONSIVE FIXES
+        --------------------------------*/
+
+    @media (max-width: 768px) {
+        .col-form-label {
+            text-align: left !important;
+            padding-top: 0;
+            padding-bottom: 2px;
+        }
+
+        .form-group.row > div {
+            margin-bottom: 12px;
+        }
+    }

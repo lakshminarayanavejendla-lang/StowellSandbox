@@ -1,0 +1,138 @@
+<div class="new-opportunity-page">
+
+  <h3>New Bid</h3>
+  <hr />
+<!-- 
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  } -->
+<ejs-toast
+  #toast
+  [position]="position">
+</ejs-toast>
+  <form [formGroup]="form" (ngSubmit)="save()" class="new-bid-form">
+<div class="form-row two-column">
+    <!-- Bid ID -->
+    <div class="form-field opportunity-id">
+      <label for="opportunityId">Bid ID</label>
+      <input
+        id="opportunityId"
+        type="text"
+        [value]="nextBidId ?? ''"
+        readonly />
+    </div>
+</div>
+    <!-- Department + Division -->
+    <div class="form-row two-column">
+
+      <div class="form-field">
+        <label for="department">Department</label>
+
+        <select id="department" formControlName="department">
+          <option value="">Select Department</option>
+
+          @for (d of departments; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="division">Division</label>
+
+        <select id="division" formControlName="division">
+          <option value="">Select Division</option>
+
+          @for (d of divisions; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+      </div>
+
+    </div>
+    <div class="form-row two-column">
+    <!-- Bid Name -->
+    <div class="form-field">
+      <label for="bidName">Bid Name</label>
+
+      <input
+        id="bidName"
+        type="text"
+        formControlName="bidName"
+        autocomplete="off" />
+    </div>
+
+    <!-- Address -->
+    <div class="form-field">
+      <label for="address1">Address</label>
+
+      <input
+        id="address1"
+        type="text"
+        formControlName="address1"
+        autocomplete="off" />
+    </div>
+</div>
+    <!-- City + State + Zip -->
+    <div class="form-row three-column">
+
+      <div class="form-field">
+        <label for="city">City</label>
+
+        <input
+          id="city"
+          type="text"
+          formControlName="city"
+          autocomplete="off" />
+      </div>
+
+      <div class="form-field">
+        <label for="state">State</label>
+
+        <select id="state" formControlName="state">
+          <option value="">Select State</option>
+
+          @for (s of states; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-field zip-field">
+        <label for="zipCode">Zip</label>
+
+        <input
+          id="zipCode"
+          type="text"
+          formControlName="zipCode"
+          autocomplete="off" />
+      </div>
+
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-row">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()">
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Create' }}
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

@@ -1,0 +1,52 @@
+<div class="panel">
+  <div class="panel-hdr"><h3>Accounting</h3></div>
+  <div class="panel-content reportlinks">
+    <div class="row">
+      <a class="report-tile" href="javascript:void(0)" (click)="openCostCodeSummary()">
+        <i class="bi bi-currency-dollar"></i>
+        <span>Job Cost Summary Reports</span>
+      </a>
+      <a class="report-tile" [routerLink]="['/project-management/cash-flow-report', 0]">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        <span>Cash Flow Report</span>
+      </a>
+      <a class="report-tile" routerLink="/reporting-dashboard/cash-flow-to-date">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        <span>Cash Flow To Date - Multiple</span>
+      </a>
+      <a class="report-tile" routerLink="/reporting-dashboard/prime-change-list">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        <span>Prime Change List</span>
+      </a>
+      <a class="report-tile" routerLink="/reporting-dashboard/invoice-receivable">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        <span>Invoice Receivable</span>
+      </a>
+      <a class="report-tile" routerLink="/reporting-dashboard/ar-invoice-list">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        <span>AR Invoice List</span>
+      </a>
+      <a class="report-tile" routerLink="/reporting-dashboard/contract-summary">
+        <i class="bi bi-file-earmark-spreadsheet"></i>
+        <span>Contract Summary</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-hdr"><h3>Project Management</h3></div>
+  <div class="panel-content reportlinks">
+    <div class="row">
+      <a class="report-tile" routerLink="/reporting-dashboard/job-summary-report">
+        <i class="bi bi-file-earmark-text"></i>
+        <span>Job Summary Report</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!--
+  Power BI "Budget Report" panel not ported - the Blazor source wraps it in class="hide"
+  (display:none) and the link itself is commented out; nothing live to reproduce.
+-->

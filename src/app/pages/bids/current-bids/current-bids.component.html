@@ -1,0 +1,40 @@
+<div class="card-header">
+  <h3 class="m-0">Current Bids</h3>
+  <a class="btn btn-primary" routerLink="/bids/new-bid">New Bid</a>
+</div>
+<hr />
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input
+      type="text"
+      placeholder="Search Bids..."
+      [value]="searchTerm"
+      (input)="onSearchChange($any($event.target).value)"
+    />
+  </div>
+</div>
+
+<ejs-grid
+class="black-grid"
+  [dataSource]="filteredBids"
+  [allowPaging]="true"
+  [allowSorting]="true"
+  [allowFiltering]="true"
+  [pageSettings]="pageSettings"
+>
+  <e-columns>
+    <e-column field="BidId" headerText="Bid ID" width="130">
+      <ng-template #template let-data>
+        <a [routerLink]="['/bids/bid-overview', data.bidId, 'current']"  class="opportunity-link">{{ data.bidId }}</a>
+      </ng-template>
+    </e-column>
+    <e-column field="BidName" headerText="Bid Name" width="200"></e-column>
+    <!-- NOTE: CurrentBids.razor's "Bid Manager" column shows the Bidder field
+         (Property="Bidder"), while BidQueue.razor's equivalent column shows BidManager -
+         an inconsistency in the source, ported as-is per page. -->
+    <e-column field="Bidder" headerText="Bid Manager" width="180"></e-column>
+    <e-column field="Status" headerText="Status" width="120"></e-column>
+  </e-columns>
+</ejs-grid>

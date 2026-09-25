@@ -1,0 +1,178 @@
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-primary {
+  background-color: #00355f;
+  border-color: #00355f;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input {
+    width: 260px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bids-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background-color: #00355f;
+    color: #fff;
+    text-align: left;
+    padding: 8px 10px;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .empty {
+    text-align: center;
+    color: #888;
+  }
+}
+
+.pager {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+
+  button {
+    padding: 4px 10px;
+  }
+}
+.black-grid {
+  .e-gridheader {
+    background: #00355f;
+  }
+
+  .e-gridheader .e-columnheader {
+    background: #00355f;
+    color: #ffffff;
+  }
+
+  .e-gridheader .e-headercell {
+    background: #00355f;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .opportunity-link {
+    // color: #ff4601;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .opportunity-link:hover {
+    // color: #ff6a33;
+    text-decoration: underline;
+  }
+}
+.black-grid .e-headercell:hover .e-headertext {
+  color: #ffffff !important;
+  background: transparent !important;
+  display: inline-block !important;
+}
+.black-grid .e-gridheader,
+.black-grid .e-gridheader .e-columnheader,
+.black-grid .e-gridheader .e-headercell {
+  background-color: #00355f !important;
+  color: #ffffff !important;
+}
+
+.black-grid .e-gridheader .e-headertext {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Keep header text visible on hover */
+.black-grid .e-gridheader .e-headercell:hover,
+.black-grid .e-gridheader .e-headercell:hover .e-headertext {
+  background-color: #00355f !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Sort icons */
+.black-grid .e-gridheader .e-sortfilterdiv,
+.black-grid .e-gridheader .e-sortfilterdiv .e-icons {
+  color: #ffffff !important;
+}
+
+/* Filter icon */
+.black-grid .e-gridheader .e-filtermenudiv,
+.black-grid .e-gridheader .e-filtermenudiv .e-icons {
+  color: #ffffff !important;
+}
+
+/* Opportunity ID link */
+.black-grid .opportunity-link {
+  // color: #ff4601 !important;
+  text-decoration: none;
+}
+
+.black-grid .opportunity-link:hover {
+  // color: #ff6a33 !important;
+  text-decoration: underline;
+}
+/* Sort/filter area */
+.black-grid .e-gridheader .e-sortfilterdiv {
+  color: #ffffff !important;
+}
+
+/* Sort icons */
+.black-grid .e-gridheader .e-sortfilterdiv .e-icons {
+  color: #ffffff !important;
+}
+
+/* Prevent hover background from covering the text */
+.black-grid .e-gridheader .e-headercell:hover {
+  background-color: #00355f !important;
+}
+/* Opportunity ID link */
+.black-grid .opportunity-link {
+  // color: #ff4601 !important;
+  text-decoration: none !important;
+  font-weight: 500;
+}
+
+.black-grid .opportunity-link:hover {
+  // color: #ff6a33 !important;
+  text-decoration: underline !important;
+}

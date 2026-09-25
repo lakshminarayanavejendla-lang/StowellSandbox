@@ -1,0 +1,166 @@
+<h3>API Success &amp; Errors</h3>
+<hr />
+
+<!-- Filters -->
+<div class="filters">
+  <div class="presets">
+    <button type="button" [class.on]="preset === '1h'" (click)="applyPreset('1h')">Last hour</button>
+    <button type="button" [class.on]="preset === '24h'" (click)="applyPreset('24h')">Last 24 hours</button>
+    <button type="button" [class.on]="preset === '7d'" (click)="applyPreset('7d')">Last 7 days</button>
+    <button type="button" [class.on]="preset === '30d'" (click)="applyPreset('30d')">Last 30 days</button>
+    <button type="button" [class.on]="preset === 'custom'" (click)="preset = 'custom'">Custom</button>
+  </div>
+
+  <div class="row">
+    @if (preset === 'custom') {
+      <label>From <input type="datetime-local" [(ngModel)]="from" (change)="onFilterChanged()" /></label>
+      <label>To <input type="datetime-local" [(ngModel)]="to" (change)="onFilterChanged()" /></label>
+    }
+    <label>Result
+      <select [(ngModel)]="result" (change)="onFilterChanged()">
+        <option value="all">All calls</option>
+        <option value="success">Successes only</option>
+        <option value="error">Errors only</option>
+      </select>
+    </label>
+    <label>Source
+      <select [(ngModel)]="source" (change)="onFilterChanged()">
+        <option value="">API + browser</option>
+        <option value="API">API calls</option>
+        <option value="Client">Browser-reported</option>
+      </select>
+    </label>
+    <label>User <input type="text" [(ngModel)]="user" (keyup.enter)="onFilterChanged()" placeholder="name or email" /></label>
+    <label>Path / message <input type="text" [(ngModel)]="q" (keyup.enter)="onFilterChanged()" placeholder="e.g. CoBudgetAllocation" /></label>
+    <button type="button" class="btn-primary" (click)="onFilterChanged()">Search</button>
+    <button type="button" class="btn-link" (click)="clearFilters()">Reset</button>
+    <label class="auto"><input type="checkbox" [(ngModel)]="autoRefresh" (change)="toggleAutoRefresh()" /> Auto-refresh (15s)</label>
+  </div>
+</div>
+
+<!-- Summary -->
+@if (summary) {
+  <div class="cards">
+    <button type="button" class="card" (click)="setResult('all')"><span class="num">{{ summary.total | number }}</span><span class="lbl">API calls</span></button>
+    <button type="button" class="card good" (click)="setResult('success')"><span class="num">{{ summary.success | number }}</span><span class="lbl">Successful</span></button>
+    <button type="button" class="card bad" (click)="setResult('error')"><span class="num">{{ summary.errors | number }}</span><span class="lbl">Errors ({{ errorRate }})</span></button>
+    <div class="card static"><span class="num">{{ summary.avgMs | number: '1.0-0' }} ms</span><span class="lbl">Average time</span></div>
+  </div>
+
+  <div class="side-by-side">
+    <div class="box">
+      <h4>Endpoints failing most</h4>
+      @if (summary.topErrors.length) {
+        <table class="mini">
+          @for (t of summary.topErrors; track t.path) {
+            <tr class="click" (click)="pickPath(t.path)">
+              <td class="path">{{ t.path }}</td>
+              <td class="n">{{ t.count | number }}</td>
+              <td class="when">{{ t.lastAt | date: 'MM/dd HH:mm' }}</td>
+            </tr>
+          }
+        </table>
+      } @else {
+        <p class="none">No errors in this period.</p>
+      }
+    </div>
+    <div class="box">
+      <h4>Users</h4>
+      <table class="mini">
+        @for (u of summary.users | slice: 0 : 8; track u.userName) {
+          <tr class="click" (click)="pickUser(u.userName)">
+            <td class="path">{{ u.userName || '(none)' }}</td>
+            <td class="n">{{ u.calls | number }}</td>
+            <td class="n err">{{ u.errors ? u.errors + ' err' : '' }}</td>
+          </tr>
+        }
+      </table>
+    </div>
+  </div>
+}
+
+<!-- Calls -->
+@if (loadFailed) {
+  <p class="message error">Could not load the API log. {{ loadError }}</p>
+}
+
+<div class="table-wrap" [class.busy]="loading">
+  <table class="calls">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>User</th>
+        <th>Method</th>
+        <th>Path</th>
+        <th>Status</th>
+        <th>Time taken</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (r of data?.rows; track r.id) {
+        <tr class="call-row" [class.selected]="selected?.id === r.id" [ngClass]="statusClass(r)" (click)="open(r)">
+          <td class="nowrap">{{ r.loggedAt | date: 'MM/dd/yyyy HH:mm:ss' }}</td>
+          <td>{{ r.userName || '-' }}</td>
+          <td>{{ r.method || (r.source === 'Client' ? 'browser' : '') }}</td>
+          <td class="path" [title]="r.path">{{ r.path }}<span class="q">{{ r.query }}</span></td>
+          <td><span class="pill" [ngClass]="statusClass(r)">{{ r.statusCode ?? (r.isError ? 'ERR' : '') }}</span></td>
+          <td class="nowrap">{{ r.durationMs != null ? r.durationMs + ' ms' : '' }}</td>
+          <td class="reason" [title]="r.errorMessage || ''">{{ r.errorMessage }}</td>
+        </tr>
+        @if (selected?.id === r.id) {
+          <tr class="detail-row">
+            <td colspan="7">
+              <div class="detail">
+                <div class="meta">
+                  <span><b>Source</b> {{ r.source }}</span>
+                  <span><b>Type</b> {{ r.errorType || (r.isError ? 'Error' : 'OK') }}</span>
+                  @if (detail) {
+                    <span><b>IP</b> {{ detail.clientIp || '-' }}</span>
+                    <span><b>Trace</b> {{ detail.traceId || '-' }}</span>
+                  }
+                </div>
+                @if (detailLoading) {
+                  <p class="none">Loading details...</p>
+                } @else if (detail?.details) {
+                  <pre>{{ detail!.details }}</pre>
+                } @else {
+                  <p class="none">{{ r.isError ? 'No further details were recorded.' : 'Successful call - nothing further to show.' }}</p>
+                }
+                @if (detail?.userAgent) {
+                  <p class="ua">{{ detail!.userAgent }}</p>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      } @empty {
+        <tr>
+          <td colspan="7" class="empty">{{ loading ? 'Loading...' : 'No API calls match these filters.' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Pager -->
+@if (data) {
+  <div class="pager">
+    <button type="button" (click)="goToPage(1)" [disabled]="page <= 1">«</button>
+    <button type="button" (click)="goToPage(page - 1)" [disabled]="page <= 1">‹ Prev</button>
+    <span>Page {{ page }} of {{ totalPages }} &nbsp;·&nbsp; {{ data.total | number }} calls</span>
+    <button type="button" (click)="goToPage(page + 1)" [disabled]="page >= totalPages">Next ›</button>
+    <button type="button" (click)="goToPage(totalPages)" [disabled]="page >= totalPages">»</button>
+    <label>Per page
+      <select [(ngModel)]="pageSize" (change)="onFilterChanged()">
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+        <option [ngValue]="200">200</option>
+      </select>
+    </label>
+    @if (lastLoaded) {
+      <span class="stamp">Updated {{ lastLoaded | date: 'HH:mm:ss' }}</span>
+    }
+  </div>
+}

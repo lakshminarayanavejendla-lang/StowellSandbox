@@ -1,0 +1,45 @@
+@if (!model) {
+  <p>Loading...</p>
+} @else {
+  <div class="form-row">
+    <label>Job Id</label>
+    <input type="text" [value]="model.selectedJobId" readonly />
+    <label>Job Name</label>
+    <input type="text" [value]="model.selectedJobName" readonly />
+  </div>
+
+  <div class="form-row">
+    <a [routerLink]="['/project-management/cost-code-summary', model.selectedJobId]" target="_blank">
+      <img src="assets/images/pie-chart.png" alt="Cost Code Summary" class="pie-icon" />
+    </a>
+    <table class="table budget-table">
+      <tr><th>Total Budget</th><td>{{ asCurrency(model.budgetPayment?.budget) | currency }}</td></tr>
+      <tr><th>Total Paid</th><td>{{ asCurrency(model.budgetPayment?.paid) | currency }}</td></tr>
+      <tr><th>Total Remaining</th><td>{{ asCurrency(model.budgetPayment?.balance) | currency }}</td></tr>
+    </table>
+    <a [routerLink]="['/project-budget-configuration/CreateBudget', projectId]" class="btn-link">
+      Create/Modify Budget
+    </a>
+  </div>
+
+  <h2>Invoicing</h2>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Date</th><th>Name</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody>
+  </table>
+  <button type="button" class="btn-primary">Upload Invoice</button>
+
+  <h2>Change Orders</h2>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Date</th><th>Name</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody>
+  </table>
+  <button type="button" class="btn-primary">Upload CO</button>
+
+  <h2>Purchase Orders</h2>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Date</th><th>Name</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody><tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></tbody>
+  </table>
+  <button type="button" class="btn-primary">Upload PO</button>
+}

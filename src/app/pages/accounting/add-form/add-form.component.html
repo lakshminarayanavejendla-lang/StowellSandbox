@@ -1,0 +1,1250 @@
+<h3>Add Form</h3>
+
+<hr />
+
+@if (isLoading) {
+  <div class="busy-indicator">
+      <div class="spinner"></div>
+  </div>
+}
+
+<form [formGroup]="form" class="add-form">
+
+  <!-- ================================================= -->
+  <!-- BASIC INFORMATION -->
+  <!-- ================================================= -->
+
+  <section class="row-3">
+
+    <div class="field">
+      <label>Bidder</label>
+
+      <input
+        type="text"
+        formControlName="bidder" />
+    </div>
+
+    <div class="field">
+      <label>Job Phase</label>
+
+      <select formControlName="jobPhase">
+
+        <option value="">
+          Select Job Phase
+        </option>
+
+        @for (p of jobPhases; track p) {
+          <option [value]="p">
+            {{ p }}
+          </option>
+        }
+
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Bid Status</label>
+
+      <select formControlName="bidStatus">
+
+        <option value="">
+          Select status
+        </option>
+
+        @for (s of bidStatuses; track s) {
+          <option [value]="s">
+            {{ s }}
+          </option>
+        }
+
+      </select>
+    </div>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- PROJECT -->
+  <!-- ================================================= -->
+
+  <section class="row-3">
+
+    <div class="field">
+      <label>Project Number</label>
+
+      <input
+        type="text"
+        formControlName="jobId" />
+    </div>
+
+    <div class="field">
+      <label>Division</label>
+
+      <select formControlName="division">
+
+        <option value="selectDivision">
+          Select Division
+        </option>
+
+        @for (d of divisions; track d.value) {
+          <option [value]="d.value">
+            {{ d.text }}
+          </option>
+        }
+
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Department</label>
+
+      <select
+        formControlName="department"
+        (change)="onDepartmentChange($any($event.target).value)">
+
+        <option value="">
+          Select department
+        </option>
+
+        @for (dep of departments; track dep) {
+          <option [value]="dep">
+            {{ dep }}
+          </option>
+        }
+
+      </select>
+    </div>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- JOB DETAILS -->
+  <!-- ================================================= -->
+
+  <section class="row-3">
+
+    <div class="field">
+      <label>Job Type</label>
+
+      <select
+        formControlName="jobType"
+        [disabled]="jobTypeOptions.length === 0">
+
+        <option value="">
+          Select job type
+        </option>
+
+        @for (jt of jobTypeOptions; track jt) {
+          <option [value]="jt">
+            {{ jt }}
+          </option>
+        }
+
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Job Name</label>
+
+      <input
+        type="text"
+        formControlName="jobName"
+        placeholder="Enter job name" />
+    </div>
+
+    <div class="field">
+      <label>Short Name</label>
+
+      <input
+        type="text"
+        formControlName="shortName"
+        placeholder="Enter short name" />
+    </div>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- BIDS -->
+  <!-- ================================================= -->
+
+  <section class="grid-section">
+
+    <div class="grid-header">
+
+      <h2>Bids</h2>
+
+      <button
+        type="button"
+        class="btn-primary btn-sm"
+        (click)="openBidPopup()">
+
+        Add Bid
+
+      </button>
+
+    </div>
+
+
+    <table
+      class="sub-grid"
+      formArrayName="bidAmounts">
+
+      <thead>
+
+        <tr>
+          <th>Action</th>
+          <th>Bid Date</th>
+          <th>Bid Amount</th>
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        @for (
+          row of bidAmounts.controls;
+          track $index;
+          let i = $index
+        ) {
+
+          <tr [formGroupName]="i">
+
+            <td>
+
+              <button
+                type="button"
+                class="btn-danger btn-sm"
+                (click)="deleteBidAmount(row.value)">
+
+                Delete
+
+              </button>
+
+            </td>
+
+            <td>
+              {{ row.value.bidDate | date:'MM/dd/yyyy' }}
+            </td>
+
+            <td>
+              $ {{ row.value.bidAmount1 | number:'1.2-2' }}
+            </td>
+
+          </tr>
+
+        }
+
+        @empty {
+
+          <tr>
+
+            <td
+              colspan="3"
+              class="empty">
+
+              No bid amounts.
+
+            </td>
+
+          </tr>
+
+        }
+
+      </tbody>
+
+    </table>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- CONTRACT -->
+  <!-- ================================================= -->
+
+  <section class="row-3">
+
+    <div class="field">
+
+      <label>Contract Number</label>
+
+      <input
+        type="text"
+        formControlName="contractNumber"
+        placeholder="Enter contract number" />
+
+    </div>
+
+    <div class="field">
+
+      <label>Contract Date</label>
+
+      <ejs-datepicker
+        formControlName="contractDate"
+        format="MM/dd/yyyy"
+        placeholder="MM/DD/YYYY">
+      </ejs-datepicker>
+
+    </div>
+
+    <div class="field">
+
+      <label>Contract Amount</label>
+
+      <input
+        type="number"
+        step="0.01"
+        formControlName="contractAmount"
+        placeholder="Enter contract amount" />
+
+    </div>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- ESTIMATED DATES -->
+  <!-- ================================================= -->
+
+  <section class="row-2">
+
+    <div class="field">
+
+      <label>Est Start Date</label>
+
+      <ejs-datepicker
+        formControlName="estStartDate"
+        format="MM/dd/yyyy"
+        placeholder="MM/DD/YYYY">
+      </ejs-datepicker>
+
+    </div>
+
+    <div class="field">
+
+      <label>Est Completion Date</label>
+
+      <ejs-datepicker
+        formControlName="estCompletionDate"
+        format="MM/dd/yyyy"
+        placeholder="MM/DD/YYYY">
+      </ejs-datepicker>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- ADDITIONAL PHASES -->
+  <!-- ================================================= -->
+
+<section class="grid-section">
+
+  <div class="grid-header">
+
+    <h2>Additional Phases</h2>
+
+    <button
+      type="button"
+      class="btn-primary btn-sm"
+      (click)="openPhasePopup()">
+
+      Add Phases
+
+    </button>
+
+  </div>
+
+  <table
+    class="sub-grid"
+    formArrayName="bidPhases">
+
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th>Phase</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      @for (
+        row of bidPhases.controls;
+        track $index;
+        let i = $index
+      ) {
+
+        <tr [formGroupName]="i">
+
+          <td>
+
+            <button
+              type="button"
+              class="btn-danger btn-sm"
+              (click)="deleteBidPhase(row.value)">
+
+              Delete
+
+            </button>
+
+          </td>
+
+          <td>
+            {{ row.value.phase }}
+          </td>
+
+          <td>
+            {{ row.value.description }}
+          </td>
+
+        </tr>
+
+      }
+
+      @empty {
+
+        <tr>
+
+          <td
+            colspan="3"
+            class="empty">
+
+            No additional phases.
+
+          </td>
+
+        </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+</section>
+
+
+  <!-- ================================================= -->
+  <!-- LOCATION + CONTRACTOR -->
+  <!-- ================================================= -->
+
+  <section class="row-2">
+
+    <div class="location-block">
+
+      <h2>Project Location</h2>
+
+      <div class="field">
+
+        <label>Jobsite</label>
+
+        <input
+          type="text"
+          formControlName="jobSite"
+          placeholder="Enter jobsite" />
+
+      </div>
+
+      <div class="field">
+
+        <label>Address</label>
+
+        <input
+          type="text"
+          formControlName="jobSiteAddress"
+          placeholder="Enter address" />
+
+      </div>
+
+      <div class="field">
+
+        <label>Address 2</label>
+
+        <input
+          type="text"
+          formControlName="jobSiteAddress2"
+          placeholder="Enter address 2" />
+
+      </div>
+
+      <div class="field">
+
+        <label>City</label>
+
+        <input
+          type="text"
+          formControlName="jobSiteCity"
+          placeholder="Enter city" />
+
+      </div>
+
+      <div class="field">
+
+        <label>State</label>
+
+        <input
+          type="text"
+          formControlName="jobSiteState"
+          placeholder="Enter state" />
+
+      </div>
+
+      <div class="field">
+
+        <label>Sales Tax District</label>
+
+        <input
+          type="text"
+          formControlName="jobSiteSalesTaxDistrict"
+          placeholder="Enter sales tax district" />
+
+      </div>
+
+    </div>
+
+
+    <div class="location-block">
+
+      <h2>
+        General Contractor Information
+      </h2>
+
+      <div class="field">
+
+        <label>Client</label>
+
+        <!-- <select
+          formControlName="clientId"
+          (change)="onClientChange($any($event.target).value)">
+
+          <option value="">
+            Select Client
+          </option>
+
+          @for (
+            c of contractorClientList;
+            track c.id
+          ) {
+
+            <option [value]="c.id">
+              {{ c.name }}
+            </option>
+
+          }
+
+        </select> -->
+<select
+  formControlName="clientId"
+  (change)="onClientChange($any($event.target).value)">
+
+  <option value="">Select Client</option>
+
+  @for (c of contractorClientList; track c.id) {
+    <option [value]="c.id">
+      {{ c.name }}
+    </option>
+  }
+
+</select>
+      </div>
+
+      <div class="field">
+
+        <label>Address</label>
+
+        <input
+          type="text"
+          formControlName="clientAddress1"
+          placeholder="Address line 1" />
+
+      </div>
+
+      <div class="field">
+
+        <label>Address 2</label>
+
+        <input
+          type="text"
+          formControlName="clientAddress2"
+          placeholder="Address line 2" />
+
+      </div>
+
+      <div class="field">
+
+        <label>City</label>
+
+        <input
+          type="text"
+          formControlName="clientCity"
+          placeholder="Enter city" />
+
+      </div>
+
+      <div class="two-col">
+
+        <div class="field">
+
+          <label>State</label>
+
+          <input
+            type="text"
+            formControlName="clientState"
+            placeholder="Enter state" />
+
+        </div>
+
+        <div class="field">
+
+          <label>Zip</label>
+
+          <input
+            type="text"
+            maxlength="5"
+            formControlName="clientZip"
+            placeholder="Enter zip" />
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================================================= -->
+  <!-- PROJECT INFORMATION -->
+  <!-- ================================================= -->
+
+  <h2>Project Information</h2>
+
+  <hr />
+
+  <section class="row-2">
+
+    <div class="location-block">
+
+      <div class="field">
+
+        <label>Insurance Type</label>
+
+        <select formControlName="insuranceType">
+
+          <option [value]="0">
+            Select insurance type
+          </option>
+
+          <option [value]="1">
+            OCIP
+          </option>
+
+          <option [value]="2">
+            CCIP
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+
+        <label>Bonded</label>
+
+        <select formControlName="bonded">
+
+          <option [value]="0">
+            Select
+          </option>
+
+          <option [value]="1">
+            Yes
+          </option>
+
+          <option [value]="2">
+            No
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+
+        <label>Tax Exempt</label>
+
+        <select formControlName="taxExempt">
+
+          <option [value]="0">
+            Select
+          </option>
+
+          <option [value]="1">
+            Yes
+          </option>
+
+          <option [value]="2">
+            No
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+
+        <label>Invoice Submittal</label>
+
+        <select formControlName="invoiceSubmittal">
+
+          <option [value]="0">
+            Select
+          </option>
+
+          <option [value]="1">
+            Email
+          </option>
+
+          <option [value]="2">
+            Portal
+          </option>
+
+          <option [value]="3">
+            Mail
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="location-block">
+
+      <div class="field">
+
+        <label>Certified Payroll</label>
+
+        <select formControlName="certifiedPayroll">
+
+          <option [value]="0">
+            Select
+          </option>
+
+          <option [value]="1">
+            Yes
+          </option>
+
+          <option [value]="2">
+            No
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+
+        <label>Net Terms Date</label>
+
+   
+         <ejs-datepicker
+        formControlName="netTermsDate"
+        format="MM/dd/yyyy"
+        placeholder="MM/DD/YYYY">
+      </ejs-datepicker>
+
+      </div>
+
+      <div class="field">
+
+        <label>Retainage %</label>
+
+        <input
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          formControlName="retainagePerc"
+          placeholder="Enter retainage percentage" />
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+<!-- ================================================= -->
+<!-- PROJECT RESOURCES -->
+<!-- ================================================= -->
+
+<h2>Project Resources</h2>
+
+<hr />
+
+<section class="grid-section">
+
+  <div class="grid-header">
+
+    <h2>Employees</h2>
+
+    <button
+      type="button"
+      class="btn-primary btn-sm"
+      (click)="openEmployeePopup()">
+
+      Add Employee
+
+    </button>
+
+  </div>
+
+
+  <table
+    class="sub-grid"
+    formArrayName="bidEmployees">
+
+    <thead>
+
+      <tr>
+        <th>Action</th>
+        <th>Role</th>
+        <th>Employee</th>
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      @for (
+        row of bidEmployees.controls;
+        track $index;
+        let i = $index
+      ) {
+
+        <tr [formGroupName]="i">
+
+          <td>
+
+            <button
+              type="button"
+              class="btn-danger btn-sm"
+              (click)="deleteEmployee(row.value)">
+
+              Delete
+
+            </button>
+
+          </td>
+
+          <td>
+            {{ row.value.role }}
+          </td>
+
+          <td>
+            {{ row.value.employee }}
+          </td>
+
+        </tr>
+
+      }
+
+      @empty {
+
+        <tr>
+
+          <td
+            colspan="3"
+            class="empty">
+
+            No employees assigned.
+
+          </td>
+
+        </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+</section>
+
+
+  <!-- ================================================= -->
+  <!-- MESSAGES -->
+  <!-- ================================================= -->
+
+  @if (successMessage) {
+  <div class="success-message">
+    {{ successMessage }}
+  </div>
+}
+
+@if (errorMessage) {
+  <div class="error-message">
+    {{ errorMessage }}
+  </div>
+}
+
+
+  <!-- ================================================= -->
+  <!-- ACTIONS -->
+  <!-- ================================================= -->
+
+  <div class="actions">
+
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="isLoading"
+      (click)="submitBid()">
+
+      Create/Update Job
+
+    </button>
+
+
+    <button
+      type="button"
+      class="btn-danger"
+      (click)="rejectBid()">
+
+      Reject
+
+    </button>
+
+  </div>
+
+</form>
+
+
+<!-- ================================================= -->
+<!-- ADD BID POPUP -->
+<!-- ================================================= -->
+
+<!--
+  IMPORTANT:
+  Do NOT use @if here.
+
+  The popup remains in the DOM and only its display
+  property changes. This avoids the rendering problem
+  that was occurring immediately after showBidPopup=true.
+-->
+
+<div
+  class="bid-popup-overlay"
+  [style.display]="showBidPopup ? 'flex' : 'none'">
+
+  <div
+    class="bid-popup"
+    (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+
+    <div class="bid-popup-header">
+
+      <h2>Add Bid</h2>
+
+      <button
+        type="button"
+        class="bid-popup-close"
+        (click)="closeBidPopup()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- BODY -->
+
+    <div class="bid-popup-body">
+
+      <div class="field">
+
+        <label>Bid Date</label>
+
+        <!-- <input
+          type="date"
+          [(ngModel)]="newBidAmount.bidDate"
+          [ngModelOptions]="{ standalone: true }" /> -->
+<ejs-datepicker
+  [(ngModel)]="newBidAmount.bidDate"
+  [ngModelOptions]="{ standalone: true }"
+  format="MM/dd/yyyy"
+  placeholder="MM/DD/YYYY">
+</ejs-datepicker>
+      </div>
+
+
+      <div class="field">
+
+        <label>Bid Amount</label>
+
+       <div class="amount-input">
+  <span>$</span>
+  <input
+    type="number"
+    step="0.01"
+    min="0"
+    [(ngModel)]="newBidAmount.bidAmount"
+    [ngModelOptions]="{ standalone: true }" />
+</div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="bid-popup-footer">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="saveBidFromPopup()">
+
+        Add
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-danger"
+        (click)="closeBidPopup()">
+
+        Cancel
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- ================================================= -->
+<!-- ADD PHASE POPUP -->
+<!-- ================================================= -->
+
+<div
+  class="bid-popup-overlay"
+  [style.display]="showPhasePopup ? 'flex' : 'none'">
+
+  <div
+    class="bid-popup"
+    (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+
+    <div class="bid-popup-header">
+
+      <h2>Add Phase</h2>
+
+      <button
+        type="button"
+        class="bid-popup-close"
+        (click)="closePhasePopup()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- BODY -->
+
+    <div class="bid-popup-body">
+
+      <div class="field">
+
+        <label>Phase</label>
+
+        <select
+          [(ngModel)]="newBidPhase.phaseNum"
+          [ngModelOptions]="{ standalone: true }">
+
+          <option value="">
+            Select Phase
+          </option>
+
+          @for (
+            p of phases;
+            track p.phaseNum
+          ) {
+
+            <option [value]="p.phaseNum">
+              {{ p.phaseNum }} - {{ p.phaseName }}
+            </option>
+
+          }
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="bid-popup-footer">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="savePhaseFromPopup()">
+
+        Add
+
+      </button>
+
+      <button
+        type="button"
+        class="btn-danger"
+        (click)="closePhasePopup()">
+
+        Cancel
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================================================= -->
+<!-- ADD EMPLOYEE POPUP -->
+<!-- ================================================= -->
+
+<div
+  class="bid-popup-overlay"
+  [style.display]="showEmployeePopup ? 'flex' : 'none'">
+
+  <div
+    class="bid-popup"
+    (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+
+    <div class="bid-popup-header">
+
+      <h2>Add Employee</h2>
+
+      <button
+        type="button"
+        class="bid-popup-close"
+        (click)="closeEmployeePopup()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- BODY -->
+
+    <div class="bid-popup-body">
+
+      <!-- ROLE -->
+
+      <div class="field">
+
+        <label>Role</label>
+
+        <select
+          [(ngModel)]="newEmployee.role"
+          [ngModelOptions]="{ standalone: true }">
+
+          <option [ngValue]="null">
+            Select Role
+          </option>
+
+          @for (
+            r of employeeRoles;
+            track r
+          ) {
+
+            <option [value]="r">
+              {{ r }}
+            </option>
+
+          }
+
+        </select>
+
+      </div>
+
+
+      <!-- EMPLOYEE -->
+
+      <div class="field">
+
+        <label>Employee</label>
+
+        <select
+          [(ngModel)]="newEmployee.employeeId"
+          [ngModelOptions]="{ standalone: true }">
+
+          <option [ngValue]="null">
+            Select Employee
+          </option>
+
+          @for (
+            e of employeeOptions;
+            track e.id
+          ) {
+
+            <option [value]="e.id">
+              {{ e.name }}
+            </option>
+
+          }
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="bid-popup-footer">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="saveEmployeeFromPopup()">
+
+        Add
+
+      </button>
+
+      <button
+        type="button"
+        class="btn-danger"
+        (click)="closeEmployeePopup()">
+
+        Cancel
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

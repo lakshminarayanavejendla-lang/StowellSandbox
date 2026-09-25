@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.angular/
+*.log
+
+Deploy_*/
+.claude/scheduled_tasks.lock

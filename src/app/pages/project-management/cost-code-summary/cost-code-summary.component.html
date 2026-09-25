@@ -1,0 +1,85 @@
+<h3>Current Cost Summary</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of model.jobs; track job.recnum) {
+        <option [value]="job.recnum">{{ job.fullJob }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Cost Code</label>
+    <select multiple [(ngModel)]="selectedCostCodes">
+      @for (c of model.costCodes; track c.description) {
+        <option [value]="c.description">{{ c.description }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Phase</label>
+    <select [(ngModel)]="selectedPhaseId">
+      <option value="">Select Phase</option>
+      @for (p of model.phases; track p.phaseNum) {
+        <option [value]="p.phaseNum">{{ p.phaseName }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="field">
+    <label>Start Date</label>
+    <input type="date" [(ngModel)]="startDate" />
+  </div>
+  <div class="field">
+    <label>End Date</label>
+    <input type="date" [(ngModel)]="endDate" />
+  </div>
+  <button type="button" class="btn-primary" (click)="onSubmit()">Submit</button>
+</div>
+
+<div class="summary-row">
+  <div class="field"><label>Job Name</label><input type="text" [value]="model.selectedJobName" disabled /></div>
+  <div class="field"><label>Budget + Change</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfBudgetAndChanges | currency" disabled /></div>
+  <div class="field"><label>To Date</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfToDate | currency" disabled /></div>
+  <div class="field"><label>This Period</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfThisPeriod | currency" disabled /></div>
+  <div class="field"><label>Remaining</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfRemaining | currency" disabled /></div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary"  title="Needs a client-side PDF library - see code comment">Export PDF</button>
+    <button type="button" class="btn-primary"  title="Needs a client-side XLSX library - see code comment">Export Excel</button>
+  </div>
+</div>
+
+<ejs-grid
+  [dataSource]="filteredJobs"
+  [allowPaging]="true"
+  [allowSorting]="true"
+  [allowFiltering]="true"
+  [pageSettings]="pageSettings"
+>
+  <e-columns>
+    <e-column field="jobNumber" headerText="Job ID" width="110"></e-column>
+    <e-column field="phase" headerText="Phase" width="150"></e-column>
+    <e-column field="costCode" headerText="Cost Code" width="110"></e-column>
+    <e-column field="costCodeDescription" headerText="Cost Code Description" width="220"></e-column>
+    <e-column field="budgetAndChanges" headerText="Budget & Changes" width="140" format="C2"></e-column>
+    <e-column field="toDate" headerText="To Date" width="120" format="C2"></e-column>
+    <e-column field="thisPeriod" headerText="This Period" width="120" format="C2"></e-column>
+    <e-column field="committed" headerText="Open POs" width="120" format="C2"></e-column>
+    <e-column field="remaining" headerText="Remaining" width="120" format="C2"></e-column>
+  </e-columns>
+</ejs-grid>

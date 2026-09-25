@@ -1,0 +1,88 @@
+.nav-menu {
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  a,
+  .menu-toggle,
+  .disabled-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: #fff;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .disabled-link {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  /* Active normal menu item - matches stowelldashboard.proserv360.tech's
+     ".nav-menu a:hover, .nav-menu a.active { background-color: #01355f }" (confirmed via that
+     site's live stylesheet 2026-09-13). */
+  a.active {
+    background-color: #01355f;
+    color: #fff;
+  }
+
+  /* Parent menu toggle (e.g. "Project Management") - the live site has NO .menu-toggle:hover or
+     .menu-toggle.active background rule at all (confirmed via its live stylesheet) - it stays
+     fully transparent whether expanded or not, unlike a plain nav link. Previously this
+     incorrectly painted #01355f here too. */
+
+  /* Hover / Focus - matches stowelldashboard.proserv360.tech's .nav-menu a:hover (NOT
+     .menu-toggle - see comment above). */
+  a:hover
+  // a:focus
+   {
+    background-color: #01355f;
+    color: #fff;
+    outline: none;
+  }
+
+  /* Make icon follow the parent text color */
+  a i,
+  .menu-toggle i {
+    margin-right: 0.6rem;
+    color: inherit;
+  }
+
+  /* Submenu - matches stowelldashboard.proserv360.tech's .submenu a (reference has no
+     distinct active-item style here - hover only). */
+  .submenu {
+    a {
+      padding-left: 2.2rem;
+      font-size: 0.9rem;
+      background-color: #13294b;
+    }
+
+    /* Submenu hover / focus */
+    a:hover
+    // a:focus
+     {
+      background-color: #1f3d73;
+      color: #fff;
+      outline: none;
+    }
+  }
+
+  .menu-toggle span {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .menu-arrow {
+    font-size: 0.7rem;
+    margin-left: 0.2rem;
+  }
+}

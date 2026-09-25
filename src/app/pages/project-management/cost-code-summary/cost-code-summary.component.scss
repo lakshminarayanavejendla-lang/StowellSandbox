@@ -1,0 +1,68 @@
+.filters, .summary-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label { font-weight: 600; color: #444; }
+  select, input {
+    height: 38px;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    padding: 6px 10px;
+    min-width: 220px;
+  }
+
+  select[multiple] { height: auto; min-height: 90px; }
+
+  // Selected cost codes showed as flat grey with white text (the browser's default for an
+  // unfocused multi-select) - hard to read. Use the app's navy so selected vs not is obvious.
+  select[multiple] option:checked {
+    background: #00355f linear-gradient(#00355f, #00355f);
+    color: #fff;
+  }
+  select:focus { outline: 2px solid #1c84c6; outline-offset: 0; }
+
+  input[disabled] { background-color: #f7f7f7; }
+}
+
+.btn-primary, .btn-secondary {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  color: #fff;
+  height: 38px;
+}
+
+.btn-primary { background-color: #007bff; }
+.btn-secondary { background-color: #6c757d; }
+.btn-secondary[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+}
+
+.actions { display: flex; gap: 5px; }
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th { background-color: #0d47a1; color: #fff; text-align: left; padding: 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
+  .empty { text-align: center; color: #888; }
+}

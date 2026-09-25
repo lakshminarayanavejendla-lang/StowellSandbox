@@ -1,0 +1,258 @@
+<div class="wrapper">
+  <h2>
+    @if (isEditMode) { Change Order - CO ID: {{ editCoId }} }
+    @else if (mode === 'approval') { Change Order Request Approval }
+    @else { Change Order Request }
+  </h2>
+  <hr class="dashed" />
+
+  <div class="header-grid">
+    <div class="col">
+      <div class="field">
+        <label>Requester</label>
+        <input type="text" [(ngModel)]="requester" placeholder="Placeholder" [readonly]="mode === 'approval'" />
+      </div>
+      <div class="field">
+        <label>Job ID</label>
+        <select [ngModel]="selectedJobId" (ngModelChange)="onJobChange($any($event))" [disabled]="mode === 'approval'">
+          <option value="">Select</option>
+          @for (job of jobs; track job.recNum) {
+            <option [value]="job.recNum">{{ recJobNumber(job) }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Job Name</label>
+        <input type="text" [(ngModel)]="jobName" placeholder="Placeholder" [readonly]="mode === 'approval'" />
+      </div>
+      <div class="field">
+        <label>Purchase Order</label>
+        <select [(ngModel)]="selectedPurchaseOrderId" [disabled]="mode === 'approval'">
+          <option value="">Select</option>
+          @for (po of purchaseOrders; track po.poId) {
+            <option [value]="po.poId">{{ po.poId }} - {{ po.poDescription }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Vendor</label>
+        <ejs-combobox
+          [dataSource]="vendors"
+          [fields]="vendorFields"
+          [(value)]="vendor"
+          [allowFiltering]="true"
+          placeholder="Select vendor"
+          [enabled]="mode !== 'approval'"
+        ></ejs-combobox>
+      </div>
+      <div class="field">
+        <label>CO Reason</label>
+        <input type="text" [(ngModel)]="coReason" placeholder="Placeholder" [readonly]="mode === 'approval'" />
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="field">
+        <label>Total CO Amount</label>
+        <input type="text" [value]="'$' + totalCoAmount.toFixed(2)" readonly />
+      </div>
+      <div class="field">
+        <label>Date Requested</label>
+        <input type="date" [(ngModel)]="dateRequested" [readonly]="mode === 'approval'" />
+      </div>
+      <div class="field">
+        <label>Required OnSite</label>
+        <input type="date" [(ngModel)]="requiredOnSite" [readonly]="mode === 'approval'" />
+      </div>
+      @if (mode === 'approval' && approvalStatus) {
+        <div class="field">
+          <label>Status</label>
+          <input type="text" [value]="approvalStatus" readonly />
+        </div>
+      }
+    </div>
+  </div>
+
+  <h3 class="section-header">Requested Item</h3>
+
+  @if (mode !== 'approval') {
+    <div class="entry-panel">
+      <div class="field">
+        <label>Item</label>
+        <ejs-combobox
+          [dataSource]="costCodes"
+          [fields]="costCodeFields"
+          [(value)]="newItemCostCode"
+          (change)="onCostCodeSelected($any($event).value)"
+          [allowFiltering]="true"
+          placeholder="Select cost code"
+        ></ejs-combobox>
+      </div>
+      <div class="field">
+        <label>Remaining Budget</label>
+        <input type="number" [ngModel]="newItem.remainingBudget" readonly />
+      </div>
+      <div class="field">
+        <label>Item Cost</label>
+        <input type="number" [(ngModel)]="newItem.itemCost" />
+      </div>
+      <div class="field">
+        <label>Item Note</label>
+        <input type="text" [(ngModel)]="newItem.itemNote" placeholder="Item Note" />
+      </div>
+      <button type="button" class="btn-primary" (click)="addItem()">Add Item</button>
+    </div>
+  }
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Total</th>
+        <th>Remaining Budget</th>
+        <th>Item Note</th>
+        @if (mode !== 'approval') { <th></th> }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of items; track $index) {
+        <tr>
+          <td>{{ row.item }}</td>
+          <td>${{ row.itemCost }}</td>
+          <td>${{ row.remainingBudget }}</td>
+          <td>{{ row.itemNote }}</td>
+          @if (mode !== 'approval') {
+            <td>
+              <button type="button" class="btn-sm" (click)="editItem($index)">Edit</button>
+              <button type="button" class="btn-sm" (click)="removeItem($index)">Remove</button>
+            </td>
+          }
+        </tr>
+      }
+      @if (!items.length) {
+        <tr><td colspan="5" class="empty-row">No items added yet.</td></tr>
+      }
+    </tbody>
+  </table>
+
+  @if (mode !== 'approval') {
+    <div class="field file-upload">
+      <label>File Upload</label>
+      <div
+        class="drop-zone"
+        [class.dragging]="dragging"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <span>{{ uploading ? 'Uploading...' : 'Drag and Drop' }}</span>
+        <label class="browse-link">
+          Browse
+          <input type="file" multiple (change)="onFilesSelected($event)" [disabled]="uploading" hidden />
+        </label>
+      </div>
+    </div>
+  }
+
+  @if (attachments.length) {
+    <ul class="attachment-list">
+      @for (att of attachments; track att.storedName) {
+        <li>
+          <a [href]="attachmentUrl(att)" target="_blank">{{ att.name }}</a>
+          @if (mode !== 'approval') {
+            <button type="button" class="btn-sm" (click)="removeAttachment(att)">Remove</button>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="section-header-row">
+    <h3 class="section-header">Back Charges</h3>
+    @if (mode !== 'approval') {
+      <label class="back-charge-toggle">
+        <input type="checkbox" [(ngModel)]="backChargeEnabled" name="backChargeEnabled" />
+        Back Charge
+      </label>
+    }
+  </div>
+
+  @if (mode !== 'approval') {
+    <div class="entry-panel" [class.disabled]="!backChargeEnabled">
+      <div class="field">
+        <label>Vendor</label>
+        <input type="text" [(ngModel)]="newBackCharge.vendor" placeholder="Vendor" [disabled]="!backChargeEnabled" />
+      </div>
+      <div class="field">
+        <label>%</label>
+        <input type="number" [(ngModel)]="newBackCharge.percentCharge" [disabled]="!backChargeEnabled" />
+      </div>
+      <div class="field">
+        <label>$ Amount</label>
+        <input type="number" [(ngModel)]="newBackCharge.dollarCharge" [disabled]="!backChargeEnabled" />
+      </div>
+      <div class="field">
+        <label>Reason</label>
+        <input type="text" [(ngModel)]="newBackCharge.reason" placeholder="Reason" [disabled]="!backChargeEnabled" />
+      </div>
+      <button type="button" class="btn-primary" (click)="addBackCharge()" [disabled]="!backChargeEnabled">ADD</button>
+    </div>
+  }
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Vendor</th>
+        <th>% Charge</th>
+        <th>$ Charge</th>
+        <th>Reason</th>
+        @if (mode !== 'approval') { <th></th> }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of backCharges; track $index) {
+        <tr>
+          <td>{{ row.vendor }}</td>
+          <td>{{ row.percentCharge != null ? row.percentCharge + '%' : '' }}</td>
+          <td>${{ row.dollarCharge }}</td>
+          <td>{{ row.reason }}</td>
+          @if (mode !== 'approval') {
+            <td>
+              <button type="button" class="btn-sm" (click)="editBackCharge($index)">Edit</button>
+              <button type="button" class="btn-sm" (click)="removeBackCharge($index)">Remove</button>
+            </td>
+          }
+        </tr>
+      }
+      @if (!backCharges.length) {
+        <tr><td colspan="5" class="empty-row">No back charges added yet.</td></tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="form-row actions">
+    @if (mode === 'approval') {
+      <button type="button" class="btn-reject" (click)="openRejectReason()">Reject</button>
+      <button type="button" class="btn-approve" (click)="approve()">Approved</button>
+    } @else if (isEditMode) {
+      <button type="button" class="btn-primary" (click)="saveEdits()">Save Changes</button>
+    } @else {
+      <button type="button" class="btn-primary" (click)="saveCo()">Save CO</button>
+      <button type="button" class="btn-secondary" (click)="submitRequest()">Submit Request</button>
+    }
+    @if (statusMessage) {
+      <span class="status-message" [class.error]="statusMessage.startsWith('Save failed') || statusMessage.startsWith('Submit failed') || statusMessage.startsWith('Reject failed') || statusMessage.startsWith('Approve failed')">{{ statusMessage }}</span>
+    }
+  </div>
+
+  @if (mode === 'approval' && showRejectReason) {
+    <div class="reject-reason-box">
+      <label>Please enter reason for Rejection</label>
+      <textarea rows="3" [(ngModel)]="rejectionReason" placeholder="Reason for Rejection"></textarea>
+      <div class="form-row actions">
+        <button type="button" class="btn-secondary" (click)="cancelReject()">Cancel</button>
+        <button type="button" class="btn-reject" [disabled]="!rejectionReason.trim()" (click)="confirmReject()">Confirm Rejection</button>
+      </div>
+    </div>
+  }
+</div>

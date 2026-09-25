@@ -1,0 +1,10 @@
+<h3>Document Management @if (jobName) { <span class="job-name">- {{ jobName }}</span> }</h3>
+<hr />
+
+@if (notFound) {
+  <div class="not-found">Could not resolve a document folder for project "{{ projectId }}".</div>
+} @else if (!isResolved) {
+  <p>Loading project details...</p>
+} @else {
+  <app-file-browser [scope]="'project'" [folder]="folderName"></app-file-browser>
+}

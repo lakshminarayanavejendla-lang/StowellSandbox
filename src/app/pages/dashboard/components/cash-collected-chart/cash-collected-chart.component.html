@@ -1,0 +1,26 @@
+<h4>Cash Collected vs Cash Paid by Job</h4>
+<ejs-chart
+  [primaryXAxis]="primaryXAxis"
+  [primaryYAxis]="primaryYAxis"
+  [legendSettings]="legendSettings"
+  height="320px"
+>
+  <e-series-collection>
+    <e-series
+      [dataSource]="chartData"
+      type="Column"
+      xName="category"
+      yName="cashCollected"
+      name="Cash Collected"
+      fill="#3767ad"
+    ></e-series>
+    <e-series
+      [dataSource]="chartData"
+      type="Column"
+      xName="category"
+      yName="cashPaid"
+      name="Cash Paid"
+      fill="gray"
+    ></e-series>
+  </e-series-collection>
+</ejs-chart>

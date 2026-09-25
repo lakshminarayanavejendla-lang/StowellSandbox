@@ -1,0 +1,50 @@
+<h3>Prime Change List</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of costCodeRecords; track job.recNum) {
+        <option [value]="job.recNum">{{ recJobNumber(job) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredJobs` data source. -->
+@if (filteredJobs.length > 0) {
+  <ejs-grid #primeChangeGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="recNum" headerText="Record#" width="110"></e-column>
+      <e-column field="chgNum" headerText="Order#" width="110"></e-column>
+      <e-column field="chgDate" headerText="Date" width="120">
+        <ng-template #template let-data>{{ data.chgDate | date: 'MM/dd/yyyy' }}</ng-template>
+      </e-column>
+      <e-column field="description" headerText="Description" width="220"></e-column>
+      <e-column field="status" headerText="Status" width="120"></e-column>
+      <e-column field="reqAmt" headerText="Requested" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.reqAmt | currency }}</ng-template>
+      </e-column>
+      <e-column field="appAmt" headerText="Approved" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.appAmt | currency }}</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">Select a job to load its prime change list.</p>
+}

@@ -1,0 +1,79 @@
+<h3>Project Overview</h3>
+<hr />
+
+<ul class="nav-tabs">
+  <li>
+    <a class="nav-link" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">
+      <i class="bi bi-bar-chart-line"></i> Overview
+    </a>
+  </li>
+  <li>
+    <a class="nav-link" [class.active]="activeTab === 'details'" (click)="switchTab('details')">
+      <i class="bi bi-clipboard"></i> Details
+    </a>
+  </li>
+  <li>
+    <!-- NEW tab - confirmed by Mike Smith (see project-overview.component.ts header comment). -->
+    <a class="nav-link" [class.active]="activeTab === 'budget'" (click)="switchTab('budget')">
+      <i class="bi bi-piggy-bank"></i> Budget
+    </a>
+  </li>
+  <li>
+    <!-- NEW tab - Stowell PO Module (see project-overview.component.ts header comment). -->
+    <a class="nav-link" [class.active]="activeTab === 'po'" (click)="switchTab('po')">
+      <i class="bi bi-currency-dollar"></i> PO
+    </a>
+  </li>
+  <li>
+    <!-- NEW tab - client-updated Moqups (see project-overview.component.ts header comment). -->
+    <a class="nav-link" [class.active]="activeTab === 'co'" (click)="switchTab('co')">
+      <i class="bi bi-arrow-left-right"></i> CO
+    </a>
+  </li>
+  <li>
+    <!-- NEW tab - client-updated Moqups. -->
+    <a class="nav-link" [class.active]="activeTab === 'invoices'" (click)="switchTab('invoices')">
+      <i class="bi bi-receipt"></i> Invoices
+    </a>
+  </li>
+  <li>
+    <a class="nav-link" [class.active]="activeTab === 'reporting'" (click)="switchTab('reporting')">
+      <i class="bi bi-pie-chart"></i> Reporting
+    </a>
+  </li>
+  <li>
+    <!-- NEW tab - client-updated Moqups. -->
+    <a class="nav-link" [class.active]="activeTab === 'documents'" (click)="switchTab('documents')">
+      <i class="bi bi-folder"></i> Documents
+    </a>
+  </li>
+</ul>
+
+<div class="tab-box">
+  @switch (activeTab) {
+    @case ('overview') {
+      <app-overview-tab [projectId]="projectId"></app-overview-tab>
+    }
+    @case ('details') {
+      <app-project-details-tab [projectId]="projectId"></app-project-details-tab>
+    }
+    @case ('budget') {
+      <app-budget-tab [projectId]="projectId"></app-budget-tab>
+    }
+    @case ('po') {
+      <app-po-tab [projectId]="projectId"></app-po-tab>
+    }
+    @case ('co') {
+      <app-co-tab [projectId]="projectId"></app-co-tab>
+    }
+    @case ('invoices') {
+      <app-invoices-tab [projectId]="projectId"></app-invoices-tab>
+    }
+    @case ('reporting') {
+      <app-reporting-tab [projectId]="projectId"></app-reporting-tab>
+    }
+    @case ('documents') {
+      <app-documents-tab [projectId]="projectId"></app-documents-tab>
+    }
+  }
+</div>

@@ -1,0 +1,232 @@
+@if (!bidRecord) {
+  <p>Loading...</p>
+} @else {
+  @if (!isClosed) {
+    <div class="header-actions">
+      <button class="btn btn-warning" (click)="saveBidData()" [disabled]="isSaving">Save Project</button>
+      <button class="btn btn-danger" (click)="getBidLost()" [disabled]="isClosingLost">Bid Lost</button>
+      <button class="btn btn-success" (click)="getBidWon()" [disabled]="isConverting">{{ isConverting ? 'Creating Project...' : 'Bid Won' }}</button>
+    </div>
+  }
+
+  @if (message) {
+    <div class="message">{{ message }}</div>
+  }
+
+  <form [formGroup]="form">
+    <div class="form-group row">
+      <div class="field">
+        <label>Bid Id</label>
+        <input type="text" formControlName="displayBidID" readonly />
+      </div>
+      <div class="field">
+        <label>Bid Name</label>
+        <input type="text" formControlName="bidName" [readonly]="isClosed" />
+      </div>
+      <a class="doc-link" [routerLink]="['/bids/documents', bidId]"><i class="fas fa-folder"></i> Bid Document Library</a>
+    </div>
+
+    <h2>Bid Overview</h2>
+    <div class="hr-line-dashed"></div>
+    <div class="form-group row">
+      <div class="field">
+        <label>Division</label>
+        <select formControlName="division" [attr.disabled]="isClosed ? true : null">
+          <option value="">Select Division</option>
+          @for (d of divisions; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Bid Phase</label>
+        <select formControlName="bidPhase" [attr.disabled]="isClosed ? true : null">
+          <option value="">None</option>
+          @for (p of bidPhaseOptions; track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Bid Status</label>
+        <select formControlName="bidStatus" [attr.disabled]="isClosed ? true : null">
+          <option value="">None</option>
+          @for (s of bidStatusOptions; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="field">
+        <label>Address</label>
+        <input type="text" placeholder="Enter address" formControlName="address1" [readonly]="isClosed" />
+      </div>
+      <div class="field">
+        <label>Address 2</label>
+        <input type="text" formControlName="address2" [readonly]="isClosed" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="field">
+        <label>City</label>
+        <input type="text" placeholder="Enter city" formControlName="city" [readonly]="isClosed" />
+      </div>
+      <div class="field">
+        <label>State</label>
+        <select formControlName="state" [attr.disabled]="isClosed ? true : null">
+          <option value="">Select State</option>
+          @for (s of states; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Zip</label>
+        <input type="text" placeholder="Enter zip" formControlName="zipCode" [readonly]="isClosed" />
+      </div>
+    </div>
+  </form>
+
+  <div class="bids-section">
+    <div class="section-header">
+      <h2>Bids</h2>
+      <button  type="button" class="btn btn-primary btn-sm" [disabled]="isClosed" (click)="openAddAmount()">Add Bid</button>
+    </div>
+    <div class="hr-line-dashed"></div>
+
+    <!-- FLAG: isClosed is fixed for the lifetime of this tab (derived from the `type` route
+         param set once via @Input), so conditionally including the Action e-column below with
+         @if isn't expected to hit any live add/remove-column re-render edge case - but I
+         couldn't confirm from the ej2-angular-grids 27.x docs whether ColumnsDirective's content
+         children are re-queried if that assumption ever stops holding. Flagging rather than
+         silently assuming full reactivity. -->
+    <ejs-grid [dataSource]="bidAmounts" width="auto">
+      <e-columns>
+        @if (!isClosed) {
+          <e-column headerText="Action" width="90">
+            <ng-template #template let-data>
+              <button class="btn btn-danger btn-sm" (click)="deleteAmount(data)">Delete</button>
+            </ng-template>
+          </e-column>
+        }
+        <e-column field="bidDate" headerText="Bid Date" width="120">
+          <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
+        </e-column>
+        <e-column field="bidAmount" headerText="Bid Amount" width="130">
+          <ng-template #template let-data>{{ data.bidAmount | currency }}</ng-template>
+        </e-column>
+      </e-columns>
+    </ejs-grid>
+  </div>
+
+  <div class="notes-section">
+    <h2>Notes</h2>
+    <div class="hr-line-dashed"></div>
+
+    <div class="notes-toolbar">
+      <label for="noteDate">Date</label>
+      <input id="noteDate" type="text" class="readonly-field" [value]="today | date: 'MM/dd/yyyy'" disabled />
+
+      <label for="noteUser">User</label>
+      <input id="noteUser" type="text" class="readonly-field" [value]="currentUserName" disabled />
+
+      <label for="noteText">Note</label>
+      <input
+        id="noteText"
+        type="text"
+        placeholder="Type here"
+        [(ngModel)]="newNoteText"
+        [ngModelOptions]="{ standalone: true }"
+        [disabled]="isClosed"
+        (keyup.enter)="addNote()" />
+
+      <button type="button" class="btn btn-secondary btn-sm" [disabled]="isClosed" (click)="addNote()">Add</button>
+    </div>
+
+    <table class="notes-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>User</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (n of notes; track n.noteId) {
+          <tr>
+            <td>{{ n.noteDate | date: 'MM/dd/yyyy' }}</td>
+            <td>{{ displayUser(n.enteredBy) }}</td>
+            <td>{{ n.note }}</td>
+          </tr>
+        }
+        @if (!notes.length) {
+          <tr><td colspan="3" class="empty-row">No notes yet.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (showAddAmount) {
+  <div class="add-bid-overlay" (click)="closeAddAmount()">
+    <div class="add-bid-modal" (click)="$event.stopPropagation()">
+
+      <div class="add-bid-header">
+        <h4>Add Bid</h4>
+
+        <button
+          type="button"
+          class="add-bid-close"
+          (click)="closeAddAmount()">
+          &times;
+        </button>
+      </div>
+
+      <div class="add-bid-body">
+
+        <div class="add-bid-form-group">
+          <label>Bid Date</label>
+
+          <input
+            type="date"
+            [(ngModel)]="newBidDate"
+            [ngModelOptions]="{ standalone: true }"
+            class="add-bid-control">
+        </div>
+
+        <div class="add-bid-form-group">
+          <label>Bid Amount</label>
+
+          <input
+            type="number"
+            step="0.01"
+            [(ngModel)]="newBidAmount"
+            [ngModelOptions]="{ standalone: true }"
+            class="add-bid-control">
+        </div>
+
+      </div>
+
+      <div class="add-bid-footer">
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="closeAddAmount()">
+          Close
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          (click)="saveNewAmount()">
+          Save Changes
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+}
+}

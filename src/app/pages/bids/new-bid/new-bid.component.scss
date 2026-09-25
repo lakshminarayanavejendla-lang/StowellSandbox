@@ -1,0 +1,244 @@
+.new-opportunity-page {
+  width: 100%;
+  // padding: 0 30px;
+  box-sizing: border-box;
+
+  h3 {
+    margin: 0;
+    padding: 0 0 8px 0;
+
+    // font-size: 18px;
+    // font-weight: 600;
+    color: #111;
+  }
+
+  hr {
+    margin: 0 0 10px 0;
+    border: 0;
+    border-top: 1px solid #cfcfcf;
+  }
+}
+
+/* =========================
+   MAIN FORM
+   ========================= */
+
+.new-bid-form {
+  width: 100%;
+  // max-width: 1000px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d5d5d5;
+  background: #fff;
+
+  padding: 14px 18px 12px 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+/* =========================
+   FIELD
+   ========================= */
+
+.form-field {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #111;
+
+    margin: 0 0 4px 0;
+
+    line-height: 1.2;
+  }
+
+  input,
+  select {
+    width: 100%;
+    height: 31px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d1d1d1;
+    border-radius: 2px;
+
+    background: #fff;
+
+    padding: 4px 8px;
+
+    font-size: 13px;
+    color: #222;
+
+    outline: none;
+
+    &:focus {
+      border-color: #999;
+    }
+  }
+
+  input[readonly] {
+    background: #f5f5f5;
+  }
+}
+
+/* =========================
+   OPPORTUNITY ID
+   ========================= */
+
+// .opportunity-id {
+//   width: 48%;
+//   max-width: 445px;
+// }
+
+/* =========================
+   DEPARTMENT / DIVISION
+   ========================= */
+
+.form-row {
+  width: 100%;
+
+  display: grid;
+
+  gap: 12px;
+}
+
+.two-column {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* =========================
+   CITY / STATE / ZIP
+   ========================= */
+
+.three-column {
+  grid-template-columns: 1.35fr 0.8fr 0.9fr;
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+.button-row {
+  width: 100%;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 7px;
+}
+
+.btn {
+  height: 30px;
+
+  min-width: 53px;
+
+  padding: 3px 12px;
+
+  border-radius: 2px;
+
+  border: 1px solid transparent;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+
+  &:hover {
+    background: #5c636a;
+  }
+}
+
+.btn-primary {
+  background: #00355f;
+  border-color: #00355f;
+  color: #fff;
+
+  &:hover {
+    background: #222;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+/* =========================
+   ALERTS
+   ========================= */
+
+.alert {
+  padding: 7px 10px;
+  margin-bottom: 8px;
+
+  border-radius: 2px;
+
+  font-size: 13px;
+}
+
+.alert-success {
+  color: #155724;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+  color: #721c24;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1100px) {
+
+  .new-opportunity-page {
+    padding: 0 20px;
+  }
+
+  .new-bid-form {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+
+  // .new-opportunity-page {
+  //   padding: 0 10px;
+  // }
+
+  .new-bid-form {
+    padding: 12px;
+  }
+
+  .opportunity-id {
+    width: 100%;
+    max-width: none;
+  }
+
+  .two-column,
+  .three-column {
+    grid-template-columns: 1fr;
+  }
+}

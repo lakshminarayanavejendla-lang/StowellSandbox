@@ -1,0 +1,61 @@
+<h3>Invoice Receivable</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of costCodeRecords; track job.recNum) {
+        <option [value]="job.recNum">{{ recJobNumber(job) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredJobs` data source. -->
+@if (filteredJobs.length > 0) {
+  <ejs-grid #invoiceReceivableGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="recNum" headerText="Record#" width="100"></e-column>
+      <e-column field="invNum" headerText="Invoice#" width="110"></e-column>
+      <e-column field="invDate" headerText="Invoice Date" width="130"></e-column>
+      <e-column field="description" headerText="Description" width="200"></e-column>
+      <e-column field="dueDate" headerText="Due Date" width="120"></e-column>
+      <e-column field="status" headerText="Requested" width="120"></e-column>
+      <e-column field="invTtl" headerText="Invoice Total" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.invTtl | currency }}</ng-template>
+      </e-column>
+      <e-column field="amtPad" headerText="Paid" width="120" textAlign="Right">
+        <ng-template #template let-data>{{ data.amtPad | currency }}</ng-template>
+      </e-column>
+      <e-column field="discCred" headerText="Disc/Cred" width="120" textAlign="Right">
+        <ng-template #template let-data>{{ data.discCred | currency }}</ng-template>
+      </e-column>
+      <e-column field="invBal" headerText="Balance" width="120" textAlign="Right">
+        <ng-template #template let-data>{{ data.invBal | currency }}</ng-template>
+      </e-column>
+      <e-column field="retain" headerText="Retention" width="120" textAlign="Right">
+        <ng-template #template let-data>{{ data.retain | currency }}</ng-template>
+      </e-column>
+      <e-column field="invNet" headerText="Net Due" width="120" textAlign="Right">
+        <ng-template #template let-data>{{ data.invNet | currency }}</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">Select a job to load its invoice receivables.</p>
+}

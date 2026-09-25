@@ -1,0 +1,12 @@
+<div class="file-browser">
+  @if (ajaxSettings) {
+    <ejs-filemanager
+      [ajaxSettings]="ajaxSettings"
+      height="520px"
+      (fileOpen)="onFileOpen($event)"
+      (beforeSend)="onBeforeSend($event)"
+    ></ejs-filemanager>
+  } @else {
+    <div class="loading">Loading file manager...</div>
+  }
+</div>

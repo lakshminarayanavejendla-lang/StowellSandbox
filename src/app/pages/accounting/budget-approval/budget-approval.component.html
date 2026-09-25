@@ -1,0 +1,84 @@
+<app-page-header [title]="pageTitle"></app-page-header>
+
+<form [formGroup]="form" class="budget-form">
+  <div class="dropdown-row">
+    <div class="field">
+      <label for="jobDropdown">Job Number</label>
+      <select id="jobDropdown" formControlName="selectedProjectId" (change)="onJobChanged()">
+        <option [value]="0" disabled>Select ProjectId</option>
+        @for (job of jobOptions; track job.recNum) {
+          <option [value]="job.recNum">{{ job.recJobNumber }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="phaseDropdown">Phase</label>
+      <select id="phaseDropdown" formControlName="selectedPhaseId" (change)="onPhaseChanged()">
+        @for (phase of phaseOptions; track phase.phaseNum) {
+          <option [value]="phase.phaseNum">{{ phase.phaseName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <h2>Pending Budget Lines</h2>
+  <hr class="dashed" />
+
+  <table class="budget-table" formArrayName="budgetRows">
+    <thead>
+      <tr>
+        <th>Cost Code Description</th>
+        <th>Total Budget</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of budgetRows.controls; track $index; let i = $index) {
+        <tr [formGroupName]="i">
+          <td>
+            <input
+              type="text"
+              formControlName="costCodeDescription"
+              list="cost-code-descriptions"
+              placeholder="Select Cost Code Description"
+              (input)="onCostCodeFilterChange($any($event.target).value)"
+            />
+            <datalist id="cost-code-descriptions">
+              @for (cc of costCodeDescriptions; track cc.id) {
+                <option [value]="cc.description"></option>
+              }
+            </datalist>
+          </td>
+          <td>
+            <input type="number" formControlName="totalBudget" step="0.01" />
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="2" class="empty">No budget lines for this job/phase.</td></tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="actions">
+    <button type="button" class="btn-approve" (click)="approve()">Approve</button>
+    <button type="button" class="btn-reject" (click)="reject()">Reject</button>
+  </div>
+</form>
+
+@if (isSaving) {
+  <div class="overlay">
+    <div class="spinner"></div>
+  </div>
+}
+
+ @if (successMessage) {
+  <div class="success-message">
+    {{ successMessage }}
+  </div>
+}
+
+@if (errorMessage) {
+  <div class="error-message">
+    {{ errorMessage }}
+  </div>
+}

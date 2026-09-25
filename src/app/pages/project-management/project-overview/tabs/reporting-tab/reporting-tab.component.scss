@@ -1,0 +1,72 @@
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 1rem;
+
+  label { font-weight: 600; color: #777; }
+  input { background-color: #f7f7f7; border: 1px solid #dcdcdc; border-radius: 4px; padding: 6px 10px; }
+}
+
+h2 { font-weight: 700; color: #00355f; margin-top: 20px; }
+.dashed { border-top: 1px dashed #c7c7c7; margin: 15px 0 25px 0; }
+
+.cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1;
+  min-width: 320px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+
+  .card-header {
+    background: #f7f7f7;
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
+    h4 { margin: 0; font-size: 1rem; }
+  }
+
+  .card-body {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    flex-wrap: wrap;
+  }
+}
+
+.progress-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 6px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.chart-wrap {
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.summary {
+  h5 { margin-top: 0; }
+}
+
+.table-borderless {
+  td { padding: 4px 8px; }
+}
+
+.job-summary-link {
+  text-align: center;
+  margin-top: 10px;
+}

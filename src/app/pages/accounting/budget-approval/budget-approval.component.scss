@@ -1,0 +1,196 @@
+// Consistent with the rest of the app's form pages (create-budget/bid-details-tab): labeled
+// fields with proper spacing, 32-36px inputs, dark-blue table headers, dashed section rules.
+.dropdown-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+
+  label {
+    font-weight: 600;
+    color: #777;
+    font-size: 0.9rem;
+  }
+
+  select,
+  input {
+    height: 36px;
+    padding: 4px 10px;
+    border: 1px solid #8a8a8a;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+
+    &:focus {
+      outline: none;
+      border-color: #00355f;
+      box-shadow: 0 0 0 2px rgba(0, 53, 95, 0.15);
+    }
+  }
+}
+
+h2 {
+  font-weight: 700;
+  color: #00355f;
+  margin-top: 20px;
+}
+
+.dashed {
+  border-top: 1px dashed #c7c7c7;
+  margin: 15px 0 20px 0;
+}
+
+.budget-table {
+  width: 100%;
+  max-width: 720px;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  border: 1px solid #dcdcdc;
+
+  th {
+    background-color: #00355f;
+    color: #fff;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #eee;
+
+    input {
+      height: 34px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 4px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem;
+
+      &:focus {
+        outline: none;
+        border-color: #00355f;
+        box-shadow: 0 0 0 2px rgba(0, 53, 95, 0.15);
+      }
+
+      &[disabled] {
+        background-color: #f7f7f7;
+        color: #555;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  tbody tr:hover {
+    background-color: #f0f4f8;
+  }
+
+  .empty {
+    text-align: center;
+    color: #888;
+    padding: 16px;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+
+  button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .btn-approve {
+    background-color: #00355f;
+  }
+
+  .btn-reject {
+    background-color: #c0392b;
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(128, 128, 128, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.spinner {
+  border: 8px solid #e0e0e0;
+  border-top: 8px solid #00355f;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.success-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  padding: 15px 30px;
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+
+  z-index: 11000;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.error-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  padding: 15px 30px;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+
+  z-index: 11000;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+}

@@ -1,0 +1,53 @@
+{
+  "name": "stowellco-angular",
+  "version": "0.1.0-phase1",
+  "description": "Angular port of StowellCoApp (Phase 1: Shell + Dashboard). Converted from the StowellCoApp Blazor Server application.",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "build:prod": "ng build --configuration production --base-href /StowellAngularApp/",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^22.1.1",
+    "@angular/common": "^22.1.1",
+    "@angular/compiler": "^22.1.1",
+    "@angular/core": "^22.1.1",
+    "@angular/forms": "^22.1.1",
+    "@angular/platform-browser": "^22.1.1",
+    "@angular/platform-browser-dynamic": "^22.1.1",
+    "@angular/router": "^22.1.1",
+    "@azure/msal-angular": "^3.0.15",
+    "@azure/msal-browser": "^3.14.0",
+    "@syncfusion/ej2-angular-base": "34.2.6",
+    "@syncfusion/ej2-angular-buttons": "34.2.6",
+    "@syncfusion/ej2-angular-calendars": "34.2.6",
+    "@syncfusion/ej2-angular-charts": "34.2.6",
+    "@syncfusion/ej2-angular-documenteditor": "34.2.6",
+    "@syncfusion/ej2-angular-dropdowns": "34.2.6",
+    "@syncfusion/ej2-angular-filemanager": "34.2.6",
+    "@syncfusion/ej2-angular-grids": "34.2.6",
+    "@syncfusion/ej2-angular-inputs": "34.2.6",
+    "@syncfusion/ej2-angular-layouts": "34.2.6",
+    "@syncfusion/ej2-angular-navigations": "34.2.6",
+    "@syncfusion/ej2-angular-notifications": "34.2.6",
+    "@syncfusion/ej2-angular-pdfviewer": "34.2.6",
+    "@syncfusion/ej2-angular-popups": "34.2.6",
+    "@syncfusion/ej2-angular-schedule": "34.2.6",
+    "@syncfusion/ej2-angular-spreadsheet": "34.2.6",
+    "@syncfusion/ej2-base": "34.2.6",
+    "rxjs": "~7.8.1",
+    "tslib": "^2.6.2",
+    "zone.js": "~0.15.1"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.1.3",
+    "@angular/cli": "^22.1.3",
+    "@angular/compiler-cli": "^22.1.1",
+    "@types/node": "^20.11.0",
+    "typescript": "~6.0.3"
+  }
+}

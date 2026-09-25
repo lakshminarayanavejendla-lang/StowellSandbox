@@ -1,0 +1,63 @@
+<app-page-header title="Contacts"></app-page-header>
+
+@if (!groupsLoaded) {
+  <p>Loading ...</p>
+} @else if (groups.length === 0) {
+  <p>No groups found.</p>
+} @else {
+  <div class="group-tabs">
+    @for (group of groups; track group.id) {
+      <button
+        type="button"
+        class="group-tab"
+        [class.active]="group.id === selectedGroup?.id"
+        (click)="selectGroup(group)"
+      >
+        {{ group.displayName }}
+      </button>
+    }
+  </div>
+
+  @if (selectedGroup) {
+    <div class="group-panel">
+      <h3 class="group-heading">{{ selectedGroup.displayName }}</h3>
+
+      @if (!membersLoaded) {
+        <p>Loading members...</p>
+      } @else if (groupMembers.length === 0) {
+        <p>No members in this group.</p>
+      } @else {
+        <div class="contact-grid">
+          @for (member of groupMembers; track member.id) {
+            <div class="contact-box">
+              <div class="contact-photo">
+                <img [src]="avatarSrc(member)" alt="{{ member.displayName }} avatar" />
+                <div class="job-title">{{ member.jobTitle || ' ' }}</div>
+              </div>
+              <div class="contact-details">
+                <h3><strong>{{ member.displayName }}</strong></h3>
+                @if (member.streetAddress) {
+                  <div class="street">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <a [href]="member.streetAddress" target="_blank">{{ member.streetAddress }}</a>
+                  </div>
+                }
+                <address>
+                  @if (hasCityStateZip(member)) {
+                    <span>{{ member.city }}, {{ member.state }} {{ member.postalCode }}<br /></span>
+                  }
+                  @if (member.phone) {
+                    <span class="phone-label" title="Phone">P: {{ member.phone }}<br /></span>
+                  }
+                  @if (member.mail) {
+                    <a href="mailto:{{ member.mail }}">{{ member.mail }}</a>
+                  }
+                </address>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+}

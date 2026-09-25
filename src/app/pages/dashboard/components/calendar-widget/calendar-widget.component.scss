@@ -1,0 +1,22 @@
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+// Syncfusion Schedule renders its own header/view-navigator/toolbar chrome (via the bootstrap5
+// theme CSS loaded globally in index.html) - the old agenda/flat-list rules are no longer needed.
+ejs-schedule {
+  display: block;
+  width: 100%;
+}
+// .e-schedule .e-month-view .e-appointment{
+//   background: #ff4601 !important;
+// }
+// .e-schedule .e-month-view .e-appointment .e-appointment-details{
+//   background: #ff4601 !important;
+// }
+.e-content-wrap{
+  height: 450px !important;
+}

@@ -1,0 +1,12 @@
+<div class="widget-header">
+  <h4>Calendar</h4>
+</div>
+
+<!-- Real Syncfusion Schedule replacing the old hand-built agenda list. Day/Week/Month views
+     mirror the original RadzenScheduler's RadzenDayView/RadzenWeekView/RadzenMonthView; the
+     "Agenda" view is included as a list-style view (closest match to the old widget's flat-list
+     toggle mode) and is switchable via the schedule's own built-in view-navigator header - the
+     old custom "List"/"Calendar" toggle button was dropped since Schedule already provides this
+     navigation itself. -->
+<ejs-schedule [eventSettings]="eventSettings" [views]="views" [currentView]="currentView" height="420px">
+</ejs-schedule>

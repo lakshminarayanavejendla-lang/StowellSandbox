@@ -1,0 +1,52 @@
+<h3>AR Invoice List</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of costCodeRecords; track job.recNum) {
+        <option [value]="job.recNum">{{ recJobNumber(job) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!--
+  Syncfusion GridComponent replaces the plain <table>. Column/field pairing intentionally
+  mirrors the source's apparent bug (see component header comment) - "Invoice#" is field
+  `jobName`, "Job" is field `invNum`, reproduced exactly, not corrected.
+-->
+@if (filteredJobs.length > 0) {
+  <ejs-grid #arInvoiceGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="recNum" headerText="Record#" width="100"></e-column>
+      <e-column field="jobName" headerText="Invoice#" width="140"></e-column>
+      <e-column field="invNum" headerText="Job" width="140"></e-column>
+      <e-column field="invDate" headerText="Date" width="120"></e-column>
+      <e-column field="dueDate" headerText="Due Date" width="120"></e-column>
+      <e-column field="invoiceTotal" headerText="Invoice Total" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.invoiceTotal | currency }}</ng-template>
+      </e-column>
+      <e-column field="balance" headerText="Balance" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.balance | currency }}</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">Select a job to load its AR invoices.</p>
+}

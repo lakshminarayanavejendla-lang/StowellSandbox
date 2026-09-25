@@ -1,0 +1,65 @@
+<h3>Contract Summary Report</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of costCodeRecords; track job.recNum) {
+        <option [value]="job.recNum">{{ recJobNumber(job) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!-- Syncfusion GridComponent replaces the plain <table>. The last three columns stay hardcoded
+     "$0.00" static templates - not bound to any field, see component header comment. FLAG: these
+     three e-column entries deliberately omit `field` (there's nothing to bind); not fully certain
+     that's valid on Syncfusion Grid 27.1.x for a template-only column vs. requiring some
+     placeholder field name - flagging rather than guessing a fake field. -->
+@if (filteredJobs.length > 0) {
+  <ejs-grid #contractSummaryGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="originalContractAmount" headerText="Original Contract" width="150" textAlign="Right">
+        <ng-template #template let-data>{{ data.originalContractAmount | currency }}</ng-template>
+      </e-column>
+      <e-column field="changesToDate" headerText="Changes To Date" width="150" textAlign="Right">
+        <ng-template #template let-data>{{ data.changesToDate | currency }}</ng-template>
+      </e-column>
+      <e-column field="newContract" headerText="New Contract" width="140" textAlign="Right">
+        <ng-template #template let-data>{{ data.newContract | currency }}</ng-template>
+      </e-column>
+      <e-column field="invoicedToDate" headerText="Invoiced To Date" width="150" textAlign="Right">
+        <ng-template #template let-data>{{ data.invoicedToDate | currency }}</ng-template>
+      </e-column>
+      <e-column field="balanceOnContract" headerText="Balance on Contract" width="160" textAlign="Right">
+        <ng-template #template let-data>{{ data.balanceOnContract | currency }}</ng-template>
+      </e-column>
+      <e-column headerText="Balance With Tax" width="150" textAlign="Right">
+        <ng-template #template>$0.00</ng-template>
+      </e-column>
+      <e-column headerText="Retained" width="120" textAlign="Right">
+        <ng-template #template>$0.00</ng-template>
+      </e-column>
+      <e-column headerText="Net Due With Tax" width="150" textAlign="Right">
+        <ng-template #template>$0.00</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">Select a job to load its contract summary.</p>
+}

@@ -1,0 +1,171 @@
+<div class="form-row">
+  <div class="field">
+    <label>Job Id</label>
+    <input type="text" [value]="bidModel?.jobID" readonly />
+  </div>
+  <div class="field">
+    <label>Job Name</label>
+    <input type="text" [value]="bidModel?.jobName" readonly />
+  </div>
+  <!-- NEW (2026-09-23, Mike Smith - "figure out how to see second phase... dropdown to select the
+       phase at top"). Phase list comes from the same cost-summary call as the budget box; picking
+       a phase re-queries it for that phase. Always shown (as in Mike's mockup), even for a job with
+       a single phase - there it just lists "All phases" and that one phase. -->
+  <div class="field">
+    <label>Phase</label>
+    <select [ngModel]="selectedPhaseId" (ngModelChange)="onPhaseChange($event)">
+      <option value="">All phases</option>
+      @for (p of phases; track p.phaseNum) {
+        <option [value]="p.phaseNum">{{ p.phaseNum }} - {{ p.phaseName }}</option>
+      }
+    </select>
+  </div>
+  @if (projectFolderLibraryUrl) {
+    <a [href]="projectFolderLibraryUrl" target="_blank"><i class="bi bi-folder"></i> Project Folder Library</a>
+  }
+</div>
+
+<div class="summary-row">
+  <div
+    class="budget-pie"
+    [style.background]="'conic-gradient(#3f6db3 0% ' + paidPercent() + '%, #0a2c52 ' + paidPercent() + '% 100%)'"
+    title="Paid vs Remaining"
+  ></div>
+  <table class="summary-table">
+    <tbody>
+      <tr>
+        <td class="label">Total Budget</td>
+        <td class="value">{{ totalBudget() | currency }}</td>
+      </tr>
+      <tr>
+        <td class="label">Total Paid</td>
+        <td class="value">{{ totalPaid() | currency }}</td>
+      </tr>
+      <tr>
+        <td class="label">Open POs (committed)</td>
+        <td class="value">{{ totalCommitted() | currency }}</td>
+      </tr>
+      <tr>
+        <td class="label">Total Remaining</td>
+        <td class="value">{{ totalRemaining() | currency }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="toggle-row">
+  <label><input type="checkbox" [(ngModel)]="showDraftPOs" [ngModelOptions]="{ standalone: true }" /> Show Draft POs</label>
+  <label><input type="checkbox" [(ngModel)]="showActivePOs" [ngModelOptions]="{ standalone: true }" /> Show Active POs</label>
+  <label><input type="checkbox" [(ngModel)]="showArchivedPOs" [ngModelOptions]="{ standalone: true }" /> Show Archived POs</label>
+</div>
+
+@if (showDraftPOs) {
+  <div class="section-header">
+    <h2>Draft Purchase Order Queue</h2>
+    <div class="header-actions">
+      <a [routerLink]="['/project-management/new-po-form']" [queryParams]="{ jobId: projectId }" class="btn-primary new-po-btn">
+        New PO
+      </a>
+      <!-- FLAG: "Duplicate PO" isn't implemented yet - no backend endpoint exists for cloning a
+           PO/draft, and doing it properly needs the per-row selection checkboxes the mockup
+           shows (also not implemented yet). See po-tab.component.ts's header comment. -->
+      <button type="button" class="btn-secondary" disabled title="Not yet implemented">Duplicate PO</button>
+    </div>
+  </div>
+  <hr class="dashed" />
+  @if (draftsLoaded) {
+    <!-- FIX (2026-09-10): gated on draftsLoaded rather than always present - a confirmed EJ2
+         Angular Grid bug means a grid created with an empty dataSource and later reassigned real
+         data via [dataSource] gets permanently stuck (aria-busy="true", 0 rows painted) even
+         though its own internal state is correct and .refresh()/.dataBind() do nothing. Creating
+         the grid fresh, already holding its final data, avoids the bug entirely. -->
+    <ejs-grid class="black-grid" [dataSource]="poDrafts" [allowPaging]="true" [allowSorting]="true" [pageSettings]="pageSettings">
+      <e-columns>
+        <e-column headerText="PO ID" width="120">
+          <ng-template #template let-data>Draft #{{ data.draftId }}</ng-template>
+        </e-column>
+        <e-column headerText="Project Name" width="180">
+          <ng-template #template>{{ bidModel?.jobName }}</ng-template>
+        </e-column>
+        <e-column field="status" headerText="Status" width="110"></e-column>
+        <e-column field="createdDate" headerText="Date Submitted" width="140"></e-column>
+        <e-column headerText="Required Onsite" width="140"></e-column>
+        <e-column field="poDescription" headerText="PO Description" width="200"></e-column>
+        <e-column headerText="Action" width="150">
+          <ng-template #template let-data>
+            <button class="btn-sm" (click)="resumeDraft(data)">Resume</button>
+            <button class="btn-sm btn-danger" (click)="deleteDraft(data)">Delete</button>
+          </ng-template>
+        </e-column>
+      </e-columns>
+    </ejs-grid>
+  } @else {
+    <p class="loading-row">Loading...</p>
+  }
+}
+
+@if (showActivePOs) {
+  <h2>Active Purchase Order Queue</h2>
+  <hr class="dashed" />
+  @if (poOverviewLoaded) {
+    <ejs-grid class="black-grid" [dataSource]="activePurchaseOrders" [allowPaging]="true" [allowSorting]="true" [pageSettings]="pageSettings">
+      <e-columns>
+        <e-column field="poId" headerText="PO ID" width="120">
+          <ng-template #template let-data>
+            <a [routerLink]="['/project-management/edit-po-form', data.poId]" class="opportunity-link">{{ data.poId }}</a>
+          </ng-template>
+        </e-column>
+        <e-column headerText="Project Name" width="180">
+          <ng-template #template>{{ bidModel?.jobName }}</ng-template>
+        </e-column>
+        <e-column field="status" headerText="Status" width="110"></e-column>
+        <e-column field="dateSubmitted" headerText="Date Submitted" width="140"></e-column>
+        <e-column field="requiredOnsite" headerText="Required Onsite" width="140"></e-column>
+        <e-column field="poDescription" headerText="PO Description" width="220"></e-column>
+      </e-columns>
+    </ejs-grid>
+  } @else {
+    <p class="loading-row">Loading...</p>
+  }
+}
+
+@if (showArchivedPOs) {
+  <h2>Archived Purchase Order Queue</h2>
+  <hr class="dashed" />
+  @if (poOverviewLoaded) {
+    <ejs-grid class="black-grid" [dataSource]="archivedPurchaseOrders" [allowPaging]="true" [allowSorting]="true" [pageSettings]="pageSettings">
+      <e-columns>
+        <e-column field="poId" headerText="PO ID" width="120">
+          <ng-template #template let-data>
+            <a [routerLink]="['/project-management/edit-po-form', data.poId]" class="opportunity-link">{{ data.poId }}</a>
+          </ng-template>
+        </e-column>
+        <e-column headerText="Project Name" width="180">
+          <ng-template #template>{{ bidModel?.jobName }}</ng-template>
+        </e-column>
+        <e-column field="status" headerText="Status" width="110"></e-column>
+        <e-column field="dateSubmitted" headerText="Date Submitted" width="140"></e-column>
+        <e-column field="requiredOnsite" headerText="Required Onsite" width="140"></e-column>
+        <e-column field="poDescription" headerText="PO Description" width="220"></e-column>
+      </e-columns>
+    </ejs-grid>
+  } @else {
+    <p class="loading-row">Loading...</p>
+  }
+}
+
+<h2>Back Charge Log</h2>
+<hr class="dashed" />
+@if (poOverviewLoaded) {
+  <ejs-grid class="black-grid" [dataSource]="backChargeLog" [allowPaging]="true" [allowSorting]="true" [pageSettings]="pageSettings">
+    <e-columns>
+      <e-column field="bcId" headerText="BC ID" width="140"></e-column>
+      <e-column field="bcDescription" headerText="BC Description" width="200"></e-column>
+      <e-column field="bcAmount" headerText="BC Amount" width="120" format="C2"></e-column>
+      <e-column field="bcStatus" headerText="BC Status" width="120"></e-column>
+      <e-column field="bcReason" headerText="BC Reason" width="220"></e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="loading-row">Loading...</p>
+}

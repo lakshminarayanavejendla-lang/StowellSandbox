@@ -1,0 +1,103 @@
+<h3>Current Cost Summary</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of model.jobs; track job.recnum) {
+        <option [value]="job.recnum">{{ job.fullJob }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Cost Code</label>
+    <select multiple [(ngModel)]="selectedCostCodes">
+      @for (c of model.costCodes; track c.description) {
+        <option [value]="c.description">{{ c.description }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Phase</label>
+    <select [(ngModel)]="selectedPhaseId">
+      <option value="">Select Phase</option>
+      @for (p of model.phases; track p.phaseNum) {
+        <option [value]="p.phaseNum">{{ p.phaseName }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="field">
+    <label>Start Date</label>
+    <input type="date" [(ngModel)]="startDate" />
+  </div>
+  <div class="field">
+    <label>End Date</label>
+    <input type="date" [(ngModel)]="endDate" />
+  </div>
+  <button type="button" class="btn-primary" (click)="onSubmit()">Submit</button>
+</div>
+
+<div class="summary-row">
+  <div class="field"><label>Job Name</label><input type="text" [value]="model.selectedJobName" disabled /></div>
+  <div class="field"><label>Budget + Change</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfBudgetAndChanges | currency" disabled /></div>
+  <div class="field"><label>To Date</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfToDate | currency" disabled /></div>
+  <div class="field"><label>This Period</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfThisPeriod | currency" disabled /></div>
+  <div class="field"><label>Remaining</label><input type="text" [value]="model.costCodeSummaryModel?.sumOfRemaining | currency" disabled /></div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!--
+  Syncfusion GridComponent replaces the plain <table>, bound to the same `filteredJobs` array
+  this component already computes above (the search box's client-side filtering is untouched -
+  NOT using Grid's built-in Search toolbar item, to avoid a second, competing filter mechanism).
+  The "select a job first" empty state is kept as a plain @else message rather than Grid's
+  emptyRecordTemplate, since this project isn't fully certain of that template's exact Angular
+  wrapper syntax in 27.1.x - flagging per the "flag, don't guess" convention instead of risking a
+  silently-broken template.
+-->
+@if (filteredJobs.length > 0) {
+  <ejs-grid #costCodeSummaryGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
+    <e-columns>
+      <e-column field="jobNumber" headerText="Job ID" width="120"></e-column>
+      <e-column field="phase" headerText="Phase" width="150"></e-column>
+      <e-column field="costCode" headerText="Cost Code" width="120"></e-column>
+      <e-column field="costCodeDescription" headerText="Cost Code Description" width="220"></e-column>
+      <e-column field="budgetAndChanges" headerText="Budget & Changes" width="150" textAlign="Right">
+        <ng-template #template let-data>{{ data.budgetAndChanges | currency }}</ng-template>
+      </e-column>
+      <e-column field="toDate" headerText="To Date" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.toDate | currency }}</ng-template>
+      </e-column>
+      <e-column field="thisPeriod" headerText="This Period" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.thisPeriod | currency }}</ng-template>
+      </e-column>
+      <e-column field="committed" headerText="Open POs" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.committed | currency }}</ng-template>
+      </e-column>
+      <e-column field="remaining" headerText="Remaining" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.remaining | currency }}</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">Select a job to load its cost code summary.</p>
+}

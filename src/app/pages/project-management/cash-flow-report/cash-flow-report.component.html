@@ -1,0 +1,64 @@
+<h3>Cash Flow Report</h3>
+<hr />
+
+<div class="form-row">
+  <label>Status</label>
+  <select [(ngModel)]="selectedStatusId" (ngModelChange)="onStatusChanged($event)">
+    <option [ngValue]="undefined">Select Status</option>
+    @for (s of statusModels; track s.id) {
+      <option [ngValue]="s.id">{{ s.status }}</option>
+    }
+  </select>
+
+  <label>Job Number</label>
+  <select [(ngModel)]="selectedJobId">
+    <option [ngValue]="undefined">Select Job Number</option>
+    @for (j of jobsModel; track j.recNum) {
+      <option [ngValue]="j.recNum">{{ recJobNumber(j) }}</option>
+    }
+  </select>
+</div>
+
+<div class="form-row">
+  <label>Start Date</label>
+  <input type="date" [(ngModel)]="startDate" />
+  <label>End Date</label>
+  <input type="date" [(ngModel)]="endDate" />
+  <button type="button" class="btn-primary" (click)="getReportData()">Get Data</button>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary"  title="Needs a client-side PDF library - see code comment">Export PDF</button>
+    <button type="button" class="btn-primary"  title="Needs a client-side XLSX library - see code comment">Export Excel</button>
+  </div>
+</div>
+
+<ejs-grid
+  [dataSource]="filteredRecords"
+  [allowPaging]="true"
+  [allowSorting]="true"
+  [allowFiltering]="true"
+  [pageSettings]="pageSettings"
+>
+  <e-columns>
+    <e-column field="recNum" headerText="Rec Num" width="100"></e-column>
+    <e-column field="jobNumber" headerText="Job Number" width="120"></e-column>
+    <e-column field="cashCollected" headerText="Cash Collected" width="140" format="C2"></e-column>
+    <e-column field="cashPaid" headerText="Cash Paid" width="120" format="C2"></e-column>
+    <e-column field="netCash" headerText="Net Cash" width="120" format="C2"></e-column>
+    <e-column field="invoiceJ2D" headerText="Invoice J2D" width="130" format="C2"></e-column>
+    <e-column field="a_REndBal_Today" headerText="A/R End Balance Today" width="180" format="C2"></e-column>
+    <e-column field="jobcoststodate" headerText="Job Costs To Date" width="160" format="C2"></e-column>
+    <e-column field="a_PEndBal_Today" headerText="A/P End Balance Today" width="180" format="C2"></e-column>
+    <e-column field="cashPaidOut" headerText="Cash Paid Out" width="140" format="C2"></e-column>
+    <e-column field="netCashInOut" headerText="Net Cash In/Out" width="150" format="C2"></e-column>
+  </e-columns>
+</ejs-grid>
+<!-- The original empty-state message ("No data. Choose a job and click 'Get Data'.") is
+     superseded by Grid's own built-in empty-records display when filteredRecords is []. -->

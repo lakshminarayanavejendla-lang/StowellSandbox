@@ -1,0 +1,136 @@
+.card-header {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 2px;
+
+  h4 { color: #676a6c; font-weight: 500; margin: 0; }
+}
+
+.gridcard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar {
+  margin-bottom: 10px;
+
+  input {
+    width: 300px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th { background-color: #00355f; color: #fff; text-align: left; padding: 8px 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+  .empty { text-align: center; color: #888; }
+}
+.black-grid {
+  .e-gridheader {
+    background: #00355f;
+  }
+
+  .e-gridheader .e-columnheader {
+    background: #00355f;
+    color: #ffffff;
+  }
+
+  .e-gridheader .e-headercell {
+    background: #00355f;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .opportunity-link {
+    // color: #ff4601;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .opportunity-link:hover {
+    // color: #ff6a33;
+    text-decoration: underline;
+  }
+}
+.black-grid .e-headercell:hover .e-headertext {
+  color: #ffffff !important;
+  background: transparent !important;
+  display: inline-block !important;
+}
+.black-grid .e-gridheader,
+.black-grid .e-gridheader .e-columnheader,
+.black-grid .e-gridheader .e-headercell {
+  background-color: #00355f !important;
+  color: #ffffff !important;
+}
+
+.black-grid .e-gridheader .e-headertext {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Keep header text visible on hover */
+.black-grid .e-gridheader .e-headercell:hover,
+.black-grid .e-gridheader .e-headercell:hover .e-headertext {
+  background-color: #00355f !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Sort icons */
+.black-grid .e-gridheader .e-sortfilterdiv,
+.black-grid .e-gridheader .e-sortfilterdiv .e-icons {
+  color: #ffffff !important;
+}
+
+/* Filter icon */
+.black-grid .e-gridheader .e-filtermenudiv,
+.black-grid .e-gridheader .e-filtermenudiv .e-icons {
+  color: #ffffff !important;
+}
+
+/* Opportunity ID link */
+.black-grid .opportunity-link {
+  // color: #ff4601 !important;
+  text-decoration: none;
+}
+
+.black-grid .opportunity-link:hover {
+  // color: #ff6a33 !important;
+  text-decoration: underline;
+}
+/* Sort/filter area */
+.black-grid .e-gridheader .e-sortfilterdiv {
+  color: #ffffff !important;
+}
+
+/* Sort icons */
+.black-grid .e-gridheader .e-sortfilterdiv .e-icons {
+  color: #ffffff !important;
+}
+
+/* Prevent hover background from covering the text */
+.black-grid .e-gridheader .e-headercell:hover {
+  background-color: #00355f !important;
+}
+/* Opportunity ID link */
+.black-grid .opportunity-link {
+  // color: #ff4601 !important;
+  text-decoration: none !important;
+  font-weight: 500;
+}
+
+.black-grid .opportunity-link:hover {
+  // color: #ff6a33 !important;
+  text-decoration: underline !important;
+}

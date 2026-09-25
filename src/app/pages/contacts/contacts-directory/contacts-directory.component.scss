@@ -1,0 +1,107 @@
+.group-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 12px;
+}
+
+.group-tab {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 2px;
+  background: #eef1f4;
+  color: #00355f;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: #e2e7ec;
+  }
+
+  &.active {
+    background: #00355f;
+    color: #fff;
+  }
+}
+
+.group-panel {
+  padding-top: 20px;
+}
+
+.group-heading {
+  font-weight: 700;
+  color: #00355f;
+  margin: 0 0 16px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.contact-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+
+  .contact-photo {
+    flex: 0 0 100px;
+    width: 100px;
+    text-align: center;
+
+    img {
+      display: block;
+      width: 100px;
+      height: 100px;
+      border-radius: 100%;
+      object-fit: cover;
+      overflow: hidden;
+    }
+
+    .job-title {
+      margin-top: 4px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      word-break: break-word;
+    }
+  }
+
+  .contact-details {
+    flex: 1;
+    min-width: 0;
+    color: gray;
+    overflow-wrap: break-word;
+    word-break: break-word;
+
+    h3 {
+      color: gray;
+      font-weight: normal;
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+    }
+
+    .street {
+      margin-bottom: 4px;
+
+      i {
+        color: gray;
+        margin-right: 5px;
+      }
+    }
+
+    .phone-label {
+      font-weight: 600;
+    }
+
+    address {
+      font-style: normal;
+    }
+  }
+}

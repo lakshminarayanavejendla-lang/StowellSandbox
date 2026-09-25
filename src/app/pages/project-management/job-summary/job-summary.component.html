@@ -1,0 +1,34 @@
+<h3>Job Summary Report</h3>
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary"  title="Needs a client-side PDF library - see code comment">Export PDF</button>
+    <button type="button" class="btn-primary"  title="Needs a client-side XLSX library - see code comment">Export Excel</button>
+  </div>
+</div>
+
+<ejs-grid
+  [dataSource]="filteredJobs"
+  [allowPaging]="true"
+  [allowSorting]="true"
+  [allowFiltering]="true"
+  [pageSettings]="pageSettings"
+>
+  <e-columns>
+    <e-column field="jobNumber" headerText="Job ID" width="110">
+      <ng-template #template let-data>
+        <a href="#">{{ data.jobNumber }}</a>
+      </ng-template>
+    </e-column>
+    <e-column field="costCode" headerText="Cost Code" width="110"></e-column>
+    <e-column field="costCodeDescription" headerText="Cost Code Description" width="220"></e-column>
+    <e-column field="budgetAndChanges" headerText="Budget And Changes" width="150" format="C2"></e-column>
+    <e-column field="toDate" headerText="To Date" width="120" format="C2"></e-column>
+    <e-column field="thisPeriod" headerText="This Period" width="120" format="C2"></e-column>
+    <e-column field="remaining" headerText="Remaining" width="120" format="C2"></e-column>
+  </e-columns>
+</ejs-grid>

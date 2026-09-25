@@ -1,0 +1,122 @@
+<app-page-header title="Project Access Management"></app-page-header>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input
+      type="text"
+      placeholder="Search ..."
+      [value]="searchTerm"
+      (input)="onSearchChange($any($event.target).value)"
+    />
+  </div>
+  <div class="page-size">
+    <span>Show</span>
+    <select (change)="onPageSizeChange($any($event.target).value)">
+      @for (size of pageSizeOptions; track size) {
+        <option [value]="size">{{ size }}</option>
+      }
+      <option value="All">All</option>
+    </select>
+    <span>entries</span>
+  </div>
+</div>
+
+@if (errorMessage) {
+  <p class="message error">{{ errorMessage }}</p>
+}
+@if (successMessage) {
+  <p class="message success">{{ successMessage }}</p>
+}
+
+<!--
+  FIX - assignments panel opening at the bottom of the page instead of under the clicked row:
+  the outer list previously used <ejs-grid>, which structurally can't place arbitrary content
+  directly after ONE specific row without Syncfusion's own detailTemplate/DetailRowService (the
+  original port deliberately avoided that - single-expand-at-a-time wasn't confidently
+  reproducible with that feature's API sight-unseen, per the older version of this comment).
+  Reverted the OUTER list to a plain <table> (the inner per-project assignments Grid below is
+  UNCHANGED, still Syncfusion) - a real, direct fix, not a workaround: a plain <tr> can be
+  followed immediately by another <tr> holding the expanded panel, which is exactly what
+  "expand under the row you clicked" needs, using plain and completely reliable Angular (click)
+  bindings throughout. This also happens to restore the .projects-table/.project-row/
+  .assignments-row CSS already sitting unused in this component's stylesheet since that earlier
+  Grid swap - not new styling, just no longer dead code.
+-->
+<table class="projects-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Project</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (group of pagedProjectGroups; track group.jobNumber) {
+      <tr class="project-row" (click)="toggleExpand(group)">
+        <td class="expand-cell">{{ group.expanded ? '▾' : '▸' }}</td>
+        <td><strong>{{ group.jobNumber }}</strong></td>
+      </tr>
+      @if (group.expanded) {
+        <tr class="assignments-row">
+          <td colspan="2">
+            <div class="assignments-panel">
+              <button type="button" class="btn-add" (click)="addAssignment(group)">+ Add</button>
+
+              @if (group.addForm) {
+                <div class="add-assignment-form" [formGroup]="group.addForm">
+                  <select formControlName="selectedRoleId">
+                    <option [ngValue]="null">Select Role</option>
+                    @for (role of projectRoles; track role.roleId) {
+                      <option [ngValue]="role.roleId">{{ role.roleName }}</option>
+                    }
+                  </select>
+                  <select formControlName="selectedUserId">
+                    <option [ngValue]="null">Select mail</option>
+                    @for (user of stowellUsers; track user.id) {
+                      <option [ngValue]="user.id">{{ user.email }}</option>
+                    }
+                  </select>
+                  <button type="button" class="btn-icon success" (click)="saveAssignment(group)">✓</button>
+                  <button type="button" class="btn-icon" (click)="cancelAssignment(group)">✕</button>
+                </div>
+              }
+
+              @if (group.assignments.length > 0) {
+                <!-- FIX - delete not working: (click) bound inside this column's own
+                     ng-template wasn't reliably wired. Uses (recordClick) on this <ejs-grid>
+                     instead, gated to the "Actions" column (the only template-only column here,
+                     so headerText is the way to identify it - same "no field on template-only
+                     columns" situation flagged below). -->
+                <ejs-grid [dataSource]="group.assignments" [allowSorting]="true" height="auto" (recordClick)="onAssignmentRecordClick(group, $event)">
+                  <e-columns>
+                    <e-column field="userRoleName" headerText="Role" width="150"></e-column>
+                    <e-column field="emailId" headerText="Employee" width="220"></e-column>
+                    <e-column headerText="Actions" width="100">
+                      <ng-template #template let-data>
+                        <button type="button" class="btn-icon danger">🗑</button>
+                      </ng-template>
+                    </e-column>
+                  </e-columns>
+                </ejs-grid>
+              } @else if (!group.addForm) {
+                <p class="empty">No assignments for this project.</p>
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    } @empty {
+      <tr><td colspan="2" class="empty">No projects found.</td></tr>
+    }
+  </tbody>
+</table>
+
+@if (pageCount > 1) {
+  <div class="pager">
+    <button (click)="goToPage(0)" [disabled]="currentPage === 0">First</button>
+    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">Prev</button>
+    <span>Page {{ currentPage + 1 }} of {{ pageCount }}</span>
+    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= pageCount - 1">Next</button>
+    <button (click)="goToPage(pageCount - 1)" [disabled]="currentPage >= pageCount - 1">Last</button>
+  </div>
+}

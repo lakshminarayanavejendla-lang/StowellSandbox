@@ -1,0 +1,321 @@
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.message {
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background-color: #e6f7ec;
+  border: 1px solid #b7e4c7;
+  border-radius: 4px;
+  color: #1a7f3c;
+}
+
+.form-group.row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 16px 32px;
+  margin-bottom: 14px;
+margin-left: 5px;
+margin-right: 5px;
+ .field {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+
+
+    label {
+      width: auto;
+      white-space: nowrap;
+    }
+
+    input,
+    select {
+      flex: none;
+    }
+  }
+  label {
+    font-weight: 600;
+    color: #777;
+    white-space: nowrap;
+  }
+
+  input,
+  select {
+    width: 100%;
+    height: 32px;
+    border: 1px solid #8a8a8a;
+    border-radius: 4px;
+    padding: 4px 10px;
+    box-sizing: border-box;
+
+    &[readonly] {
+      background-color: #f7f7f7;
+      cursor: not-allowed;
+    }
+  }
+
+  .doc-link {
+    white-space: nowrap;
+  }
+}
+
+h2 {
+  font-weight: 700;
+  color: #00355f;
+  margin-top: 20px;
+}
+
+.hr-line-dashed {
+  border-top: 1px dashed #c7c7c7;
+  margin: 15px 0 25px 0;
+}
+
+.bids-section {
+  margin-top: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn {
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #00355f;
+  color: #fff;
+}
+
+.btn-warning {
+  background-color: #f0ad4e;
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: #d9534f;
+  color: #fff;
+}
+
+.btn-success {
+  background-color: #5cb85c;
+  color: #fff;
+}
+
+.btn-secondary {
+  background-color: gray;
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.add-bid-overlay {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 999999;
+}
+
+.add-bid-modal {
+  position: relative;
+
+  width: 500px;
+  max-width: 90vw;
+
+  background: #ffffff;
+
+  border-radius: 6px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+  z-index: 1000000;
+}
+
+.add-bid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 15px 20px;
+
+  border-bottom: 1px solid #ddd;
+}
+
+.add-bid-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.add-bid-close {
+  border: none;
+  background: transparent;
+
+  font-size: 28px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  padding: 0 5px;
+}
+
+.add-bid-body {
+  padding: 20px;
+}
+
+.add-bid-form-group {
+  margin-bottom: 20px;
+}
+
+.add-bid-form-group label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  font-weight: 600;
+  color: #333;
+}
+
+.add-bid-control {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  height: 38px;
+
+  padding: 6px 10px;
+
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  background: #fff;
+
+  font-size: 14px;
+}
+
+.add-bid-footer {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding: 15px 20px;
+
+  border-top: 1px solid #ddd;
+}
+.e-grid .e-headercelldiv{
+  font-size: 15px;
+}
+.e-grid .e-columnheader .e-headercell{
+  background: #00355f;
+  color: #fff;
+}
+
+// NEW - Notes table (see bid-note.model.ts header comment).
+.notes-section {
+  margin-top: 20px;
+}
+
+.notes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+
+  label {
+    font-weight: 600;
+    color: #777;
+    white-space: nowrap;
+  }
+
+  input[type='date'] {
+    width: 160px;
+    height: 34px;
+    border: 1px solid #8a8a8a;
+    border-radius: 4px;
+    padding: 4px 10px;
+    box-sizing: border-box;
+  }
+
+  input[type='text'] {
+    flex: 1;
+    height: 34px;
+    border: 1px solid #8a8a8a;
+    border-radius: 4px;
+    padding: 4px 10px;
+    box-sizing: border-box;
+  }
+
+  input[type='text'].readonly-field {
+    flex: none;
+    width: 140px;
+    background-color: #eaeaea;
+    color: #555;
+    cursor: not-allowed;
+  }
+}
+
+.notes-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid #00355f;
+
+  th {
+    text-align: left;
+    background-color: #f3f6fb;
+    color: #00355f;
+    padding: 8px 12px;
+    border-bottom: 1px solid #00355f;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 120px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 180px;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-top: 1px solid #eaeaea;
+    // FIX (2026-09-10, live testing): table-layout:fixed truncates cells to their column width,
+    // but an email address (User column) has no spaces to wrap on, so it visually overflowed
+    // into the Note column instead of wrapping ("p360admin@stowellinc.com" running into "test").
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .empty-row {
+    text-align: center;
+    color: #888;
+  }
+}

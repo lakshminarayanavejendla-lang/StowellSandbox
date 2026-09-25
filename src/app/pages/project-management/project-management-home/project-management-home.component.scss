@@ -1,0 +1,22 @@
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 2px;
+
+  h4 {
+    color: #676a6c;
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+.doclibrary {
+  // color: #fe866d;
+
+  &:hover {
+    text-decoration: none;
+  }
+}

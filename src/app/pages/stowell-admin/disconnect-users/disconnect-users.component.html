@@ -1,0 +1,15 @@
+<h3>Disconnect Users</h3>
+<hr />
+
+<div>
+  <button type="button" class="btn-primary" [disabled]="isLoading" (click)="onDisconnectAllUsers()">
+    Disconnect All Users
+  </button>
+</div>
+
+@if (errorMessage) {
+  <p class="message error">{{ errorMessage }}</p>
+}
+@if (successMessage) {
+  <p class="message success">{{ successMessage }}</p>
+}

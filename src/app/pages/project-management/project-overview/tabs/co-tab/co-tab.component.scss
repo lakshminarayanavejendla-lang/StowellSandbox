@@ -1,0 +1,175 @@
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 16px 32px;
+  margin-bottom: 1rem;
+
+  .field {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #777;
+    white-space: nowrap;
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f7f7f7;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    padding: 6px 10px;
+  }
+
+  // Phase dropdown - same look as po-tab.component.scss (matches the inputs, white as it's editable).
+  select {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    padding: 6px 10px;
+  }
+}
+
+h2 {
+  font-weight: 700;
+  color: #00355f;
+  margin-top: 30px;
+}
+
+.dashed {
+  border-top: 1px dashed #c7c7c7;
+  margin: 15px 0 25px 0;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.budget-pie {
+  flex: 0 0 auto;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.summary-table {
+  border-collapse: collapse;
+
+  td {
+    padding: 6px 14px;
+    border: 1px solid #dcdcdc;
+  }
+
+  .label {
+    font-weight: 600;
+    color: #555;
+    background-color: #f7f7f7;
+  }
+
+  .value {
+    min-width: 140px;
+  }
+}
+
+.toggle-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 10px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #555;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 30px;
+
+  h2 {
+    margin-top: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.new-co-btn {
+  display: inline-block;
+}
+
+.btn-primary {
+  justify-self: start;
+  background-color: #f0c800;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: none;
+  background-color: #00355f;
+  color: #fff;
+  margin-right: 6px;
+  font-size: 0.85rem;
+
+  &.btn-danger {
+    background-color: #c0392b;
+  }
+}
+
+// Reuses the black-grid header styling convention used elsewhere in this app.
+.black-grid {
+  .e-gridheader,
+  .e-gridheader .e-columnheader,
+  .e-gridheader .e-headercell {
+    background-color: #00355f !important;
+    color: #ffffff !important;
+  }
+
+  .e-gridheader .e-headertext {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .opportunity-link {
+    color: #00355f;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .opportunity-link:hover {
+    color: #1c84c6;
+    text-decoration: underline;
+  }
+}
+
+.loading-row { color: #888; font-style: italic; padding: 10px 0; }

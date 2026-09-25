@@ -1,0 +1,31 @@
+<!--
+  FLAG: unwired in the original (see po-queue.component.ts) - both tables below are static
+  placeholders mirroring the source's empty markup, not backed by any service call.
+-->
+<div class="po-card">
+  <h3>Purchase Order Queue</h3>
+  <p class="empty">No data source wired up in the original Blazor page.</p>
+  <ejs-grid [dataSource]="emptyPoQueue">
+    <e-columns>
+      <e-column field="masterJobPoId" headerText="Master Job PO ID" width="160"></e-column>
+      <e-column field="poStatus" headerText="PO Status" width="120"></e-column>
+      <e-column field="jobName" headerText="Job Name" width="180"></e-column>
+      <e-column field="pm" headerText="PM" width="120"></e-column>
+      <e-column field="poType" headerText="PO Type" width="120"></e-column>
+    </e-columns>
+  </ejs-grid>
+</div>
+
+<div class="po-card">
+  <h3>Completed Purchase Order Queue</h3>
+  <p class="empty">No data source wired up in the original Blazor page.</p>
+  <ejs-grid [dataSource]="emptyPoQueue">
+    <e-columns>
+      <e-column field="masterJobPoId" headerText="Master Job PO ID" width="160"></e-column>
+      <e-column field="poStatus" headerText="PO Status" width="120"></e-column>
+      <e-column field="jobName" headerText="Job Name" width="180"></e-column>
+      <e-column field="pm" headerText="PM" width="120"></e-column>
+      <e-column field="poType" headerText="PO Type" width="120"></e-column>
+    </e-columns>
+  </ejs-grid>
+</div>

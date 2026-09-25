@@ -1,0 +1,91 @@
+.toolbar {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+}
+
+.note {
+  color: #888;
+  font-style: italic;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 16px;
+  background-color: #f7f7f7;
+}
+
+.completed-header {
+  margin-top: 30px;
+}
+
+.drafts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 20px;
+
+  th { background-color: #00355f; color: #fff; padding: 8px 10px; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid #dcdcdc; }
+}
+
+.btn-sm {
+  background-color: #00355f;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 10px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+// Reuses bid-queue.component.scss's black-grid header styling for visual consistency across
+// queue pages in this app.
+.black-grid {
+  .e-gridheader,
+  .e-gridheader .e-columnheader,
+  .e-gridheader .e-headercell {
+    background-color: #00355f !important;
+    color: #ffffff !important;
+  }
+
+  .e-gridheader .e-headertext {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .e-gridheader .e-headercell:hover,
+  .e-gridheader .e-headercell:hover .e-headertext {
+    background-color: #00355f !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .e-gridheader .e-sortfilterdiv,
+  .e-gridheader .e-sortfilterdiv .e-icons,
+  .e-gridheader .e-filtermenudiv,
+  .e-gridheader .e-filtermenudiv .e-icons {
+    color: #ffffff !important;
+  }
+
+  .opportunity-link {
+    color: #00355f;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .opportunity-link:hover {
+    color: #1c84c6;
+    text-decoration: underline;
+  }
+}

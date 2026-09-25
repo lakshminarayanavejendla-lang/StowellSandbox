@@ -1,0 +1,148 @@
+@if (!bidModel) {
+  <p>Loading...</p>
+} @else {
+  <div class="form-row">
+    <label>Job Id</label>
+    <input type="text" [value]="bidModel.jobID" readonly />
+    <label>Job Name</label>
+    <input type="text" [value]="bidModel.jobName" readonly />
+    @if (projectFolderLibraryUrl) {
+      <a [href]="projectFolderLibraryUrl" target="_blank"><i class="bi bi-folder"></i> Project Folder Library</a>
+    }
+    <!-- FIX (2026-09-16) - was '/Estimation/EditBidForm/' + jobID, a Blazor-era route never
+         ported (404 - reported by Mike Smith). BidFormComponent at estimation/edit-bid/:jobId is
+         the real, already-built Angular port of that exact page - see overview-tab.component.html
+         for the fuller comment (same fix, same underlying Bids_Update bug found and fixed via
+         that page). This tab itself is unchanged (still read-only). -->
+    <a [routerLink]="['/estimation/edit-bid', bidModel.jobID]" class="btn-link">Update</a>
+  </div>
+
+  <h2>Project Resources</h2>
+  <ejs-grid [dataSource]="employees">
+    <e-columns>
+      <e-column field="role" headerText="Role" width="140"></e-column>
+      <e-column field="employee" headerText="Employee" width="180"></e-column>
+      <!-- <e-column headerText="Actions" width="110">
+       The source's Delete button here has no click handler wired up either (dead button,
+             ported as-is) - preserved verbatim rather than inventing a delete call. -->
+        <!-- <ng-template #template let-data>
+          <button class="btn-danger" type="button" (click)="deleteEmployee(data)">Delete</button>
+        </ng-template> -->
+      <!-- </e-column> --> 
+    </e-columns>
+  </ejs-grid>
+
+  <div class="two-col">
+    <div>
+      <h2>Project Location</h2>
+      <div class="field"><label>Jobsite</label><input type="text" [value]="bidModel.projectLocation?.jobsite??''" readonly /></div>
+      <div class="field"><label>Address</label><input type="text" [value]="bidModel.projectLocation?.address??''" readonly /></div>
+      <div class="field"><label>Address 2</label><input type="text" [value]="bidModel.projectLocation?.address2??''" readonly /></div>
+      <div class="field"><label>City</label><input type="text" [value]="bidModel.projectLocation?.city??''" readonly /></div>
+      <div class="field"><label>State</label><input type="text" [value]="bidModel.projectLocation?.state??''" readonly /></div>
+      <div class="field"><label>Sales Tax District</label><input type="text" [value]="bidModel.projectLocation?.salesTaxDistrict??''" readonly /></div>
+    </div>
+    <div>
+      <h2>General Contractor Information</h2>
+      <div class="field">
+        <label>Client</label>
+<select
+  class="form-control"
+  id="ddlClient"
+  [(ngModel)]="selectedClientId"
+  disabled>
+
+  <option [ngValue]="null">Select Client</option>
+
+  @for (c of contractorClients; track c.id) {
+    <option [ngValue]="c.id">
+      {{ c.name }}
+    </option>
+  }
+</select>
+      </div>
+      <div class="field"><label>Address</label><input type="text" [value]="bidModel.contractorInfo?.address??''" readonly /></div>
+      <div class="field"><label>Address 2</label><input type="text" [value]="bidModel.contractorInfo?.address2??''" readonly /></div>
+      <div class="field"><label>City</label><input type="text" [value]="bidModel.contractorInfo?.city??''" readonly /></div>
+      <div class="field"><label>State</label><input type="text" [value]="bidModel.contractorInfo?.state??''" readonly /></div>
+      <div class="field"><label>Sales Tax District</label><input type="text"  readonly /></div>
+    </div>
+  </div>
+
+  <h2>Project Information</h2>
+  <div class="two-col">
+    <div>
+      <div class="field"><label>Insurance Type</label>
+        <!-- <input type="text" [value]="bidModel.projectInfo?.insuranceType??''" readonly /> -->
+        <select
+  type="text"
+  class="form-control"
+  id="ddlInsuranceType"
+  [(ngModel)]="selectedInsuranceType"
+  disabled>
+
+  <option value="0">Select insurance type</option>
+  <option value="1">OCIP</option>
+  <option value="2">CCIP</option>
+</select>
+      </div>
+      <div class="field"><label>Bonded</label>
+       <select
+  type="text"
+  class="form-control"
+  id="ddlBonded"
+  [(ngModel)]="selectedBonded"
+  disabled>
+
+  <option value="0">Select</option>
+  <option value="1">Yes</option>
+  <option value="2">No</option>
+</select>
+      </div>
+      <div class="field"><label>Tax Exempt</label>
+       <select
+  type="text"
+  class="form-control"
+  id="ddlTaxExempt"
+  [(ngModel)]="selectedTaxExempt"
+  disabled>
+
+  <option value="0">Select</option>
+  <option value="1">Yes</option>
+  <option value="2">No</option>
+</select>
+      </div>
+      <div class="field"><label>Invoice Submittal</label>
+       <select
+  type="text"
+  class="form-control"
+  id="ddlInvoiceSubmittal"
+  [(ngModel)]="selectedInvoiceSubmittal"
+  disabled>
+
+  <option value="0">Select</option>
+  <option value="1">Email</option>
+  <option value="2">Portal</option>
+  <option value="3">Mail</option>
+</select>
+      </div>
+    </div>
+    <div>
+      <div class="field"><label>Certified Payroll</label>
+      <select
+  type="text"
+  class="form-control"
+  id="ddlCertifiedPayroll"
+  [(ngModel)]="selectedCertifiedPayroll"
+  disabled>
+
+  <option value="0">Select</option>
+  <option value="1">Yes</option>
+  <option value="2">No</option>
+</select>
+      </div>
+      <div class="field"><label>Net Terms Date</label><input type="text" [value]="bidModel.projectInfo?.netTermsDate??''" readonly /></div>
+      <div class="field"><label>Retainage %</label><input type="text" [value]="bidModel.projectInfo?.retainagePerc??''" readonly /></div>
+    </div>
+  </div>
+}

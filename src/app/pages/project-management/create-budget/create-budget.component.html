@@ -1,0 +1,164 @@
+<div class="heading-row">
+  <h3>Budget Configuration</h3>
+
+  @if (saveSuccess) {
+    <span class="save-success">
+      {{ saveSuccess }}
+    </span>
+  }
+</div>
+<hr />
+
+<div class="row" style="margin-left: 0;">
+  <div class="field">
+  <label>Job Number</label>
+
+  <select
+    [(ngModel)]="selectedProjectId"
+    [ngModelOptions]="{ standalone: true }"
+    (ngModelChange)="onJobChanged($event)">
+
+    <option [ngValue]="0">
+      Select ProjectId
+    </option>
+
+    @for (job of costCodeRecords; track job.recNum) {
+      <option [ngValue]="job.recNum">
+        {{ recJobNumber(job) }}
+      </option>
+    }
+
+  </select>
+</div>
+
+  <div class="field">
+    <label>Phase</label>
+    <select [(ngModel)]="selectedPhaseId" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onPhaseChanged($event)">
+      <option value="">Select Phase</option>
+      @for (p of phases; track p.phaseNum) {
+        <option [value]="p.phaseNum">{{ p.phaseName }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<table class="budget-grid">
+  <thead>
+    <tr>
+      <th>Cost Code Description</th>
+      <!-- FIX (2026-09-16, Mike Smith quick-fix request) - ModifyBudget mode used to show a
+           readonly "Total Budget" column alongside the real editable "Update Budget" column,
+           which doesn't match the Moqup design. For now: drop the readonly Total Budget column
+           entirely in ModifyBudget mode, and relabel the one remaining editable column "Initial
+           Budget" (still the same updateBudget control/save path - display-only change). Create
+           mode is untouched (its single "Total Budget" column is the only budget input it has). -->
+      @if (isCreate) {
+        <th>Total Budget</th>
+      } @else {
+        <th>Initial Budget</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows.controls; track $index) {
+      <tr [formGroup]="row">
+        <td class="autocomplete-cell">
+  <div class="autocomplete-container">
+
+    <input
+      type="text"
+      formControlName="costCodeDescription"
+      placeholder="Select Cost Code Description"
+      autocomplete="off"
+      (input)="onCostCodeDescriptionInput($event, row)"
+      (focus)="onCostCodeDescriptionFocus($event, row)"
+      (blur)="onCostCodeDescriptionBlur()"
+    />
+
+    @if (activeRow === row && filteredCostCodeDescriptions.length > 0) {
+      <div class="autocomplete-dropdown">
+
+        @for (item of filteredCostCodeDescriptions; track item.description) {
+          <div
+            class="autocomplete-item"
+            (mousedown)="selectCostCodeDescription(item, row)">
+            {{ item.description }}
+          </div>
+        }
+
+      </div>
+    }
+
+  </div>
+</td>
+        @if (isCreate) {
+          <td>
+            <div class="currency-input">
+              <span class="currency-prefix">$</span>
+              <input type="text" inputmode="decimal"
+                [value]="formatCurrency(row.get('totalBudget')?.value)"
+                (input)="onBudgetInput($event, row, 'totalBudget')" />
+            </div>
+          </td>
+        } @else {
+          <td>
+            <div class="currency-input">
+              <span class="currency-prefix">$</span>
+              <input type="text" inputmode="decimal"
+                [value]="formatCurrency(row.get('updateBudget')?.value)"
+                (input)="onBudgetInput($event, row, 'updateBudget')" />
+            </div>
+          </td>
+        }
+      </tr>
+    } @empty {
+      <tr><td colspan="2" class="empty">No cost code rows yet.</td></tr>
+    }
+  </tbody>
+</table>
+
+<!-- FIX - "Cannot add rows in Budget": Add Row was gated to CreateBudget mode only, so a
+     ModifyBudget session with no existing cost code rows (fresh phase, nothing budgeted yet) had
+     no way to add one - a dead end. Available in both modes now; newly-added rows in ModifyBudget
+     mode still only submit if their Update Budget is filled in (see toRecords()/hasInvalidRows()),
+     so this doesn't change what ModifyBudget actually persists, just unblocks adding the row first. -->
+<button type="button" class="btn-primary" (click)="addRow()">Add Row</button>
+
+<div class="upload-row">
+  <input type="file" accept=".xls,.xlsx" (change)="onFileSelected($event)" />
+  <!-- FLAG: parsing not wired up yet - see component header comment. -->
+  <button type="button" class="btn-secondary" disabled title="Requires a client-side XLSX parsing library - see code comment">
+    Upload
+  </button>
+  <button
+  type="button"
+  class="btn-primary"
+  [disabled]="isSaving"
+  (click)="saveBudget()">
+  {{ isSaving ? 'Saving...' : 'Save' }}
+</button>
+
+
+
+@if (saveError) {
+  <div class="error-message">
+    {{ saveError }}
+  </div>
+}
+
+@if (isSaving) {
+  <div class="overlay">
+    <div class="spinner"></div>
+  </div>
+}
+  <button
+  type="button"
+  class="btn-primary"
+  [disabled]="isSubmitDisabled || isSaving"
+  (click)="submitBudget()">
+  {{ isSaving ? 'Submitting...' : 'Submit' }}
+</button>
+</div>
+
+
+

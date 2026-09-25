@@ -1,0 +1,53 @@
+<h3>Job Summary Report</h3>
+<hr />
+
+<div class="filters">
+  <div class="field">
+    <label>Job Number</label>
+    <select [(ngModel)]="selectedProjectId" (ngModelChange)="onJobChanged($event)">
+      <option value="">Select ProjectId</option>
+      @for (job of costCodeRecords; track job.recNum) {
+        <option [value]="job.recNum">{{ recJobNumber(job) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<hr />
+
+<div class="toolbar">
+  <input type="text" placeholder="Search..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" />
+  <div class="actions">
+    <button type="button" class="btn-primary" (click)="copyToClipboard()">Copy to clipboard</button>
+    <button type="button" class="btn-primary" (click)="exportCsv()">Export CSV</button>
+    <button type="button" class="btn-primary" (click)="exportPdf()">Export PDF</button>
+    <button type="button" class="btn-primary" (click)="exportExcel()">Export Excel</button>
+    <button type="button" class="btn-primary" (click)="exportWord()">Export Word</button>
+  </div>
+</div>
+
+<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredJobs` data source. -->
+@if (filteredJobs.length > 0) {
+  <ejs-grid #jobSummaryGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowExcelExport]="true"
+[allowPdfExport]="true">
+    <e-columns>
+      <e-column field="jobNumber" headerText="Job ID" width="120"></e-column>
+      <e-column field="costCode" headerText="Cost Code" width="120"></e-column>
+      <e-column field="costCodeDescription" headerText="Cost Code Description" width="220"></e-column>
+      <e-column field="budgetAndChanges" headerText="Budget And Changes" width="160" textAlign="Right">
+        <ng-template #template let-data>{{ data.budgetAndChanges | currency }}</ng-template>
+      </e-column>
+      <e-column field="toDate" headerText="To Date" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.toDate | currency }}</ng-template>
+      </e-column>
+      <e-column field="thisPeriod" headerText="This Period" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.thisPeriod | currency }}</ng-template>
+      </e-column>
+      <e-column field="remaining" headerText="Remaining" width="130" textAlign="Right">
+        <ng-template #template let-data>{{ data.remaining | currency }}</ng-template>
+      </e-column>
+    </e-columns>
+  </ejs-grid>
+} @else {
+  <p class="empty">No job summary data.</p>
+}

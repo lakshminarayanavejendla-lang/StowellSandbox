@@ -1,0 +1,32 @@
+.po-card {
+  background: #fff;
+  padding: 10px;
+  margin: 10px 0;
+
+  h3 {
+    margin: 0 0 10px;
+  }
+}
+
+.po-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background-color: #00355f;
+    color: #fff;
+    text-align: left;
+    padding: 8px 10px;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .empty {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+  }
+}

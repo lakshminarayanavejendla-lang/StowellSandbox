@@ -1,0 +1,22 @@
+<h3 class="m-0">Job Access Log</h3>
+<hr />
+
+@if (!loaded) {
+  <p>Loading...</p>
+} @else {
+  <ejs-grid
+    class="black-grid"
+    [dataSource]="records"
+    [allowPaging]="true"
+    [allowSorting]="true"
+    [allowFiltering]="true"
+    [pageSettings]="pageSettings"
+  >
+    <e-columns>
+      <e-column field="userEmail" headerText="User" width="220"></e-column>
+      <e-column field="jobId" headerText="Job ID" width="120"></e-column>
+      <e-column field="jobName" headerText="Job Name" width="220"></e-column>
+      <e-column field="accessTime" headerText="Accessed At" width="180" type="date" format="MM/dd/yyyy hh:mm a"></e-column>
+    </e-columns>
+  </ejs-grid>
+}

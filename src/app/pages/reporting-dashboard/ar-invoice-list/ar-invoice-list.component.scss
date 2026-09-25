@@ -1,0 +1,76 @@
+.filters, .summary-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label { font-weight: 600; color: #444; }
+  select, input {
+    height: 38px;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    padding: 6px 10px;
+    min-width: 220px;
+  }
+
+  select[multiple] { height: auto; min-height: 90px; }
+
+  input[disabled] { background-color: #f7f7f7; }
+}
+
+.btn-primary, .btn-secondary {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  color: #fff;
+  height: 38px;
+  white-space: nowrap; // FIX (2026-09-22) - see .actions' comment above.
+}
+
+.btn-primary { background-color: #00355f; }
+.btn-secondary { background-color: #6c757d; }
+.btn-secondary[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+  // FIX (2026-09-22, alignment sweep) - without this, at narrower widths the flex row forced
+  // all 5 export buttons onto one line, shrinking them below their own text's width; since the
+  // buttons had no white-space:nowrap (see the paired FIX on .btn-primary/.btn-secondary), the
+  // shrunk buttons wrapped their OWN TEXT onto a second line, which the buttons' fixed
+  // height then clipped ("Copy to" cutting off "clipboard", "Export" cutting off "CSV" etc).
+  // Wrapping the row instead lets a button that doesn't fit drop to the next line as a whole,
+  // intact unit.
+  flex-wrap: wrap;
+}
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th { background-color: #0d47a1; color: #fff; text-align: left; padding: 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
+  .empty { text-align: center; color: #888; }
+}
+.e-grid .e-headercell, .e-grid .e-detailheadercell {
+    background-color: #00355f;
+    color: #fff;
+}

@@ -1,0 +1,40 @@
+<h4>Total Retain by File (Hi/Low Highlight)</h4>
+
+<ejs-chart
+  [primaryXAxis]="primaryXAxis"
+  [primaryYAxis]="primaryYAxis"
+  [legendSettings]="legendSettings"
+  height="320px">
+
+  <e-series-collection>
+
+    <e-series
+      [dataSource]="chartData"
+      type="StackingColumn"
+      xName="category"
+      yName="highest"
+      name="Highest"
+      fill="#3767ad">
+    </e-series>
+
+    <e-series
+      [dataSource]="chartData"
+      type="StackingColumn"
+      xName="category"
+      yName="lowest"
+      name="Lowest"
+      fill="gray">
+    </e-series>
+
+    <e-series
+      [dataSource]="chartData"
+      type="StackingColumn"
+      xName="category"
+      yName="regular"
+      name="Regular"
+      fill="#00355f">
+    </e-series>
+
+  </e-series-collection>
+
+</ejs-chart>

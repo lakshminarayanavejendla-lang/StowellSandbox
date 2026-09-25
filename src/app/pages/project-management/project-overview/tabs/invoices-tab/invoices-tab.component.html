@@ -1,0 +1,60 @@
+<div class="form-row">
+  <div class="field">
+    <label>Job Id</label>
+    <input type="text" [value]="bidModel?.jobID" readonly />
+  </div>
+  <div class="field">
+    <label>Job Name</label>
+    <input type="text" [value]="bidModel?.jobName" readonly />
+  </div>
+  <!-- NEW (2026-09-23, Mike Smith): all phases together (default) or one phase at a time. -->
+  <div class="field">
+    <label>Phase</label>
+    <select [ngModel]="selectedPhaseId" (ngModelChange)="onPhaseChange($event)">
+      <option value="">All phases</option>
+      @for (p of phases; track p.phaseNum) {
+        <option [value]="p.phaseNum">{{ p.phaseNum }} - {{ p.phaseName }}</option>
+      }
+    </select>
+  </div>
+  <button type="button" class="btn-primary" disabled title="New Invoice form not yet available">New Invoice</button>
+</div>
+
+<div class="summary-row">
+  <div
+    class="budget-pie"
+    [style.background]="'conic-gradient(#3f6db3 0% ' + paidPercent() + '%, #0a2c52 ' + paidPercent() + '% 100%)'"
+    title="Paid vs Remaining"
+  ></div>
+  <table class="summary-table">
+    <tbody>
+      <tr>
+        <td class="label">Total Budget</td>
+        <td class="value">{{ totalBudget() | currency }}</td>
+      </tr>
+      <tr>
+        <td class="label">Total Paid</td>
+        <td class="value">{{ totalPaid() | currency }}</td>
+      </tr>
+      <tr>
+        <td class="label">Total Remaining</td>
+        <td class="value">{{ totalRemaining() | currency }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2>Invoices</h2>
+<hr class="dashed" />
+@if (invoicesLoaded) {
+<ejs-grid class="black-grid" [dataSource]="invoices" [allowPaging]="true" [allowSorting]="true" [pageSettings]="pageSettings">
+  <e-columns>
+    <e-column field="invoiceId" headerText="Invoice ID" width="140"></e-column>
+    <e-column field="name" headerText="Name" width="220"></e-column>
+    <e-column field="phase" headerText="Phase" width="90"></e-column>
+    <e-column field="invoiceDate" headerText="Date" width="120"></e-column>
+    <e-column field="amount" headerText="Amount" width="140" format="C2"></e-column>
+    <e-column field="status" headerText="Status" width="140"></e-column>
+  </e-columns>
+</ejs-grid>
+}

@@ -1,0 +1,104 @@
+<h3 class="m-0">Change Order Queue</h3>
+<hr />
+
+@if (!loaded) {
+  <p>Loading...</p>
+} @else {
+  <div class="toolbar">
+    <label class="checkbox">
+      <input type="checkbox" [checked]="showCompleted" (change)="onToggleCompleted($any($event.target).checked)" />
+      Show Completed POs
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" [checked]="showCancelled" (change)="onToggleCancelled($any($event.target).checked)" />
+      Show Cancelled POs
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" [checked]="showOnHold" (change)="onToggleOnHold($any($event.target).checked)" />
+      Show On-Hold POs
+    </label>
+  </div>
+
+  <div class="note">
+    Please Note: ( # of Outstanding PO's "of" Total # of PO's for Job )
+  </div>
+
+  @if (drafts.length) {
+    <h3 class="m-0">Draft Change Orders</h3>
+    <hr />
+    <table class="drafts-table">
+      <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Purchase Order</th>
+          <th>Vendor</th>
+          <th>Reason</th>
+          <th>Total</th>
+          <th>Saved By</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (draft of drafts; track draft.draftId) {
+          <tr>
+            <td>{{ draft.jobId }}</td>
+            <td>{{ draft.purchaseOrderId }}</td>
+            <td>{{ draft.vendor }}</td>
+            <td>{{ draft.coReason }}</td>
+            <td>${{ draft.totalAmount }}</td>
+            <td>{{ draft.createdBy }}</td>
+            <td>
+              <button type="button" class="btn-sm" (click)="resumeDraft(draft)">Resume</button>
+              <button type="button" class="btn-sm" (click)="deleteDraft(draft)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <ejs-grid
+    class="black-grid"
+    [dataSource]="filteredActiveCOs"
+    [allowPaging]="true"
+    [allowSorting]="true"
+    [allowFiltering]="true"
+    [pageSettings]="pageSettings"
+  >
+    <e-columns>
+      <e-column field="masterJobCoId" headerText="Master Job CO ID" width="180">
+        <ng-template #template let-data>
+          <a [routerLink]="coLink(data)" class="opportunity-link">{{ data.masterJobCoId }}</a>
+        </ng-template>
+      </e-column>
+      <e-column field="poStatus" headerText="PO Status" width="140"></e-column>
+      <e-column field="jobName" headerText="Job Name" width="200"></e-column>
+      <e-column field="pm" headerText="PM" width="140"></e-column>
+    </e-columns>
+  </ejs-grid>
+
+  @if (showCompleted) {
+    <h3 class="m-0 completed-header">Completed Change Order Queue</h3>
+    <hr />
+
+    <ejs-grid
+      class="black-grid"
+      [dataSource]="completedCOs"
+      [allowPaging]="true"
+      [allowSorting]="true"
+      [allowFiltering]="true"
+      [pageSettings]="pageSettings"
+    >
+      <e-columns>
+        <e-column field="masterJobCoId" headerText="Master Job CO ID" width="180">
+        <ng-template #template let-data>
+          <a [routerLink]="coLink(data)" class="opportunity-link">{{ data.masterJobCoId }}</a>
+        </ng-template>
+      </e-column>
+        <e-column field="poStatus" headerText="PO Status" width="140"></e-column>
+        <e-column field="jobName" headerText="Job Name" width="200"></e-column>
+        <e-column field="pm" headerText="PM" width="140"></e-column>
+      </e-columns>
+    </ejs-grid>
+  }
+}

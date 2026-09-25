@@ -1,0 +1,111 @@
+
+<nav class="nav-menu">
+  <ul>
+
+    @for (item of menu; track item.key) {
+
+      <li
+        [class.parent-active]="openMenu === item.key">
+
+        @if (!item.children) {
+
+          @if (item.route) {
+
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{
+                exact: item.key === 'home'
+              }">
+
+              <span>
+                <i [class]="item.icon" [style.color]="item.color"></i>
+                {{ item.label }}
+              </span>
+
+            </a>
+
+          } @else {
+
+            <span class="disabled-link">
+
+              <i [class]="item.icon" [style.color]="item.color"></i>
+              {{ item.label }}
+
+            </span>
+
+          }
+
+        } @else {
+
+          <!-- Parent menu -->
+          <button
+            type="button"
+            class="menu-toggle"
+            [class.active]="openMenu === item.key"
+            (click)="toggleMenu(item)">
+
+            <span>
+
+              <i [class]="item.icon" [style.color]="item.color"></i>
+
+              {{ item.label }}
+
+              <span class="menu-arrow arrow">
+                {{ openMenu === item.key ? '▲' : '▼' }}
+              </span>
+
+            </span>
+
+          </button>
+
+
+          <!-- Submenu -->
+          @if (openMenu === item.key) {
+
+            <ul class="submenu">
+
+              @for (
+                child of item.children;
+                track child.label
+              ) {
+
+                <li>
+
+                  @if (child.route) {
+
+                    <a
+                      [routerLink]="child.route"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{
+                        exact: true
+                      }">
+
+                      {{ child.label }}
+
+                    </a>
+
+                  } @else {
+
+                    <span class="disabled-link">
+                      {{ child.label }}
+                    </span>
+
+                  }
+
+                </li>
+
+              }
+
+            </ul>
+
+          }
+
+        }
+
+      </li>
+
+    }
+
+  </ul>
+</nav>
