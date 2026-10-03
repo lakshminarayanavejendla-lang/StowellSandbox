@@ -1,85 +1,76 @@
-import { Component, OnInit, inject,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { GridModule, PageSettingsModel, PageService, SortService } from '@syncfusion/ej2-angular-grids';
 import { JobService } from '../../../../core/services/job.service';
 import { CurrentJob } from '../../../../core/models/current-job.model';
 import { AuthService } from '../../../../core/services/auth.service';
-// Port of CurrentJobs.razor / DashboardCurrentJobs.razor. Radzen's paid RadzenDataGrid is
-// now replaced with the real Syncfusion `ejs-grid` (GridComponent) - see current-jobs.component.html
-// for the column/template markup. Search stays a hand-rolled client-side filter feeding
-// [dataSource] (rather than the grid's own toolbar Search) so the existing search box UI didn't
-// need to change; paging is now the grid's own built-in pager (PageService) instead of the old
-// manual pagedJobs/goToPage logic.
-//
-// NOTE: PageService/SortService must be listed in this component's `providers` array - Syncfusion
-// Angular Grid features (paging, sorting, filtering, etc.) are opt-in via Angular DI, not enabled
-// just by setting the corresponding @Input. Sorting was not explicitly requested but is a
-// low-risk, standard Grid feature added here for a more complete "real grid" feel - drop
-// `allowSorting`/`SortService` if that's unwanted scope creep.
+
+const PAGE_SIZE = 8;
+
+/**
+ * Current jobs: a light searchable list (job id link + name, status pill) with simple paging. Choosing a row (not its Job ID link, which
+ * opens the project overview) emits `jobSelected` so the dashboard can show that job in its details panel.
+ * Was a Syncfusion grid ported from CurrentJobs.razor / DashboardCurrentJobs.razor; the list keeps the same search fields.
+ */
 @Component({
   selector: 'app-current-jobs',
   standalone: true,
-  imports: [RouterLink, GridModule],
-  providers: [PageService, SortService],
+  imports: [RouterLink],
   templateUrl: './current-jobs.component.html',
   styleUrl: './current-jobs.component.scss',
 })
 export class CurrentJobsComponent implements OnInit {
   private jobService = inject(JobService);
+  private authService = inject(AuthService);
 
-  jobs: CurrentJob[] = [];
-  filteredJobs: CurrentJob[] = [];
-  searchTerm = '';
+  readonly jobSelected = output<CurrentJob>();
 
-  // Mirrors the old pageSizeOptions ([10, 15, 20, 50] + "All"). `pageSizes` on
-  // PageSettingsModel accepts a string[] to render a page-size dropdown in the grid's own
-  // pager - "All" is documented Syncfusion behavior for "show every record", but this hasn't
-  // been runtime-verified against the pinned 27.1.48 version.
-  pageSettings: PageSettingsModel = {
-    pageSize: 15,
-    pageSizes: ['10', '15', '20', '50', 'All'],
-  };
+  readonly jobs = signal<CurrentJob[]>([]);
+  readonly searchTerm = signal('');
+  readonly page = signal(0);
 
-  // TODO: resolve the signed-in user's email from the MSAL account instead of a hardcoded
-  // placeholder once auth is fully wired (see JobService notes).
-  //private userEmail = 'pcsadmin@phoenixcanopyshades.com';
- // private userEmail = '';
+  readonly filtered = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    const all = this.jobs();
+    return !term ? all : all.filter((j) => [j.jobID, j.jobName, j.address, j.createdBy, j.status].some((f) => f?.toLowerCase().includes(term)));
+  });
+
+  readonly pageCount = computed(() => Math.max(1, Math.ceil(this.filtered().length / PAGE_SIZE)));
+  readonly rows = computed(() => this.filtered().slice(this.page() * PAGE_SIZE, (this.page() + 1) * PAGE_SIZE));
+  readonly rangeLabel = computed(() => {
+    const n = this.filtered().length;
+    if (!n) return '0 jobs';
+    const from = this.page() * PAGE_SIZE + 1;
+    return `${from}–${Math.min(n, from + PAGE_SIZE - 1)} of ${n}`;
+  });
+
   ngOnInit(): void {
-       const userEmail = this.authservice.getLoggedInUserEmail();
-
-  console.log('Logged-in user:', userEmail);
-
-  if (!userEmail) {
-    console.warn('No logged-in MSAL account found.');
-    return;
-  }
-    this.jobService.getCurrentJobs(userEmail).subscribe((jobs) => {
-      this.jobs = jobs;
-      this.applyFilter();
-    });
+    const email = this.authService.getLoggedInUserEmail();
+    if (!email) return;
+    this.jobService.getCurrentJobs(email).subscribe((jobs) => this.jobs.set(jobs));
   }
 
-  onSearchChange(term: string): void {
-    this.searchTerm = term;
-    this.applyFilter();
+  onSearch(term: string): void {
+    this.searchTerm.set(term);
+    this.page.set(0);
   }
 
-  private applyFilter(): void {
-    const term = this.searchTerm.trim().toLowerCase();
-    debugger; 
-    this.filteredJobs = !term
-      ? this.jobs
-      : this.jobs.filter((j) =>
-          [j.jobID, j.jobName, j.address, j.createdBy, j.status].some((f) =>
-            f?.toLowerCase().includes(term)
-          )
-        );
-        console.log('Filtered Jobs:', this.filteredJobs); // Debugging line to check filtered results
-        this.cdr.detectChanges(); // Trigger change detection to update the view
+  go(delta: number): void {
+    this.page.set(Math.min(this.pageCount() - 1, Math.max(0, this.page() + delta)));
   }
-  constructor(
-  private cdr: ChangeDetectorRef,
-  private authservice: AuthService
-) {}
 
+  /** colour family for the status pill (Sage job statuses: Bid, Refused, Contract, Current, Complete, Closed) */
+  tone(status: string | undefined): 'info' | 'warn' | 'ok' | 'bad' | 'none' {
+    const s = status?.trim() ?? '';
+    if (!s) return 'none';
+    if (/refus|hold|lost/i.test(s)) return /refus|lost/i.test(s) ? 'bad' : 'warn';
+    if (/bid|pending/i.test(s)) return 'warn';
+    if (/complete|done/i.test(s)) return 'ok';
+    if (/clos/i.test(s)) return 'none';
+    return 'info'; // Current, Contract
+  }
+
+  /** percent complete for the progress bar, kept within 0-100 */
+  progress(job: CurrentJob): number {
+    return Math.min(100, Math.max(0, Math.round(job.percentComplete ?? 0)));
+  }
 }

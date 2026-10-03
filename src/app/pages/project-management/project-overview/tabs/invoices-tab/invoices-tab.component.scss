@@ -14,34 +14,34 @@
 
   label {
     font-weight: 600;
-    color: #777;
+    color: var(--sh-ink-3);
     white-space: nowrap;
   }
 
   input {
     width: 100%;
     box-sizing: border-box;
-    background-color: #f7f7f7;
-    border: 1px solid #dcdcdc;
+    background-color: var(--sh-surface-2);
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 10px;
   }
 
-  // Phase dropdown - same look as po-tab.component.scss (matches the inputs, white as it's editable).
+  // The phase dropdown looks like the PO tab's: styled like the inputs, white because it's editable.
   select {
     width: 100%;
     box-sizing: border-box;
     font: inherit;
-    color: #212529;
-    background-color: #fff;
-    border: 1px solid #dcdcdc;
+    color: var(--sh-ink);
+    background-color: var(--sh-surface);
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 10px;
   }
 }
 
-// NEW - budget summary block (see invoices-tab.component.ts header comment), copied verbatim
-// from po-tab.component.scss (no .set-budget-cell needed here - this tab has no Set Budget link).
+// The budget box (see the component header), copied from po-tab.component.scss. There's no
+// .set-budget-cell because this tab has no Set Budget link.
 .summary-row {
   display: flex;
   align-items: center;
@@ -62,13 +62,13 @@
 
   td {
     padding: 6px 14px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid var(--sh-line);
   }
 
   .label {
     font-weight: 600;
-    color: #555;
-    background-color: #f7f7f7;
+    color: var(--sh-ink);
+    background-color: var(--sh-surface-2);
   }
 
   .value {
@@ -78,18 +78,18 @@
 
 h2 {
   font-weight: 700;
-  color: #00355f;
+  color: var(--sh-ink);
   margin-top: 30px;
 }
 
 .dashed {
-  border-top: 1px dashed #c7c7c7;
+  border-top: 1px dashed var(--sh-line);
   margin: 15px 0 25px 0;
 }
 
 .btn-primary {
   justify-self: start;
-  background-color: #7cb342;
+  background-color: #14915b;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -106,7 +106,7 @@ h2 {
   .e-gridheader,
   .e-gridheader .e-columnheader,
   .e-gridheader .e-headercell {
-    background-color: #00355f !important;
+    background-color: var(--sh-blue) !important;
     color: #ffffff !important;
   }
 

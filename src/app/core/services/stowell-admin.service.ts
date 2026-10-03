@@ -5,22 +5,15 @@ import { environment } from '../../../environments/environment';
 import { StowellAdminEndpoints } from '../stowell-admin-endpoints';
 
 /**
- * Port of IStowellAdminService/StowellAdminService.cs - backs DisconnectUsers.razor.
+ * Ported from StowellAdminService.cs, for the Disconnect Users page.
  *
- * SECURITY-RELEVANT: `ProcessDisconnectUsers()` in the C# source POSTs with no request body and
- * no target user/session filter - it is an unconditional "disconnect every currently logged-in
- * user" action, not a per-user disconnect. There is no confirmation dialog in the Blazor source
- * either (DisconnectUsers.razor's button calls this directly on click). Reproduced as-is; flag
- * this for the team - a single unconfirmed click force-logs-out the entire user base, which
- * seems like it warrants a confirmation prompt before going live, even though that's not what
- * the source does today.
+ * Security: ProcessDisconnectUsers() sends no body and no user filter, so it signs out everyone
+ * who is logged in. The Blazor button did this on one click with no confirmation. Kept that way
+ * here, but it should probably ask for confirmation before going live.
  *
- * The C# method also swallows all exceptions itself (try/catch, log-only, no rethrow) and
- * NEVER surfaces failure to the caller - DisconnectUsers.razor always shows the "success" toast
- * regardless of whether the POST actually succeeded. That looks like a bug (a real network/500
- * failure would be silently reported as success), so this port intentionally does NOT reproduce
- * that swallow: the Observable reflects the real HTTP outcome and the component shows a genuine
- * error message on failure. Flagging this as a deliberate deviation from source behavior.
+ * The C# method also caught every error and the page always showed "success", even when the
+ * request failed. This version doesn't hide errors: the Observable fails when the request fails,
+ * and the page shows an error. That's a deliberate change from the original.
  */
 @Injectable({ providedIn: 'root' })
 export class StowellAdminService {

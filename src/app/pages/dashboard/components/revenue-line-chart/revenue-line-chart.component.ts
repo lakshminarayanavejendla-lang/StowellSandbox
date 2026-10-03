@@ -8,9 +8,11 @@ import {
 import {
   CategoryService,
   ChartModule,
-  LineSeriesService,
+  CrosshairService,
+  SplineAreaSeriesService,
   TooltipService,
 } from '@syncfusion/ej2-angular-charts';
+import { CHART_AREA, CHART_COLORS, TOOLTIP, categoryAxis, moneyAxis, onAxisLabel, onTooltip, useChartTheme } from '../../../../shared/charts/chart-style';
 
 import { JobService } from '../../../../core/services/job.service';
 
@@ -25,11 +27,7 @@ interface RevenuePoint {
   selector: 'app-revenue-line-chart',
   standalone: true,
   imports: [ChartModule],
-  providers: [
-    LineSeriesService,
-    CategoryService,
-    TooltipService
-  ],
+  providers: [SplineAreaSeriesService, CategoryService, TooltipService, CrosshairService],
   templateUrl: './revenue-line-chart.component.html',
 })
 export class RevenueLineChartComponent implements OnInit {
@@ -42,13 +40,17 @@ export class RevenueLineChartComponent implements OnInit {
 
   seriesName = 'Revenue';
 
-  primaryXAxis = {
-    valueType: 'Category' as const
-  };
-
-  primaryYAxis = {
-    labelFormat: '{value}'
-  };
+  readonly chartTheme = useChartTheme();
+  readonly colors = CHART_COLORS;
+  readonly chartArea = CHART_AREA;
+  readonly tooltip = { ...TOOLTIP, shared: false };
+  readonly crosshair = { enable: true, lineType: 'Vertical', line: { width: 1, dashArray: '4,4' } };
+  readonly marker = { visible: true, width: 8, height: 8, shape: 'Circle', isFilled: true, border: { width: 2, color: '#ffffff' } };
+  readonly border = { width: 3, color: CHART_COLORS.blue };
+  readonly primaryXAxis = categoryAxis({ labelIntersectAction: 'Rotate45' });
+  readonly primaryYAxis = moneyAxis({ minimum: 0 });
+  readonly onAxisLabel = onAxisLabel;
+  readonly onTooltip = onTooltip;
 
   private userEmail = '';
 

@@ -1,5 +1,5 @@
-// Mirrors StowellCoApp.DTO.BidAccessSummary and its request types (DTO/BidInfoDto.cs) - the
-// "Bid Access" sub-grid (role + employee) shown on the Details tab.
+// Matches BidAccessSummary and its request types (DTO/BidInfoDto.cs): the Bid Access grid of roles
+// and employees on the Details tab.
 export interface BidAccessSummary {
   bidAccessID: number;
   employeeName?: string;

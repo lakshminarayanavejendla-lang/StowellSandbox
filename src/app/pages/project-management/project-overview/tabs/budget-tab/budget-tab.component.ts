@@ -8,23 +8,17 @@ import { CurrentCostSummaryViewModel, Phase } from '../../../../../core/models/p
 import { BudgetLogEntry } from '../../../../../core/models/project-management/budget-log.model';
 
 /**
- * NEW tab - client-updated Moqups (page TAB-Budget/Financials). Per Mike Smith's note ("Don't
- * forget budget tab like in moqup") this was the one real gap left after the mockup review:
- * the mockup's Total Budget/Total Paid/Total Remaining + Set Budget + Budget Log block has no
- * home in the tab bar.
+ * The Budget tab (Moqups page TAB-Budget/Financials), asked for by Mike Smith ("Don't forget budget
+ * tab like in moqup"). The mockup's Total Budget, Total Paid, Total Remaining, Set Budget and Budget
+ * Log had no tab before.
  *
- * Total Budget/Paid/Remaining reuse ProjectOverviewService.getCurrentCostSummaryViewModel()'s
- * existing `budgetPayment` field (BudgetPayment: budget/paid/balance) - the SAME API call
- * financials-tab.component.ts already makes for its own (different) content; no new backend
- * dependency for those three figures. "Set Budget" links to the existing
- * 'project-budget-configuration/:action/:projectId' route (CreateBudgetComponent) - defaulting
- * to the 'ModifyBudget' action since this tab only appears once a job already exists (mirrors
- * project-budget-configuration.component.ts's own linkFor() ternary: 'Sage'-sourced jobs get
- * ModifyBudget, new ones get CreateBudget - a job with its own Project Overview page is
- * necessarily already a real job, so Modify is the correct default here, not a guess).
+ * The three totals use `budgetPayment` (budget, paid, balance) from
+ * getCurrentCostSummaryViewModel(), the same call the Financials tab makes, so no new API is needed.
+ * Set Budget opens 'project-budget-configuration/:action/:projectId' (CreateBudgetComponent) with
+ * 'ModifyBudget'. project-budget-configuration's linkFor() uses ModifyBudget for jobs from Sage, and a
+ * job with its own Project Overview page already exists, so Modify is right here.
  *
- * Budget Log is new, unbacked data (see budget-log.service.ts) - no existing service exposes a
- * budget change history, same situation as invoices-tab.component.ts's Invoices grid.
+ * The Budget Log has no API yet (see budget-log.service.ts).
  */
 @Component({
   selector: 'app-budget-tab',
@@ -43,14 +37,14 @@ export class BudgetTabComponent implements OnChanges {
   model?: CurrentCostSummaryViewModel;
   logEntries: BudgetLogEntry[] = [];
 
-  // NEW (2026-09-24, Mike Smith - "we really need to have a phase dropdown here beside Job Name"): the same
-  // Phase dropdown the PO / CO / Invoices tabs have - all phases together (default) or one phase at a time.
-  // (The phase list is captured on the all-phases load so it doesn't shrink when one phase is selected.)
+  // The same Phase dropdown as the PO, CO and Invoices tabs: all phases together (the default) or one
+  // at a time (Mike Smith, 2026-09-24: "we really need to have a phase dropdown here beside Job
+  // Name"). The phase list comes from the all-phases load, so it doesn't shrink when one is picked.
   phases: Phase[] = [];
   selectedPhaseId = '';
 
-  /** Phase figures apply only when the job really has more than one phase (with a single phase the
-   * amounts must not change when it is picked - same rule as the other tabs). */
+  /** Phase figures only apply when the job has more than one phase. With a single phase the amounts
+   * mustn't change when it's picked, as on the other tabs. */
   private get phaseFilterActive(): boolean {
     return this.selectedPhaseId !== '' && this.phases.length > 1;
   }

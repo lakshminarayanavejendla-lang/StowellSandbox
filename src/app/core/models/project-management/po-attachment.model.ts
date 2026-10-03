@@ -1,5 +1,4 @@
-// NEW - Stowell PO Module. Backs the real file upload on FORM-PO Request / FORM-CO Request
-// (previously a static placeholder - see po-attachment.service.ts).
+// File uploads on the PO Request and CO Request forms (see po-attachment.service.ts).
 export interface PoAttachment {
   name: string;
   storedName: string;

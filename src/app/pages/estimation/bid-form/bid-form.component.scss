@@ -1,17 +1,16 @@
-// This project has no Bootstrap dependency (see HANDOFF.md - free-libraries-only policy), so
-// unlike the Blazor source (which relied on Bootstrap's grid/modal/.btn classes), all layout
-// and modal chrome below is plain CSS local to this component.
+// The Blazor page used Bootstrap's grid, modal and button classes. Here the layout and the popup
+// are plain CSS in this component.
 
 h3,
 h4 {
-  color: #676a6c;
+  color: var(--sh-ink-3);
   font-weight: 500;
 }
 
 .back-link {
   display: inline-block;
   margin-bottom: 10px;
-  color: #006bb7;
+  color: var(--sh-blue);
   text-decoration: none;
 
   &:hover {
@@ -20,7 +19,7 @@ h4 {
 }
 
 .bid-form {
-  background: #fff;
+  background: var(--sh-surface);
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -42,29 +41,31 @@ h4 {
   label {
     font-size: 13px;
     font-weight: 600;
-    color: #555;
+    color: var(--sh-ink);
   }
 
   input,
   select {
     height: 36px;
     padding: 0 8px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     font-size: 14px;
   }
 
   input:disabled {
-    background: #f2f2f2;
+    background: var(--sh-surface-2);
   }
 }
 
 .field-inline {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 
   .field {
-    flex: 1;
+    flex: 1 1 200px;
+    min-width: 0;
   }
 }
 
@@ -75,12 +76,13 @@ h4 {
 
 .two-col {
   display: flex;
+  flex-wrap: wrap; // columns stack when there isn't room for two side by side (tablet/phone)
   gap: 24px;
   margin-bottom: 20px;
 
   .col {
     flex: 1;
-    min-width: 280px;
+    min-width: min(100%, 280px);
   }
 }
 
@@ -104,7 +106,7 @@ section {
   border-collapse: collapse;
 
   th {
-    background: #00355f;
+    background: var(--sh-blue);
     color: #fff;
     text-align: left;
     padding: 6px 10px;
@@ -113,13 +115,13 @@ section {
 
   td {
     padding: 6px 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--sh-line);
     font-size: 14px;
   }
 
   .empty {
     text-align: center;
-    color: #888;
+    color: var(--sh-ink-3);
   }
 }
 
@@ -142,12 +144,12 @@ section {
 }
 
 .btn-primary {
-  background-color: #00355f;
+  background-color: var(--sh-blue);
   color: #fff;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--sh-ink-3);
   color: #fff;
 }
 
@@ -180,19 +182,13 @@ section {
   z-index: 9999;
 }
 
-// FIX (2026-09-16, Mike Smith - "Add Phase locked my screen ... went grey and
-// nothing happened") - this class was named "modal", which collides with
-// Bootstrap 4's own global .modal class (loaded app-wide via index.html).
-// Bootstrap's .modal has `display: none` by default (it expects its own JS
-// to toggle a `.show` class) - since this custom popup never adds that
-// class, Bootstrap's rule won for the `display`/`position`/`z-index`
-// properties this component's scoped CSS never set, so the dialog box
-// itself was invisible while its .modal-overlay backdrop still rendered
-// (confirmed via computed styles: display:none, z-index:1050). Renamed to
-// avoid the collision - only the outer box needed renaming, since that's
-// the only property (display:none) actually causing invisibility.
+// This class used to be "modal", which clashes with Bootstrap 4's global .modal (loaded in
+// index.html). Bootstrap's .modal is display: none until its own JS adds .show, so the popup box
+// stayed hidden while its grey backdrop showed, and the screen looked locked (Mike Smith,
+// 2026-09-16: "Add Phase locked my screen ... went grey and nothing happened"). Only the outer box
+// needed a new name.
 .custom-modal {
-  background: #fff;
+  background: var(--sh-surface);
   border-radius: 8px;
   width: 500px;
   max-width: 90vw;
@@ -204,7 +200,7 @@ section {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--sh-line);
 
   .modal-title {
     font-weight: 600;
@@ -240,7 +236,7 @@ section {
       width: 100%;
       height: 34px;
       padding: 0 8px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--sh-line);
       border-radius: 4px;
     }
   }
@@ -251,5 +247,11 @@ section {
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--sh-line);
+}
+
+.field-note {
+  display: block;
+  margin-top: 4px;
+  color: var(--sh-ink-3);
 }

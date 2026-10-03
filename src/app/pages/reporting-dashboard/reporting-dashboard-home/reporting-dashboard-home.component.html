@@ -1,52 +1,137 @@
-<div class="panel">
-  <div class="panel-hdr"><h3>Accounting</h3></div>
-  <div class="panel-content reportlinks">
-    <div class="row">
-      <a class="report-tile" href="javascript:void(0)" (click)="openCostCodeSummary()">
-        <i class="bi bi-currency-dollar"></i>
-        <span>Job Cost Summary Reports</span>
-      </a>
-      <a class="report-tile" [routerLink]="['/project-management/cash-flow-report', 0]">
-        <i class="bi bi-file-earmark-spreadsheet"></i>
-        <span>Cash Flow Report</span>
-      </a>
-      <a class="report-tile" routerLink="/reporting-dashboard/cash-flow-to-date">
-        <i class="bi bi-file-earmark-spreadsheet"></i>
-        <span>Cash Flow To Date - Multiple</span>
-      </a>
-      <a class="report-tile" routerLink="/reporting-dashboard/prime-change-list">
-        <i class="bi bi-file-earmark-spreadsheet"></i>
-        <span>Prime Change List</span>
-      </a>
-      <a class="report-tile" routerLink="/reporting-dashboard/invoice-receivable">
-        <i class="bi bi-file-earmark-spreadsheet"></i>
-        <span>Invoice Receivable</span>
-      </a>
-      <a class="report-tile" routerLink="/reporting-dashboard/ar-invoice-list">
-        <i class="bi bi-file-earmark-spreadsheet"></i>
-        <span>AR Invoice List</span>
-      </a>
-      <a class="report-tile" routerLink="/reporting-dashboard/contract-summary">
-        <i class="bi bi-file-earmark-spreadsheet"></i>
-        <span>Contract Summary</span>
-      </a>
+<!-- Header -->
+@if (onlyReport(); as r) {
+  <section class="head">
+    <div>
+      <div class="eyebrow">Reports · {{ r.category }}</div>
+      <h1>{{ r.name }}</h1>
+      <p class="sub">{{ r.description }}</p>
     </div>
-  </div>
-</div>
+    <a class="btn" routerLink="/reporting-dashboard"><i class="bi bi-grid" aria-hidden="true"></i>All reports</a>
+  </section>
+} @else {
+  <section class="head">
+    <div>
+      <div class="eyebrow">Reports</div>
+      <h1>Report library</h1>
+      <p class="sub">Job costs, cash flow, receivables and month-end financials.</p>
+    </div>
+    <div class="search">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input type="search" placeholder="Find a report…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Find a report" />
+    </div>
+  </section>
+}
 
-<div class="panel">
-  <div class="panel-hdr"><h3>Project Management</h3></div>
-  <div class="panel-content reportlinks">
-    <div class="row">
-      <a class="report-tile" routerLink="/reporting-dashboard/job-summary-report">
-        <i class="bi bi-file-earmark-text"></i>
-        <span>Job Summary Report</span>
+<!-- Favourites and recently opened -->
+@if (!only() && (favoriteReports().length || recentReports().length)) {
+  <section class="shortcuts">
+    @if (favoriteReports().length) {
+      <div class="sc-group">
+        <h3><i class="bi bi-star-fill" aria-hidden="true"></i>Favourites</h3>
+        <div class="sc-list">
+          @for (r of favoriteReports(); track r.key) {
+            <button type="button" class="sc" (click)="openReport(r)"><i class="bi" [class]="r.icon" aria-hidden="true"></i>{{ r.name }}</button>
+          }
+        </div>
+      </div>
+    }
+    @if (recentReports().length) {
+      <div class="sc-group">
+        <h3><i class="bi bi-clock-history" aria-hidden="true"></i>Recently opened</h3>
+        <div class="sc-list">
+          @for (r of recentReports(); track r.key) {
+            <button type="button" class="sc" (click)="openReport(r)"><i class="bi" [class]="r.icon" aria-hidden="true"></i>{{ r.name }}</button>
+          }
+        </div>
+      </div>
+    }
+  </section>
+}
+
+@if (!only()) {
+  <!-- Category filter -->
+  <nav class="cats" aria-label="Report categories">
+    @for (c of categories; track c) {
+      <button type="button" [class.on]="category() === c" (click)="category.set(c)">
+        {{ c }} <span>{{ countFor(c) }}</span>
+      </button>
+    }
+  </nav>
+}
+
+<!-- Report cards (not shown on the Monthly Financials – All page, which is just its heading) -->
+@if (!only()) {
+  <section class="library" [class.single]="only()" aria-label="Reports">
+    @for (r of shown(); track r.key; let i = $index) {
+      @if (r.key === 'monthly-financials') {
+      <div class="report download" [attr.data-report]="r.key" [style.animation-delay]="i * 35 + 'ms'">
+        <div class="r-top">
+          <span class="r-icon"><i class="bi" [class]="r.icon" aria-hidden="true"></i></span>
+          <span class="r-cat">{{ r.category }}</span>
+          <button
+            type="button"
+            class="star"
+            [class.on]="isFavorite(r)"
+            [attr.aria-label]="isFavorite(r) ? 'Remove ' + r.name + ' from favourites' : 'Add ' + r.name + ' to favourites'"
+            [attr.aria-pressed]="isFavorite(r)"
+            (click)="toggleFavorite(r, $event)"
+          >
+            <i class="bi" [class.bi-star-fill]="isFavorite(r)" [class.bi-star]="!isFavorite(r)" aria-hidden="true"></i>
+          </button>
+        </div>
+        <h3>{{ r.name }}</h3>
+        <p>{{ r.description }}</p>
+        <div class="dl-row">
+          <input type="month" [(ngModel)]="financialsMonth" [disabled]="financialsBusy" aria-label="Accounting period" />
+          <button type="button" class="btn primary" (click)="downloadMonthlyFinancials()" [disabled]="financialsBusy">
+            @if (financialsBusy) {
+              <span class="spinner" aria-hidden="true"></span>Generating…
+            } @else {
+              <i class="bi bi-download" aria-hidden="true"></i>Download
+            }
+          </button>
+        </div>
+        @if (financialsMessage && !financialsBusy) {
+          <small class="f-msg" [class.ok]="financialsOk">{{ financialsMessage }}</small>
+        } @else {
+          <small class="f-hint">{{ financialsLabel }} · Excel workbook</small>
+        }
+      </div>
+      } @else {
+      <a class="report" [attr.data-report]="r.key" href="#" (click)="$event.preventDefault(); openReport(r)" [style.animation-delay]="i * 35 + 'ms'">
+        <div class="r-top">
+          <span class="r-icon"><i class="bi" [class]="r.icon" aria-hidden="true"></i></span>
+          <span class="r-cat">{{ r.category }}</span>
+          <button
+            type="button"
+            class="star"
+            [class.on]="isFavorite(r)"
+            [attr.aria-label]="isFavorite(r) ? 'Remove ' + r.name + ' from favourites' : 'Add ' + r.name + ' to favourites'"
+            [attr.aria-pressed]="isFavorite(r)"
+            (click)="toggleFavorite(r, $event)"
+          >
+            <i class="bi" [class.bi-star-fill]="isFavorite(r)" [class.bi-star]="!isFavorite(r)" aria-hidden="true"></i>
+          </button>
+        </div>
+        <h3>{{ r.name }}</h3>
+        <p>{{ r.description }}</p>
+        <dl>
+          <div><dt><i class="bi bi-funnel" aria-hidden="true"></i>Choose</dt><dd>{{ r.picks }}</dd></div>
+          <div><dt><i class="bi bi-box-arrow-up" aria-hidden="true"></i>Export</dt><dd>{{ r.exports }}</dd></div>
+        </dl>
+        <span class="r-open">Open report <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
       </a>
-    </div>
-  </div>
-</div>
+      }
+    } @empty {
+      <div class="empty">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <p>No reports match "{{ search() }}".</p>
+        <button type="button" class="link" (click)="search.set(''); category.set('All')">Show all reports</button>
+      </div>
+    }
+  </section>
+}
 
 <!--
-  Power BI "Budget Report" panel not ported - the Blazor source wraps it in class="hide"
-  (display:none) and the link itself is commented out; nothing live to reproduce.
+  The Power BI "Budget Report" panel isn't ported. In Blazor it's hidden and its link is commented out.
 -->

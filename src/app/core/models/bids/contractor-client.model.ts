@@ -1,15 +1,8 @@
-// Mirrors StowellCoApp.DTO.ContractorClient - CONFIRMED at DTO/CodeCodeSummaryRecord.cs
-// (despite that file's name, it's a grab-bag of several DTO classes including this one; the
-// Estimation module's parallel Angular port already found and modeled the same class at
-// core/models/estimation/contractor-client.model.ts - duplicated here rather than imported
-// cross-module, matching this app's existing pattern of small per-module duplication over
-// cross-module imports).
+// Matches ContractorClient in DTO/CodeCodeSummaryRecord.cs. Estimation has its own copy
+// (estimation/contractor-client.model.ts); each module keeps its own small copy.
 //
-// Used here by BidProjectDetailsTab.razor's "Client" (General Contractor) dropdown, which in
-// the Blazor source is populated by IEstimationService.GetAllContractorClients() - a
-// cross-module call into the Estimation service. See bid.service.ts's getAllContractorClients
-// for how that's wired (duplicating Estimation's GetAllContractorClientsUrl route rather than
-// depending on that module's Angular service directly).
+// Fills the Client (General Contractor) dropdown on the bid Details tab. Blazor loaded it from the
+// Estimation service; bid.service.ts calls the same route itself (see getAllContractorClients).
 export interface ContractorClient {
   id: number;
   name: string;

@@ -1,0 +1,239 @@
+@use '../../../shared/responsive/breakpoints' as bp;
+
+// the <aside> is the flex child of the shell, so the host must not add a box of its own
+:host {
+  display: contents;
+}
+
+// off-canvas drawer: used below 1024px, and at every width while Auto-hide is on
+@mixin drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 260px;
+  max-width: 85vw;
+  z-index: 1000;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+
+  &.open {
+    transform: none;
+    box-shadow: 14px 0 44px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+  width: 240px;
+  flex-shrink: 0;
+  background-color: var(--sh-side-bg);
+  color: var(--sh-side-ink);
+  border-right: 1px solid var(--sh-side-line);
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    padding: 1.1rem 1rem 0.5rem;
+    text-align: center;
+
+    img {
+      width: 170px;
+      max-width: 100%;
+      height: auto;
+    }
+  }
+}
+
+// Profile: a compact row pinned to the bottom of the sidebar
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: auto 0.75rem 0.75rem;
+  padding: 0.6rem 0.65rem;
+  background: var(--sh-side-hover);
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.profile-image {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--sh-side-line);
+}
+
+.profile-text {
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.profile-name {
+  overflow: hidden;
+  color: var(--sh-side-ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-role {
+  overflow: hidden;
+  color: var(--sh-side-ink-2);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Pin / auto-hide toggle
+.pin-btn {
+  display: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  color: var(--sh-side-ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--sh-side-ink);
+    background: var(--sh-side-hover);
+  }
+
+  &.on {
+    color: var(--sh-side-active-ink);
+    background: var(--sh-side-active);
+  }
+}
+
+// Collapse button: shows the menu as icons only (full sidebar widths; narrower screens already get the rail or drawer)
+.collapse-btn {
+  display: none;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  color: var(--sh-side-ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--sh-side-ink);
+    background: var(--sh-side-hover);
+  }
+}
+
+@media (min-width: bp.$bp-desktop) {
+  .sidebar:not(.auto-hide) .collapse-btn {
+    display: inline-flex;
+  }
+
+  .sidebar.collapsed:not(.auto-hide) {
+    width: 68px;
+    // so a module's pages can open as a flyout beside the rail
+    overflow: visible;
+    z-index: 1100;
+
+    .logo,
+    .pin-btn {
+      display: none;
+    }
+
+    // keep the icons clear of the button
+    app-nav-menu {
+      margin-top: 2.6rem;
+    }
+
+    .collapse-btn {
+      left: 50%;
+      margin-left: -16px;
+    }
+
+    .user-profile {
+      justify-content: center;
+      margin: auto 0.25rem 0.75rem;
+      padding: 0.5rem 0;
+      background: none;
+
+      .profile-text {
+        display: none;
+      }
+    }
+  }
+}
+
+// Auto-hide on: the sidebar is a drawer, and the pin stays reachable inside it
+.sidebar.auto-hide {
+  @include drawer;
+
+  .pin-btn {
+    display: inline-flex;
+  }
+}
+
+// < 1280px: compact sidebar
+@include bp.below(bp.$bp-desktop) {
+  .sidebar:not(.auto-hide) {
+    width: 244px;
+  }
+}
+
+// < 1024px: off-canvas drawer (opened from the top bar's menu button)
+@include bp.below(bp.$bp-compact) {
+  .sidebar {
+    @include drawer;
+  }
+}
+
+// 1024 to 1279px: an icon-only rail with labels hidden (see nav-menu.component.scss)
+@media (min-width: bp.$bp-compact) and (max-width: #{bp.$bp-desktop - 1px}) {
+  .sidebar:not(.auto-hide) {
+    width: 68px;
+    overflow: visible;
+    z-index: 1100;
+
+    .logo {
+      display: none;
+    }
+  }
+
+  .sidebar:not(.auto-hide) .user-profile {
+    justify-content: center;
+    margin: auto 0.25rem 0.75rem;
+    padding: 0.5rem 0;
+    background: none;
+
+    .profile-text {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}

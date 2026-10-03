@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 
 /**
- * Single shared version of the "Quick Shortcut" app-launcher dropdown. The Blazor source had
- * this duplicated three times (MainLayout.razor's topbar, NavMenu.razor's icon-toolbar, and a
- * third near-identical standalone QuickShortcut.razor component that nothing referenced) -
- * consolidated here into one component so MainLayout and NavMenu can both just <app-quick-shortcut>.
- * Confirm whether NavMenu's toolbar copy is still meant to be shown at all before wiring it back in;
- * it looked like leftover/dead duplication rather than an intentional second launcher.
+ * The Quick Shortcut app dropdown. Blazor had three copies: in MainLayout.razor's top bar, in
+ * NavMenu.razor's icon toolbar, and an unused QuickShortcut.razor. Now there's one component that
+ * both places can use as <app-quick-shortcut>. Check whether NavMenu's copy should be shown at all
+ * before adding it back; it looked like a leftover rather than a second launcher.
  */
 @Component({
   selector: 'app-quick-shortcut',

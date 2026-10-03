@@ -1,6 +1,4 @@
-<h3>Current Cost Summary</h3>
-<hr />
-
+<app-page-header title="Current Cost Summary"></app-page-header>
 <div class="filters">
   <div class="field">
     <label>Job Number</label>
@@ -66,13 +64,9 @@
 </div>
 
 <!--
-  Syncfusion GridComponent replaces the plain <table>, bound to the same `filteredJobs` array
-  this component already computes above (the search box's client-side filtering is untouched -
-  NOT using Grid's built-in Search toolbar item, to avoid a second, competing filter mechanism).
-  The "select a job first" empty state is kept as a plain @else message rather than Grid's
-  emptyRecordTemplate, since this project isn't fully certain of that template's exact Angular
-  wrapper syntax in 27.1.x - flagging per the "flag, don't guess" convention instead of risking a
-  silently-broken template.
+  The grid uses `filteredJobs`, filtered by the search box above. The grid's own search isn't used,
+  so there aren't two filters. "Select a job first" is a plain @else message, not the grid's
+  emptyRecordTemplate, because its Angular syntax wasn't confirmed.
 -->
 @if (filteredJobs.length > 0) {
   <ejs-grid #costCodeSummaryGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">

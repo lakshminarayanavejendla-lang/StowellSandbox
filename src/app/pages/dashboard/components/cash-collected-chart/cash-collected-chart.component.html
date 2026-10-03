@@ -1,26 +1,45 @@
 <h4>Cash Collected vs Cash Paid by Job</h4>
-<ejs-chart
-  [primaryXAxis]="primaryXAxis"
-  [primaryYAxis]="primaryYAxis"
-  [legendSettings]="legendSettings"
-  height="320px"
->
-  <e-series-collection>
-    <e-series
-      [dataSource]="chartData"
-      type="Column"
-      xName="category"
-      yName="cashCollected"
-      name="Cash Collected"
-      fill="#3767ad"
-    ></e-series>
-    <e-series
-      [dataSource]="chartData"
-      type="Column"
-      xName="category"
-      yName="cashPaid"
-      name="Cash Paid"
-      fill="gray"
-    ></e-series>
-  </e-series-collection>
-</ejs-chart>
+@if (chartData.length) {
+  <ejs-chart
+    [theme]="chartTheme()"
+    background="transparent"
+    [chartArea]="chartArea"
+    [primaryXAxis]="primaryXAxis"
+    [primaryYAxis]="primaryYAxis"
+    [legendSettings]="legendSettings"
+    [tooltip]="tooltip"
+    (axisLabelRender)="onAxisLabel($event)"
+    (tooltipRender)="onTooltip($event)"
+    (textRender)="onDataLabel($event)"
+    height="340px"
+  >
+    <e-series-collection>
+      <e-series
+        [dataSource]="chartData"
+        type="Column"
+        xName="category"
+        yName="cashCollected"
+        name="Cash Collected"
+        [fill]="colors.blue"
+        [cornerRadius]="rounded"
+        [marker]="marker"
+        columnWidth="0.55"
+        columnSpacing="0.12"
+      ></e-series>
+      <e-series
+        [dataSource]="chartData"
+        type="Column"
+        xName="category"
+        yName="cashPaid"
+        name="Cash Paid"
+        [fill]="colors.blueSoft"
+        [cornerRadius]="rounded"
+        [marker]="marker"
+        columnWidth="0.55"
+        columnSpacing="0.12"
+      ></e-series>
+    </e-series-collection>
+  </ejs-chart>
+} @else {
+  <div class="chart-empty">No data to chart yet.</div>
+}

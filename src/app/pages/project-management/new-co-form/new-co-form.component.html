@@ -1,10 +1,5 @@
 <div class="wrapper">
-  <h2>
-    @if (isEditMode) { Change Order - CO ID: {{ editCoId }} }
-    @else if (mode === 'approval') { Change Order Request Approval }
-    @else { Change Order Request }
-  </h2>
-  <hr class="dashed" />
+  <app-page-header [title]="isEditMode ? 'Change Order - CO ID: ' + editCoId : mode === 'approval' ? 'Change Order Request Approval' : 'Change Order Request'" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'CO Form' }]"></app-page-header>
 
   <div class="header-grid">
     <div class="col">
@@ -233,7 +228,7 @@
   <div class="form-row actions">
     @if (mode === 'approval') {
       <button type="button" class="btn-reject" (click)="openRejectReason()">Reject</button>
-      <button type="button" class="btn-approve" (click)="approve()">Approved</button>
+      <button type="button" class="btn-approve" (click)="approve()">Approve</button>
     } @else if (isEditMode) {
       <button type="button" class="btn-primary" (click)="saveEdits()">Save Changes</button>
     } @else {

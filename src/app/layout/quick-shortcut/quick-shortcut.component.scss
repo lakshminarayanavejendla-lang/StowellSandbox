@@ -13,7 +13,7 @@
 
 .quick-shortcut {
   width: 320px;
-  background: #fff;
+  background: var(--sh-surface);
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   overflow: hidden;
@@ -30,7 +30,7 @@
 }
 
 .quick-shortcut-header {
-  background: #00355f;
+  background: var(--sh-blue);
   padding: 18px 12px;
   text-align: center;
   color: #fff;

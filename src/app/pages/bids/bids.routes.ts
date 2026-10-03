@@ -1,32 +1,23 @@
 import { Routes } from '@angular/router';
-import { CurrentBidsComponent } from './current-bids/current-bids.component';
-import { BidQueueComponent } from './bid-queue/bid-queue.component';
-import { NewBidComponent } from './new-bid/new-bid.component';
-import { BidOverviewComponent } from './bid-overview/bid-overview.component';
-import { BidFileManagerComponent } from './bid-overview/components/bid-file-manager/bid-file-manager.component';
 
-// Route list for the Bids/Opportunities module. Paths for current-bids/bid-queue/new-bid match
-// the Phase 1 placeholder stubs 1:1 (app.routes.ts had 'bids/current-bids', 'bids/bid-queue',
-// 'bids/new-bid' as PlaceholderComponent entries - replace those three lines with everything
-// below).
+// Bids / Opportunities routes. 'bids/current-bids', 'bids/bid-queue' and 'bids/new-bid' are the
+// paths the placeholders used.
 //
-// TWO ROUTES ARE NEW, not in the original stub list - the real Blazor source needs them:
-//   - 'bids/bid-overview/:bidId/:type' (Blazor: @page "/Bids/BidOverview/{BidId}/{Type}") -
-//     every bid link from CurrentBids/BidQueue navigates here; it wasn't stubbed because Phase 1
-//     only knew about the three top-level nav links, not per-bid deep links.
-//   - 'bids/documents/:bidId' (Blazor: @page "/Bids/Documents/{BidId}") - the standalone file
-//     manager route (BidProjectDetailsTab/BidQueueOverview's "Bid Document Library" links here).
+// Two routes are new, because the Blazor pages need them:
+//   - 'bids/bid-overview/:bidId/:type' (/Bids/BidOverview/{BidId}/{Type}): every bid link in Current
+//     Bids and the Bid Queue opens it.
+//   - 'bids/documents/:bidId' (/Bids/Documents/{BidId}): the bid's file manager on its own, linked
+//     from "Bid Document Library".
 //
-// NOT included: a route for RootBidFileManagerComponent.razor's "/BidsDocManagement/Main" -
-// see bid-file-manager.component.ts's header comment for why.
+// There's no route for RootBidFileManagerComponent.razor (/BidsDocManagement/Main); it isn't ported.
 export const BIDS_ROUTES: Routes = [
-  { path: 'bids/current-bids', component: CurrentBidsComponent, data: { title: 'Bids' } },
-  { path: 'bids/bid-queue', component: BidQueueComponent, data: { title: 'Bid Queue' } },
-  { path: 'bids/new-bid', component: NewBidComponent, data: { title: 'New Bid' } },
+  { path: 'bids/current-bids', loadComponent: () => import('./current-bids/current-bids.component').then((m) => m.CurrentBidsComponent), data: { title: 'Bids' } },
+  { path: 'bids/bid-queue', loadComponent: () => import('./bid-queue/bid-queue.component').then((m) => m.BidQueueComponent), data: { title: 'Bid Queue' } },
+  { path: 'bids/new-bid', loadComponent: () => import('./new-bid/new-bid.component').then((m) => m.NewBidComponent), data: { title: 'New Bid' } },
   {
     path: 'bids/bid-overview/:bidId/:type',
-    component: BidOverviewComponent,
+    loadComponent: () => import('./bid-overview/bid-overview.component').then((m) => m.BidOverviewComponent),
     data: { title: 'Bid Overview' },
   },
-  { path: 'bids/documents/:bidId', component: BidFileManagerComponent, data: { title: 'Bid Documents' } },
+  { path: 'bids/documents/:bidId', loadComponent: () => import('./bid-overview/components/bid-file-manager/bid-file-manager.component').then((m) => m.BidFileManagerComponent), data: { title: 'Bid Documents' } },
 ];

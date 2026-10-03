@@ -6,31 +6,22 @@ import { ProjectCostCodeService } from '../../../core/services/project-cost-code
 import { CostCodeRecord, StatusModel, recJobNumber, recNumber } from '../../../core/models/project-management/cost-code.model';
 import { CashFlowRecord } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of Components/Pages/ReportingDashboard/CashFlowToDateMultiple.razor +
- * CashFlowToDateMultipleBase.cs (@page "/CashFlowToDate").
+ * Cash Flow To Date for several jobs (/CashFlowToDate in Blazor, CashFlowToDateMultiple.razor).
  *
- * Distinct from Project Management's already-ported CashFlowReportComponent
- * ('project-management/cash-flow-report/:projectId', single job, defaults status to 4 -
- * "current"): this page's job dropdown is multi-select (Radzen `Multiple="true"`) and its
- * status dropdown starts unselected (no hardcoded default status in the source), feeding
- * ICostCodeService.CashFlowAllDataByMulitpleJobsAndPeriod (note the server-side "Mulitple"
- * typo, preserved exactly in ProjectManagementEndpoints per Phase 2's flag) instead of the
- * single-job CashFlowAllDataByPeriod. Both already ported as
- * ProjectCostCodeService.cashFlowAllDataByMultipleJobsAndPeriod /.cashFlowAllDataByPeriod.
+ * Unlike Project Management's Cash Flow Report (one job, status 4 "current" by default), this lets
+ * you pick several jobs, starts with no status, and calls CashFlowAllDataByMulitpleJobsAndPeriod.
+ * The "Mulitple" typo is the server's, kept as is. The chosen jobs' rec numbers are joined with
+ * commas into the single `recnum` string, as in OnJobNumberChange.
  *
- * The source's multi-select job change handler (`OnJobNumberChange`) builds
- * `selectedJobIds = string.Join(",", selectedJobId)` - i.e. a comma-joined list of rec numbers
- * sent as the single `recnum` string on CashFlowQueryInput. Reproduced the same way here.
- *
- * FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
- * message - see report-export.util.ts's header comment.
+ * PDF, Excel and Word export work (see report-export.util.ts).
  */
 @Component({
   selector: 'app-cash-flow-to-date',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [SortService, PdfExportService, ExcelExportService],
   templateUrl: './cash-flow-to-date.component.html',
   styleUrl: './cash-flow-to-date.component.scss',

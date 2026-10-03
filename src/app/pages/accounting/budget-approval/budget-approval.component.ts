@@ -1,6 +1,6 @@
 import { Component, OnInit, inject,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AccountingService } from '../../../core/services/accounting.service';
 import { CostCodeService } from '../../../core/services/cost-code.service';
@@ -11,24 +11,17 @@ import { PageHeaderComponent } from '../../../shared/page-header/page-header.com
 export type BudgetApprovalMode = 'new' | 'modify';
 
 /**
- * Shared port of Accounting/ApproveNewBudget(.razor/Base.cs) AND ApproveModifyBudget
- * (.razor/Base.cs).
+ * One component for Approve New Budget and Approve Modify Budget.
  *
- * FINDING (per task instructions, flagging explicitly): these two Blazor pages are the same
- * flow duplicated by copy/paste, not two genuinely different UIs. Their .razor markup is
- * byte-for-byte identical (same job/phase dropdowns, same RadzenDataGrid + RadzenAutoComplete
- * cost-code grid, same Approve/Reject buttons - even the element ids "saveAllBtn"/"btnSubmit"
- * match) and their *Base.cs code-behind is identical apart from (a) which IAccountingService
- * method is called - GetApproveBudgetData vs GetModifyBudgetData - and (b) ApproveModifyBudgetBase
- * still calls its methods `ApproveNewBudget()`/`RejectNewBudget()` (leftover names from the
- * copy/paste, never renamed). There is no behavioral difference between "approve a new budget"
- * and "approve a modified budget" beyond which data-fetch endpoint feeds the grid - both post
- * to the exact same BudgetApproveRequest/BudgetRejectRequest endpoints.
+ * The two Blazor pages are copies of the same flow. The markup is identical, down to the element
+ * ids. The code differs only in which method loads the grid (GetApproveBudgetData or
+ * GetModifyBudgetData), and the modify page still calls its methods ApproveNewBudget() and
+ * RejectNewBudget() from the copy. Both post to the same BudgetApproveRequest and
+ * BudgetRejectRequest endpoints.
  *
- * Consolidated here into one component driven by `mode` (route data), rather than two
- * near-identical Angular components. Confirm with product this consolidation is correct if the
- * underlying business meaning of "new" vs "modify" budgets ever needs to diverge (e.g.
- * different approval permissions) - nothing in the source code suggests it does today.
+ * So this is one component, with `mode` from the route data. If "new" and "modify" ever need to
+ * behave differently, such as different approval permissions, check with the product owner. Nothing
+ * in the code suggests they do now.
  */
 @Component({
   selector: 'app-budget-approval',
@@ -43,6 +36,7 @@ export class BudgetApprovalComponent implements OnInit {
   private accountingService = inject(AccountingService);
   private costCodeService = inject(CostCodeService);
 private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
   mode: BudgetApprovalMode = 'new';
   projectId = 0;
  successMessage = '';
@@ -79,12 +73,34 @@ private cdr = inject(ChangeDetectorRef);
 
     this.costCodeService.getJobPhasesData(this.projectId).subscribe((phases) => {
       this.phaseOptions = phases;
-      const firstPhaseId = phases.length ? phases[0].phaseNum : '0';
-      this.form.patchValue({ selectedPhaseId: firstPhaseId });
-      this.loadBudgetData();
+      this.selectFirstPendingPhase(phases);
     });
 
     this.costCodeService.getAllUserJobs().subscribe((jobs) => (this.jobOptions = jobs));
+  }
+
+  /** In new-budget mode, opens on the first phase with budget lines waiting for approval (an added phase isn't the first), otherwise the first phase. */
+  private selectFirstPendingPhase(phases: Phase[]): void {
+    const fallback = phases.length ? phases[0].phaseNum : '0';
+    const tryPhase = (i: number): void => {
+      if (this.mode !== 'new' || i >= phases.length) {
+        this.form.patchValue({ selectedPhaseId: fallback });
+        this.loadBudgetData();
+        return;
+      }
+      const p = phases[i];
+      this.accountingService
+        .getApproveBudgetData({ recnum: String(this.projectId), phaseName: p.phaseName, phaseNum: String(p.phaseNum) })
+        .subscribe((rows) => {
+          if (rows.length) {
+            this.form.patchValue({ selectedPhaseId: p.phaseNum });
+            this.loadBudgetData();
+          } else {
+            tryPhase(i + 1);
+          }
+        });
+    };
+    tryPhase(0);
   }
 
   onJobChanged(): void {
@@ -95,9 +111,8 @@ private cdr = inject(ChangeDetectorRef);
     this.loadBudgetData();
   }
 
-  // Backs the cost-code-description autocomplete (RadzenAutoComplete's LoadData in the
-  // source) - a plain text input + native <datalist> here since we're not using a paid grid
-  // library. Fires on (input) with the current text as the filter.
+  // The cost code description autocomplete (RadzenAutoComplete's LoadData in Blazor). It's a text
+  // input with a <datalist>, filtered on (input) with the current text.
   onCostCodeFilterChange(filter: string): void {
     this.accountingService.getCostCodes(filter ?? '').subscribe((list) => (this.costCodeDescriptions = list));
   }
@@ -138,9 +153,16 @@ private runAction(
   this.errorMessage = '';
 
   action(phase).subscribe({
-    next: () => {
+    next: (res) => {
       this.isSaving = false;
-      this.successMessage = successMessage;
+      if (res && res.success === false) {
+        // The service returns { success: false } on failure, not an error, so show the real reason instead of success.
+        this.errorMessage = res.message || 'The accounting budget could not be processed.';
+      } else {
+        this.successMessage = successMessage;
+        // It's been decided, so it's no longer in the queue.
+        setTimeout(() => this.router.navigate(['/accounting']), 1200);
+      }
       this.cdr.detectChanges();
     },
     error: () => {

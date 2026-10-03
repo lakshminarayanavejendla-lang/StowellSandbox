@@ -1,29 +1,60 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ContactsEndpoints } from '../contacts-endpoints';
 import { ContactGroup, ContactGroupMember } from '../models/contacts/contact-group.model';
 
-// Port of IContactService/ContactService.cs. Both methods in the C# source swallow all errors
-// and return an empty array/list rather than throwing (try/catch around GetFromJsonAsync,
-// logging and returning Array.Empty<T>()) - reproduced here via catchError(() => of([])) to
-// match that "never surface an error to the UI, just show empty state" behavior exactly.
+// Ported from ContactService.cs. Like the C# code, errors return an empty list instead of
+// throwing, so the page just shows nothing.
 @Injectable({ providedIn: 'root' })
 export class ContactService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
+  // Kept for the session, so coming back to the page or a tab is instant (a failed load isn't kept)
+  private groups$?: Observable<ContactGroup[]>;
+  private members = new Map<string, Observable<ContactGroupMember[]>>();
+
   getAllGroups(): Observable<ContactGroup[]> {
-    return this.http
-      .get<ContactGroup[]>(`${this.base}${ContactsEndpoints.GetAllGroupsUrl}`)
-      .pipe(catchError(() => of([])));
+    return (this.groups$ ??= this.http.get<ContactGroup[]>(`${this.base}${ContactsEndpoints.GetAllGroupsUrl}`).pipe(
+      catchError(() => {
+        this.groups$ = undefined;
+        return of([]);
+      }),
+      shareReplay(1)
+    ));
   }
 
   getGroupUsers(groupId: string): Observable<ContactGroupMember[]> {
-    return this.http
-      .get<ContactGroupMember[]>(`${this.base}${ContactsEndpoints.GetGroupUsersUrl}/${groupId}`)
-      .pipe(catchError(() => of([])));
+    let cached = this.members.get(groupId);
+    if (!cached) {
+      cached = this.http.get<ContactGroupMember[]>(`${this.base}${ContactsEndpoints.GetGroupUsersUrl}/${groupId}`).pipe(
+        catchError(() => {
+          this.members.delete(groupId);
+          return of([]);
+        }),
+        shareReplay(1)
+      );
+      this.members.set(groupId, cached);
+    }
+    return cached;
+  }
+
+  private photos = new Map<string, Observable<string | null>>();
+
+  /** A person's photo as an object URL, or null when they have none. Kept for the session. */
+  getPhoto(userId: string): Observable<string | null> {
+    let cached = this.photos.get(userId);
+    if (!cached) {
+      cached = this.http.get(`${this.base}${ContactsEndpoints.UserPhotoUrl}/${userId}`, { responseType: 'blob' }).pipe(
+        map((blob) => URL.createObjectURL(blob)),
+        catchError(() => of(null)),
+        shareReplay(1)
+      );
+      this.photos.set(userId, cached);
+    }
+    return cached;
   }
 
   getUsersByEmail(emails: string[]): Observable<ContactGroupMember[]> {

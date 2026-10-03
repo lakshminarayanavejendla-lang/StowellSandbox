@@ -1,5 +1,5 @@
 .po-card {
-  background: #fff;
+  background: var(--sh-surface);
   padding: 10px;
   margin: 10px 0;
 
@@ -13,7 +13,7 @@
   border-collapse: collapse;
 
   th {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
     color: #fff;
     text-align: left;
     padding: 8px 10px;
@@ -21,12 +21,12 @@
 
   td {
     padding: 8px 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--sh-line);
   }
 
   .empty {
     text-align: center;
-    color: #888;
+    color: var(--sh-ink-3);
     font-style: italic;
   }
 }

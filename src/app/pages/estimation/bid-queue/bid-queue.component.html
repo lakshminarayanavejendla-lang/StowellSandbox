@@ -1,6 +1,7 @@
 @if (isLoading) {
   <div class="spinner">Loading...</div>
 } @else {
+  <app-page-header title="Bid Queue" [breadcrumbs]="[{ label: 'Estimation' }, { label: 'Bid Queue' }]"></app-page-header>
   <div class="card-header">
     <h4>Open Queue</h4>
   </div>
@@ -31,7 +32,7 @@
           <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
         </e-column>
         <e-column field="address" headerText="Project" width="200"></e-column>
-        <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+        <e-column field="submitter" hideAtMedia="(min-width: 768px)" headerText="Submitter" width="140"></e-column>
       </e-columns>
     </ejs-grid>
   </div>
@@ -66,7 +67,7 @@
           <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
         </e-column>
         <e-column field="address" headerText="Project" width="200"></e-column>
-        <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+        <e-column field="submitter" hideAtMedia="(min-width: 768px)" headerText="Submitter" width="140"></e-column>
       </e-columns>
     </ejs-grid>
   </div>
@@ -101,7 +102,7 @@
           <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
         </e-column>
         <e-column field="address" headerText="Project" width="200"></e-column>
-        <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+        <e-column field="submitter" hideAtMedia="(min-width: 768px)" headerText="Submitter" width="140"></e-column>
       </e-columns>
     </ejs-grid>
   </div>

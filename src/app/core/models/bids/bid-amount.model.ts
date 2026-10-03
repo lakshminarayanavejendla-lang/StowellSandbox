@@ -1,5 +1,5 @@
-// Mirrors StowellCoApp.DTO.BidAmounts and its request/response types (DTO/BidInfoDto.cs) -
-// the "Bids" sub-grid (bid date + amount history) shown on the Overview tab.
+// Matches BidAmounts and its request and response types (DTO/BidInfoDto.cs): the Bids grid of bid
+// dates and amounts on the Overview tab.
 export interface BidAmount {
   bidAmountID: number;
   internalBidID: number;
@@ -30,9 +30,8 @@ export interface DeleteBidAmountRequest {
   modifiedBy?: string;
 }
 
-// Response shape assumed camelCase per Phase 1's convention (ASP.NET Core's default
-// System.Text.Json casing) even though BidService.cs manually re-deserializes this one with
-// PropertyNameCaseInsensitive = true - worth confirming the wire format matches.
+// Assumed camelCase, ASP.NET Core's default. BidService.cs reads this one case-insensitively, so
+// check the real format.
 export interface AddBidAmountResponse {
    Message?: string;
   message?: string;

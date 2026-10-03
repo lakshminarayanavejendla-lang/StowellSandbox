@@ -13,16 +13,14 @@ import {
 import { SimpleResponse } from '../models/bids/simple-response.model';
 import { BidRecord } from '../models/bids/bid-record.model';
 
-// Port of IBidService/BidService.cs's Bid Amounts methods - the "Bids" history sub-grid on
-// BidOverview's Overview tab. Split out from bid.service.ts since it's a clearly separate
-// sub-resource.
+// The Bid Amounts part of BidService.cs: the Bids history grid on the bid's Overview tab. Kept
+// apart from bid.service.ts.
 @Injectable({ providedIn: 'root' })
 export class BidAmountService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
  getBidAmounts(displayBidId: string): Observable<BidAmount[]> {
-  debugger;
   return this.http.get<BidAmount[]>(
     `${this.base}${BidsEndpoints.GetBidAmountsUrl}/${displayBidId}`
   );
@@ -42,7 +40,7 @@ addBidAmount(
 
         console.log('Raw API response:', res);
 
-        // Handle ASP.NET response without changing the API
+        // Accept the ASP.NET response as it is, without changing the API.
         const newId =
           res?.NewBidAmountID ??
           res?.newBidAmountID ??
@@ -68,7 +66,6 @@ addBidAmount(
 }
 
   updateBidAmount(request: UpdateBidAmountRequest): Observable<string> {
-    debugger;
     return this.http
       .put<SimpleResponse>(`${this.base}${BidsEndpoints.UpdateBidAmountUrl}`, request)
       .pipe(

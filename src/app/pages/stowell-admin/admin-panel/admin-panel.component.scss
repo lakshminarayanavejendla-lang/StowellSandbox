@@ -16,7 +16,7 @@
     width: 260px;
     height: 36px;
     padding: 0 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
   }
 }
@@ -34,13 +34,13 @@
 }
 
 .message.error {
-  background-color: #fdecea;
+  background-color: var(--sh-surface-2);
   color: #611a15;
 }
 
 .message.success {
-  background-color: #e6f4ea;
-  color: #1e4620;
+  background-color: var(--sh-surface-2);
+  color: var(--sh-ink);
 }
 
 .projects-table {
@@ -48,7 +48,7 @@
   border-collapse: collapse;
 
   th {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
     color: #fff;
     text-align: left;
     padding: 8px 10px;
@@ -59,11 +59,11 @@
 
     td {
       padding: 8px 10px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--sh-line);
     }
 
     &:hover {
-      background-color: #f7f7f7;
+      background-color: var(--sh-surface-2);
     }
   }
 
@@ -74,13 +74,13 @@
 
   .assignments-row td {
     padding: 10px 10px 16px 30px;
-    border-bottom: 1px solid #eee;
-    background-color: #fafafa;
+    border-bottom: 1px solid var(--sh-line);
+    background-color: var(--sh-surface-2);
   }
 
   .empty {
     text-align: center;
-    color: #888;
+    color: var(--sh-ink-3);
     padding: 8px 10px;
   }
 }
@@ -100,7 +100,7 @@
   border-collapse: collapse;
 
   th {
-    background-color: #444;
+    background-color: var(--sh-ink);
     color: #fff;
     text-align: left;
     padding: 6px 8px;
@@ -109,14 +109,14 @@
 
   td {
     padding: 6px 8px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--sh-line);
   }
 
   select {
     width: 100%;
     height: 32px;
     padding: 0 6px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
   }
 }
@@ -127,14 +127,14 @@
   gap: 8px;
   margin-bottom: 12px;
   padding: 10px;
-  background-color: #fff;
-  border: 1px solid #ddd;
+  background-color: var(--sh-surface);
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
 
   select {
     height: 34px;
     padding: 0 8px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     min-width: 180px;
   }
@@ -143,14 +143,14 @@
 .btn-icon {
   padding: 4px 8px;
   margin-right: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--sh-surface);
   cursor: pointer;
 
   &.success {
-    border-color: #1e4620;
-    color: #1e4620;
+    border-color: var(--sh-ink);
+    color: var(--sh-ink);
   }
 
   &.danger {
@@ -177,7 +177,7 @@
 .black-grid .e-gridheader,
 .black-grid .e-gridheader .e-columnheader,
 .black-grid .e-gridheader .e-headercell {
-  background-color: #00355f !important;
+  background-color: var(--sh-blue) !important;
   color: #ffffff !important;
 }
 
@@ -190,7 +190,7 @@
 /* Keep header text visible on hover */
 .black-grid .e-gridheader .e-headercell:hover,
 .black-grid .e-gridheader .e-headercell:hover .e-headertext {
-  background-color: #00355f !important;
+  background-color: var(--sh-blue) !important;
   color: #ffffff !important;
   opacity: 1 !important;
   visibility: visible !important;
@@ -210,12 +210,12 @@
 
 /* Opportunity ID link */
 .black-grid .opportunity-link {
-  // color: #ff4601 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: none;
 }
 
 .black-grid .opportunity-link:hover {
-  // color: #ff6a33 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: underline;
 }
 /* Sort/filter area */
@@ -230,16 +230,16 @@
 
 /* Prevent hover background from covering the text */
 .black-grid .e-gridheader .e-headercell:hover {
-  background-color: #00355f !important;
+  background-color: var(--sh-blue) !important;
 }
 /* Opportunity ID link */
 .black-grid .opportunity-link {
-  // color: #ff4601 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: none !important;
   font-weight: 500;
 }
 
 .black-grid .opportunity-link:hover {
-  // color: #ff6a33 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: underline !important;
 }

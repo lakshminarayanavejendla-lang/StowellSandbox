@@ -1,7 +1,5 @@
-// Direct port of StowellCoApp.Common.GlobalEndpoints - keep this in sync with the C# source
-// so both front ends keep calling the same StowellCoAPI routes. Only the endpoints Phase 1
-// (Shell + Dashboard) actually calls are ported here; add the rest module-by-module as each
-// phase converts the page that uses them.
+// Ported from the C# GlobalEndpoints class. Keep the two in sync so both apps call the same API
+// routes. Only the shell and dashboard routes are here; each module keeps its own routes file.
 export const GlobalEndpoints = {
   GetCurrentJobsUrl: 'api/PmHome/GetCurrentJobs',
   GetChartDatasetsUrl: 'api/PmHome/GetChartDatasets',
@@ -9,4 +7,5 @@ export const GlobalEndpoints = {
   GetSampleChartDatasetsUrl: 'api/PmHome/GetSampleChartDatasets',
   GetNetCashChartUrl: 'api/PmHome/GetNetCashChart',
   GetCalendarEventsUrl: 'api/PmHome/GetCalendarEvents',
+  CreateCalendarEventUrl: 'api/PmHome/CreateCalendarEvent',
 } as const;

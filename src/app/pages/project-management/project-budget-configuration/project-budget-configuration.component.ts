@@ -7,12 +7,9 @@ import { ProjectBudgetQueueItem } from '../../../core/models/project-management/
 import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 import { AuthService } from '../../../core/services/auth.service';
 
-// Port of Components/Pages/ProjectManagement/ProjectBudgetConfiguration.razor +
-// ProjectBudgetConfigurationBase.cs (@page "/ProjectBudgetConfiguration"). Matches the stub
-// route 'project-budget-configuration'. Each row links to either CreateBudget or ModifyBudget
-// depending on Source=="Sage" (see source's `@if(Job.Source=="Sage")` branch), both handled by
-// the same CreateBudgetComponent (project-management/create-budget) via its `:action` param.
-// Plain table swapped for a Syncfusion ejs-grid - see HANDOFF.md's Syncfusion decision note.
+// Project Budget Configuration (/ProjectBudgetConfiguration in Blazor), a Syncfusion grid. Each row
+// links to CreateBudget, or to ModifyBudget when Source is "Sage", both handled by CreateBudgetComponent
+// through its `:action` parameter.
 @Component({
   selector: 'app-project-budget-configuration',
   standalone: true,

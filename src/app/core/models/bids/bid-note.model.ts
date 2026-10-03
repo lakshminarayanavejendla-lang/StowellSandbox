@@ -1,8 +1,6 @@
-// NEW - Notes table on Bid Overview's Overview tab, requested directly by the user (not a
-// Blazor port - grep of the staged Blazor source found no Notes feature for Bids at all, only
-// an unrelated "Stowell OneNote.rdp" shortcut). Shape modeled on bid-amount.model.ts's sibling
-// "Bids" sub-grid (same tab, same request/response conventions) as the closest real precedent
-// in this codebase - CONFIRM against the backend before relying on it.
+// The Notes table on the bid's Overview tab, which the user asked for. Blazor had no bid notes.
+// The shape follows bid-amount.model.ts, the closest grid on the same tab. Check it against the
+// backend.
 export interface BidNote {
   noteId: number;
   internalBidID: number;
@@ -11,8 +9,8 @@ export interface BidNote {
   enteredBy?: string;
 }
 
-// noteDate/enteredBy are stamped automatically by the caller (today's date, the signed-in MSAL
-// account's name) rather than user-editable - see bid-summary-tab.component.ts's addNote().
+// noteDate and enteredBy are filled in automatically with today's date and the signed-in user's
+// name, not typed (see addNote() in bid-summary-tab.component.ts).
 export interface AddBidNoteRequest {
   internalBidID: number;
   noteDate: string;
@@ -20,8 +18,8 @@ export interface AddBidNoteRequest {
   enteredBy: string;
 }
 
-// Response shape assumed camelCase per this module's convention (see bid-amount.model.ts's
-// AddBidAmountResponse header comment) - both casings kept defensively.
+// Assumed camelCase like the rest of this module (see bid-amount.model.ts), but both casings are
+// handled to be safe.
 export interface AddBidNoteResponse {
   Message?: string;
   message?: string;

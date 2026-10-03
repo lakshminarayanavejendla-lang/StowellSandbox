@@ -1,9 +1,6 @@
-// Mirrors StowellCoApp.DTO.BidRecords (DTO/BidInfoDto.cs) - the full bid/project record shown
-// across the BidOverview tabs. One record backs both BidQueueOverview.razor's "Overview" tab
-// and BidProjectDetailsTab.razor's "Details" tab in the Blazor source (each independently
-// fetched it via IBidService.GetBidById there); this Angular port fetches it once in
-// BidOverviewComponent and passes it down to both tab components as an @Input - see that
-// component's header comment for the reasoning and the flag around this consolidation.
+// Matches BidRecords in DTO/BidInfoDto.cs: the full bid shown on the bid's Overview and Details
+// tabs. Blazor loaded it separately in each tab. Here BidOverviewComponent loads it once and passes
+// it to both (see that component's header).
 export interface BidRecord {
   internalBidID: number;
   displayBidID: string;
@@ -41,15 +38,11 @@ export interface BidRecord {
   retainagePercentage: number;
 }
 
-// Mirrors StowellCoApp.DTO.UpdateBidDetailsRequest - posted by the "Save Bid" button, which
-// exists (near-identically duplicated) on both the Overview and Details tabs in the Blazor
-// source (BidQueueOverviewTabBase.SaveBidData / BidProjectDetailsTabBase.SaveBidData).
+// Matches UpdateBidDetailsRequest, sent by Save Bid on the Overview and Details tabs.
 //
-// FLAG - likely bug found in the source, NOT reproduced here: both C# SaveBidData methods set
-// `request.GC_ZipCode = _bidRecords.ZipCode` (the job-site zip, not `_bidRecords.GC_ZipCode`,
-// the General Contractor zip) - looks like a copy/paste mistake. This Angular port maps
-// gcZipCode from the record's own gcZipCode field instead of replicating the apparent bug -
-// confirm with the user/API owner whether the original behavior was actually intentional.
+// Both C# SaveBidData methods set GC_ZipCode to the job-site ZipCode, not the contractor's
+// GC_ZipCode, which looks like a copy-paste bug. This version sends gcZipCode from the record's
+// gcZipCode. Confirm with the API owner that this is what they want.
 export interface UpdateBidDetailsRequest {
   internalBidID: number;
   department?: string;
@@ -87,9 +80,8 @@ export interface UpdateBidDetailsRequest {
   GC_SalesTaxDistrict?: string;
 }
 
-// Mirrors ConvertBidToProjectRequest / CloseBidAsLostRequest - single-field requests keyed off
-// InternalBidID, used by the "Bid Won" / "Bid Lost" buttons (also duplicated across both tabs
-// in the Blazor source).
+// Matches ConvertBidToProjectRequest and CloseBidAsLostRequest: just the InternalBidID, sent by
+// the Bid Won and Bid Lost buttons.
 export interface ConvertBidToProjectRequest {
   internalBidID: number;
   modifiedBy?: string;

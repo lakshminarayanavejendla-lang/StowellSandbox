@@ -1,7 +1,5 @@
-// Mirrors StowellCoApp.DTO.CreateBidRequest (DTO/BidInfoDto.cs), posted by NewBid.razor.
-// CreatedBy was set server-side in the Blazor version (BidService.CreateNewBid ->
-// GetUserEmail() from the ClaimsPrincipal) - see BidService's header comment for the
-// MSAL-identity open question that carries over from Phase 1's JobService.
+// Matches CreateBidRequest in DTO/BidInfoDto.cs, sent by the New Bid page. Blazor set CreatedBy on
+// the server from the signed-in user; see the note at the top of bid.service.ts.
 export interface CreateBidRequest {
   bidId?: string;
   department?: string;

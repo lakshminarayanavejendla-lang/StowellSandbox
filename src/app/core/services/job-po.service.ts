@@ -6,13 +6,12 @@ import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { JobPoOverviewData } from '../models/project-management/job-po.model';
 
 /**
- * NEW service - Stowell PO Module (not a Blazor port; built from the "Stowell PO Module" Moqups
- * design spec, page TAB-Job PO Overview).
+ * The job's PO overview, built from the Moqups design (page TAB-Job PO Overview), not ported from
+ * Blazor.
  *
- * Backend endpoint now implemented: PoQueueController.GetJobPoOverview -> SAGESBQ's
- * PO_GetJobOverview stored proc (3 result sets: pchord/pcorln-derived PurchaseOrders,
- * prmchg-derived ChangeOrderLog, and BackChargeLog from the new SAGESBQ BackCharges table -
- * back charges have no Sage-native table). catchError kept as a defensive fallback.
+ * PoQueueController.GetJobPoOverview runs PO_GetJobOverview, which returns three lists: purchase
+ * orders (from pchord and pcorln), the change order log (from prmchg) and the back charge log (from
+ * the BackCharges table in SAGESBQ, since Sage has none). The catchError is just a safety net.
  */
 @Injectable({ providedIn: 'root' })
 export class JobPoService {

@@ -1,0 +1,12 @@
+<app-page-header title="Invoice Queue" [breadcrumbs]="[{ label: 'Accounting', route: '/accounting' }, { label: 'Invoice Queue' }]"></app-page-header>
+<p class="queue-note">Invoice approvals aren't set up yet. Items waiting for Accounting approval will appear here.</p>
+
+<ejs-grid [dataSource]="emptyQueue">
+  <e-columns>
+    <e-column field="reference" headerText="Reference" width="160"></e-column>
+    <e-column field="jobName" headerText="Job Name" width="200"></e-column>
+    <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+    <e-column field="amount" headerText="Amount" width="120"></e-column>
+    <e-column field="status" headerText="Status" width="120"></e-column>
+  </e-columns>
+</ejs-grid>

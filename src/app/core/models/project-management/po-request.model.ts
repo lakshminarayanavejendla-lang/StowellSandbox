@@ -1,14 +1,12 @@
-// NEW - Stowell PO Module (from the "Stowell PO Module" Moqups design spec, page
-// FORM-PO Request, not a Blazor port - the Blazor NewPOForm.razor this route used to serve was a
-// static, unbound mock with a different field set entirely; see new-po-form.component.ts header).
+// PO module, built from the Moqups design (page FORM-PO Request), not ported from Blazor. The old
+// NewPOForm.razor was a static mock with different fields (see new-po-form.component.ts).
 export interface PoRequestItem {
   item: string;
   remainingBudget: number;
   itemCost: number;
   itemNote: string;
-  // FIX - was never sent to the backend, so submitted PO line items had no cost-code linkage in
-  // Sage's own pcorln table and never counted against Remaining Budget. See addItem()/editItem()
-  // in new-po-form.component.ts.
+  // Sent so each PO line links to its cost code in Sage's pcorln and counts against Remaining Budget
+  // (see addItem() and editItem() in new-po-form.component.ts).
   costCode: number | null;
 }
 
@@ -28,21 +26,18 @@ export interface PoRequestSubmission {
   dateRequested: string;
   requiredOnSite: string;
   totalPoAmount: number;
-  // NEW (2026-09-14) - the real authenticated app user, distinct from `requester` (a free-text
-  // business field the user types, with no connection to who's actually logged in). This is what
-  // now feeds Sage's pchord.usrnme for a trustworthy audit trail.
+  // The signed-in user, which goes to Sage's pchord.usrnme for the audit trail. `requester` is just a
+  // name the user types (2026-09-14).
   createdBy: string;
-  // NEW (2026-09-23, Moqups FORM-PO Request: "User must select Project Phase") - the Sage phase
-  // number; written to pchord.phsnum on submit/update. Optional on a draft, required to submit.
+  // The Sage phase number, saved to pchord.phsnum. Optional on a draft, required to submit
+  // (Moqups: "User must select Project Phase", 2026-09-23).
   phaseNumber?: number | null;
   items: PoRequestItem[];
   backCharges: PoBackCharge[];
 }
 
-// Real backend response shapes (PoQueueController.SavePoRequest/SubmitPoRequest) - previously
-// mistyped as Observable<boolean> even though the actual JSON body is an object; the component
-// never checked the result, so a failed submit (e.g. vendor not found in Sage) still showed a
-// success message. Fixed by typing these for real and surfacing `error` on failure.
+// What SavePoRequest and SubmitPoRequest return. Check `error`, so a failed submit (for example a
+// vendor that isn't in Sage) isn't shown as a success.
 export interface PoSaveResult {
   saved: boolean;
   draftId?: number;
@@ -51,29 +46,31 @@ export interface PoSaveResult {
 
 export interface PoSubmitResult {
   submitted: boolean;
+  /** Submitted POs now wait for Accounting approval: this is the approval request id (poId is only set once Sage creates the PO). */
+  requestId?: number;
+  status?: string;
   poId?: string;
   poRecNum?: number;
   error?: string;
 }
 
-// NEW - edit-on-click for an already-submitted PO (see po-queue.component.html/co-tab's
-// "Master Job PO ID" link). No backend endpoint exists for GetPoById/UpdatePo yet - see
-// po-request.service.ts's getPoById/updatePo header comment. Shape assumed to match
-// PoRequestSubmission (the same fields the create form already edits) plus the real poId.
+// For editing a submitted PO from the "Master Job PO ID" link (GetPoById and UpdatePo). The same
+// fields as PoRequestSubmission plus the poId.
 export interface PoDetail extends PoRequestSubmission {
   poId: string;
 }
 
 export interface PoUpdateResult {
   saved: boolean;
+  /** True when the edit was saved as a change request: the Sage PO only changes once Accounting approves. */
+  pendingApproval?: boolean;
+  requestId?: number;
   error?: string;
 }
 
-// NEW - mockup update, page FORM-PO Request Approval. Same submission shape as
-// PoRequestSubmission plus the fields the approval view needs to render (poId, backCharges,
-// current status) - a previously-submitted PO's detail, not a draft. Distinct from PoDetail
-// above (the edit-on-click feature): approval is read-only + Approve/Reject, edit is a full
-// re-save of the PO - kept as separate shapes since the two flows may diverge in what they need.
+// For the PO approval view (Moqups page FORM-PO Request Approval): PoRequestSubmission plus poId,
+// backCharges and status. It's read-only with Approve and Reject, unlike PoDetail, which is a full
+// edit. They're kept separate because the two may need different fields later.
 export interface PoApprovalDetail {
   poId: string;
   jobId: string;
@@ -92,4 +89,18 @@ export interface PoApprovalDetail {
 export interface PoApprovalActionResult {
   succeeded: boolean;
   error?: string;
+}
+
+/** A submitted PO waiting for Accounting approval (Accounting > PO Queue). */
+export interface PendingPoApproval {
+  requestId: number;
+  jobId: string;
+  jobName: string;
+  vendor: string;
+  poDescription: string;
+  requester: string;
+  createdBy: string;
+  phaseNumber: number;
+  totalAmount: number;
+  submittedDate: string;
 }

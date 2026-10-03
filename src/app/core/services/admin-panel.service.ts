@@ -9,35 +9,28 @@ import { ProjectManagementUser } from '../models/stowell-admin/project-managemen
 import { ProjectRole } from '../models/stowell-admin/project-role.model';
 
 /**
- * Port of IAdminPanelService/AdminPanelService.cs, which backs the "Project Access Management"
- * grid (AdminPanel.razor / AdminPanelBase.cs). Every C# method swallows exceptions and returns
- * an empty array/false rather than throwing - reproduced here via catchError(() => of([]/false)),
- * same convention as JobService/ContactService.
+ * Ported from AdminPanelService.cs, for the Project Access Management grid. Like the C# code,
+ * errors return an empty array or false instead of throwing.
  *
- * SECURITY-RELEVANT: insertProjectManagementUser/deleteProjectManagementUser are real
- * access-control writes (grant/revoke an employee's role on a project). Nothing in the Blazor
- * source (AdminPanelBase.cs or this service) checks the *calling* admin's own permissions before
- * submitting - confirm server-side authorization exists on these endpoints before relying on the
- * UI alone to gate who can grant access.
+ * Security: insertProjectManagementUser and deleteProjectManagementUser grant and remove an
+ * employee's role on a project. The Blazor code never checks the admin's own permissions first,
+ * so make sure the server checks them before trusting the UI to control access.
  */
 @Injectable({ providedIn: 'root' })
 export class AdminPanelService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
-  // FLAG: confirmed part of IAdminPanelService's contract, but AdminPanelBase.cs never calls
-  // this method and no grid/dropdown in AdminPanel.razor consumes CostCodeRecord - appears
-  // orphaned in the source provided. Ported for completeness only.
+  // Part of the C# service, but nothing on the Admin Panel uses it. Ported for completeness.
   getProjectIds(): Observable<CostCodeRecord[]> {
     return this.http
       .get<CostCodeRecord[]>(`${this.base}${StowellAdminEndpoints.GetProjectIdsUrl}`)
       .pipe(catchError(() => of([])));
   }
 
-  // FLAG: confirmed part of IAdminPanelService's contract, but the one call site
-  // (AdminPanelBase.OnAfterRenderAsync) is commented out - the live page instead populates the
-  // "Employee" dropdown via ContactService.getGroupUsers() scoped to a hardcoded security-group
-  // id (see admin-panel.component.ts). Ported for completeness; not called by any component here.
+  // Part of the C# service, but its only call is commented out. The page fills the Employee dropdown
+  // from ContactService.getGroupUsers() for one fixed security group (see admin-panel.component.ts).
+  // Nothing here calls it.
   getAdminPanelUsers(): Observable<StowellUser[]> {
     return this.http
       .get<StowellUser[]>(`${this.base}${StowellAdminEndpoints.GetAdminPanelUsersUrl}`)
@@ -56,14 +49,14 @@ export class AdminPanelService {
       .pipe(catchError(() => of([])));
   }
 
-  // SECURITY-RELEVANT: grants a (project, employee, role) assignment - see class header flag.
+  // Security-sensitive: gives an employee a role on a project (see the note at the top).
   insertProjectManagementUser(user: ProjectManagementUser): Observable<boolean> {
     return this.http
       .post<boolean>(`${this.base}${StowellAdminEndpoints.InsertProjectManagementUserUrl}`, user)
       .pipe(catchError(() => of(false)));
   }
 
-  // SECURITY-RELEVANT: revokes a (project, employee) assignment - see class header flag.
+  // Security-sensitive: removes an employee from a project (see the note at the top).
   deleteProjectManagementUser(jobNumber: number, emailId: string): Observable<boolean> {
     const params = `jobNumber=${jobNumber}&emailId=${encodeURIComponent(emailId)}`;
     return this.http

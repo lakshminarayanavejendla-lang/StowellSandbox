@@ -3,9 +3,10 @@ import { ErrorHandler, Injectable, inject } from '@angular/core';
 import { ClientLogService } from './client-log.service';
 
 /**
- * NEW (2026-09-24) - catches uncaught errors anywhere in the app (a JavaScript error while a page renders or handles a click) and
- * reports them to the API's call/error log with the signed-in user and the page. Behaves exactly like Angular's default handler
- * otherwise (the error still goes to the browser console). HTTP error responses are skipped here - the API already logged those.
+ * Catches uncaught errors anywhere in the app, such as a JavaScript error while a page renders or
+ * handles a click, and sends them to the API's error log with the user and the page (2026-09-24).
+ * The error still goes to the console as usual. HTTP errors are skipped because the API already
+ * logged them.
  */
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {

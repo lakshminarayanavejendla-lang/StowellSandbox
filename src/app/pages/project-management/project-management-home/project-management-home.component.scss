@@ -3,11 +3,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--sh-line);
   margin-bottom: 2px;
 
   h4 {
-    color: #676a6c;
+    color: var(--sh-ink-3);
     font-weight: 500;
     margin: 0;
   }

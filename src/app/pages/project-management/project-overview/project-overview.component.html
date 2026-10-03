@@ -1,6 +1,4 @@
-<h3>Project Overview</h3>
-<hr />
-
+<app-page-header title="Project Overview"></app-page-header>
 <ul class="nav-tabs">
   <li>
     <a class="nav-link" [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">
@@ -13,25 +11,25 @@
     </a>
   </li>
   <li>
-    <!-- NEW tab - confirmed by Mike Smith (see project-overview.component.ts header comment). -->
+    <!-- Asked for by Mike Smith (see the component header). -->
     <a class="nav-link" [class.active]="activeTab === 'budget'" (click)="switchTab('budget')">
       <i class="bi bi-piggy-bank"></i> Budget
     </a>
   </li>
   <li>
-    <!-- NEW tab - Stowell PO Module (see project-overview.component.ts header comment). -->
+    <!-- From the PO module design (see the component header). -->
     <a class="nav-link" [class.active]="activeTab === 'po'" (click)="switchTab('po')">
       <i class="bi bi-currency-dollar"></i> PO
     </a>
   </li>
   <li>
-    <!-- NEW tab - client-updated Moqups (see project-overview.component.ts header comment). -->
+    <!-- From the updated Moqups (see the component header). -->
     <a class="nav-link" [class.active]="activeTab === 'co'" (click)="switchTab('co')">
       <i class="bi bi-arrow-left-right"></i> CO
     </a>
   </li>
   <li>
-    <!-- NEW tab - client-updated Moqups. -->
+    <!-- From the updated Moqups. -->
     <a class="nav-link" [class.active]="activeTab === 'invoices'" (click)="switchTab('invoices')">
       <i class="bi bi-receipt"></i> Invoices
     </a>
@@ -42,7 +40,7 @@
     </a>
   </li>
   <li>
-    <!-- NEW tab - client-updated Moqups. -->
+    <!-- From the updated Moqups. -->
     <a class="nav-link" [class.active]="activeTab === 'documents'" (click)="switchTab('documents')">
       <i class="bi bi-folder"></i> Documents
     </a>

@@ -11,29 +11,23 @@ import { CostCodeList } from '../../../core/models/accounting/cost-code.model';
 import { AccountingService } from '../../../core/services/accounting.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { finalize } from 'rxjs';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// Port of Components/Pages/ProjectManagement/CreateBudget.razor + CreateBudgetBase.cs
-// (@page "/ProjectBudgetConfiguration/{Action}/{ProjectId:int}").
+// Create and Modify Budget, from CreateBudget.razor (/ProjectBudgetConfiguration/{Action}/{ProjectId:int}).
 //
-// FLAG - route addition: this path was NOT one of the five original stub routes handed to this
-// phase (only bare 'project-budget-configuration' was stubbed). The Blazor source clearly needs
-// the {Action}/{ProjectId} segments (Action is "CreateBudget" or "ModifyBudget", driving both
-// which fields are editable and which service call happens) - added as
-// 'project-budget-configuration/:action/:projectId'. Please splice this into app.routes.ts too.
+// The route 'project-budget-configuration/:action/:projectId' is new; only the bare
+// 'project-budget-configuration' had a placeholder. Action is "CreateBudget" or "ModifyBudget" and
+// decides which fields can be edited and which service call runs.
 //
-// FLAG - Excel upload: the source parses the uploaded .xlsx with NPOI (server-side, since this
-// runs in Blazor Server) before posting parsed rows via IProjectBudget.UploadAddExcelAsync
-// (List<BudgetRecord> overload - the source's other overload, taking MultipartFormDataContent
-// directly, is defined but never actually called from this page, so it's dead code here too).
-// A browser SPA has no server-side XLSX parser; this component exposes the file picker but
-// does NOT parse it client-side, since that requires adding a new npm dependency (e.g.
-// SheetJS/xlsx) that hasn't been confirmed/installed for this project. Wire this up once that
-// library choice is signed off, or add a raw-file upload endpoint so the API keeps doing the
-// parsing (closer to today's architecture).
+// Excel upload: Blazor read the .xlsx on the server with NPOI, then posted the rows through
+// UploadAddExcelAsync(List<BudgetRecord>). (The overload that takes the file directly was never
+// used.) The browser can't do that without a library such as SheetJS, which hasn't been approved,
+// so this shows the file picker but doesn't read the file. Add the library once it's approved, or
+// add an API endpoint that takes the raw file so the server keeps doing the parsing.
 @Component({
   selector: 'app-create-budget',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './create-budget.component.html',
   styleUrl: './create-budget.component.scss',
 })
@@ -45,15 +39,11 @@ export class CreateBudgetComponent implements OnInit {
   private _accountingService = inject(AccountingService);
   private authService = inject(AuthService);
 
-  // FIX (2026-09-16, Mike Smith - Initial Budget submitted but Budget/PO/CO/Invoices tabs never
-  // showed it, even after the Sage auto-approve + sp_BudgetTran fixes) - this hardcoded placeholder
-  // ('pcsadmin@phoenixcanopyshades.com', an unrelated dummy tenant's address) was sent as the
-  // submitting user's email on every request. sp_BudgetTran requires @User to resolve to a real
-  // row in StowellUsers - since this placeholder never did, every approve attempt for a batch
-  // containing it threw "User not found in StowellUsers." internally, which sp_ApproveBudgetTransaction
-  // catches and rolls back the WHOLE transaction (all cost codes in that job/phase), not just this
-  // field - so nothing in the batch ever posted to Sage, confirmed live via direct testing. Now uses
-  // the actual signed-in user, same as the rest of this module.
+  // This used to send a dummy email ('pcsadmin@phoenixcanopyshades.com') as the user on every
+  // request. sp_BudgetTran needs @User to be a real StowellUsers row, so every approval threw "User
+  // not found in StowellUsers.", and sp_ApproveBudgetTransaction rolled back the whole batch for that
+  // job and phase. Nothing reached Sage, so the Budget, PO, CO and Invoices tabs never showed the
+  // initial budget (Mike Smith, 2026-09-16). It now sends the signed-in user, like the rest of the module.
   private get placeholderEmail(): string {
     return this.authService.getLoggedInUserEmail() ?? 'pcsadmin@phoenixcanopyshades.com';
   }
@@ -78,8 +68,20 @@ private hideAutocompleteTimeout: any;
   private successMessageTimeout: any;
   selectedFile: File | null = null;
 
+  // "After initial budget is set, no one can change it - all changes come through Change Orders. The
+  // user can click into budget but if it's been set already all they can do is view the initial
+  // budget or create an initial budget for an added phase." (Mike Smith, 2026-09-26.) So on a job
+  // that already has a Sage budget (ModifyBudget), a phase with a budget is view-only, and a phase
+  // with no budget yet (an added phase) works like Create Budget for that phase.
+  phaseCreateMode = false;
+
   get isCreate(): boolean {
-    return this.action === 'CreateBudget';
+    return this.action === 'CreateBudget' || this.phaseCreateMode;
+  }
+
+  /** The selected phase already has an initial budget. It's shown but can't be changed here, only through change orders. */
+  get isViewOnly(): boolean {
+    return !this.isCreate && this.selectedPhaseId !== '' && this.rows.length > 0;
   }
 
   recJobNumber = recJobNumber;
@@ -105,7 +107,7 @@ ngOnInit(): void {
       console.log('Normalized jobs:', this.costCodeRecords);
       console.log('Selected project:', this.selectedProjectId);
 
-      // Set selected value AFTER jobs are loaded
+      // Set the selected value after the jobs load.
       const projectExists = this.costCodeRecords.some(
         job => Number(job.recNum) === this.selectedProjectId
       );
@@ -161,16 +163,20 @@ ngOnInit(): void {
       this.phases.find(
         p => p.phaseNum === this.selectedPhaseId
       )?.phaseName ?? '',
-    source: this.isCreate ? 'Local' : 'Sage',
+    source: this.action === 'CreateBudget' ? 'Local' : 'Sage',
   };
 
   this.budgetService.budgetData(phase).subscribe({
     next: (records) => {
+      // On a job that already has a budget, a phase with no budget lines is an added phase, so the user
+      // can create its initial budget. A phase with budget lines is locked (see isViewOnly).
+      this.phaseCreateMode = this.action !== 'CreateBudget' && (records ?? []).length === 0;
       this.setRows(records ?? []);
       this.cdr.detectChanges();
     },
     error: (error) => {
       console.error('Error loading budget data:', error);
+      this.phaseCreateMode = false;
       this.rows.clear();
       this.cdr.detectChanges();
     }
@@ -201,6 +207,7 @@ onJobChanged(value: number): void {
   if (this.selectedProjectId <= 0) {
     this.phases = [];
     this.selectedPhaseId = '';
+    this.phaseCreateMode = false;
     this.rows.clear();
     return;
   }
@@ -265,7 +272,7 @@ private toRecords(): BudgetRecord[] {
     updateBudget: g.get('updateBudget')?.value,
     phaseNum: Number(this.selectedPhaseId) || 0,
     source: this.isCreate ? 'Local' : 'Sage',
-    actionType: this.action,
+    actionType: this.isCreate ? 'CreateBudget' : this.action,
     email: this.placeholderEmail
   }));
 }
@@ -273,16 +280,14 @@ private toRecords(): BudgetRecord[] {
 private hasInvalidRows(): boolean {
 
   if (this.isCreate) {
-    // Create mode:
-    // Every row must have Cost Code Description and Total Budget
+    // Create mode: every row needs a Cost Code Description and a Total Budget.
     return this.rows.controls.some((g) =>
       !g.get('costCodeDescription')?.value ||
       g.get('totalBudget')?.value == null
     );
   }
 
-  // Modify mode:
-  // At least one Update Budget must be entered
+  // Modify mode: at least one Update Budget must be filled in.
   const rowsToUpdate = this.rows.controls.filter((g) => {
     const value = g.get('updateBudget')?.value;
 
@@ -301,6 +306,8 @@ private hasInvalidRows(): boolean {
 
 
 saveBudget(): void {
+
+  if (this.isViewOnly) return; // initial budget is set - changes go through Change Orders
 
   if (this.hasInvalidRows()) {
     this.saveError = 'Please enter Cost Code and Budget for all rows.';
@@ -349,6 +356,8 @@ saveBudget(): void {
 
 submitBudget(): void {
 
+  if (this.isViewOnly) return; // initial budget is set - changes go through Change Orders
+
   if (this.isCreate) {
 
     if (this.hasInvalidRows()) {
@@ -381,8 +390,7 @@ submitBudget(): void {
   this.saveSuccess = '';
   this.isSaving = true;
 
-  // IMPORTANT:
-  // toRecords() should return only the rows being updated
+  // toRecords() must return only the rows being updated.
   const records = this.toRecords();
 
   this.budgetService.submitBatchCostCodes(records).subscribe({
@@ -478,12 +486,11 @@ onCostCodeDescriptionBlur(): void {
   }, 200);
 }
 
-// FIX (2026-09-16, Mike Smith - "not showing like US $ ie. $1,500,000") - the budget columns are
-// plain number inputs, which can't display thousands separators (browsers reject non-digit
-// characters in type="number"). These format the FormControl's raw numeric value for display
-// (type="text" input, driven by [value] instead of formControlName - see the template) and parse
-// typed text back into a clean number on every keystroke, so toRecords()/hasInvalidRows() still
-// read a plain number from the FormControl, not a comma-containing string.
+// The budget columns show US dollars with commas, such as $1,500,000 (Mike Smith, 2026-09-16), which
+// a type="number" input can't do. These inputs are type="text" with [value] instead of
+// formControlName (see the template). This formats the control's number for display and turns
+// typed text back into a plain number on every keystroke, so toRecords() and hasInvalidRows() still
+// read a number, not a string with commas.
 formatCurrency(value: number | string | null): string {
   if (value === null || value === undefined || value === '') {
     return '';

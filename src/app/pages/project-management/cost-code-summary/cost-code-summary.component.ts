@@ -5,19 +5,17 @@ import { FormsModule } from '@angular/forms';
 import { GridModule, PageService, SortService, FilterService } from '@syncfusion/ej2-angular-grids';
 import { ProjectCostCodeService } from '../../../core/services/project-cost-code.service';
 import { CurrentCostSummaryViewModel, CostCodeSummaryRecord } from '../../../core/models/project-management/cost-summary.model';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// Port of Components/Pages/ProjectManagement/CashCodeSummary.razor (source filename, note the
-// swapped letters vs. "CostCodeSummary") + CostCodeSummaryBase.cs
-// (@page "/CostCodeSummary/{ProjectId:int}").
+// The Cost Code Summary (/CostCodeSummary/{ProjectId:int} in Blazor; the file is spelled
+// CashCodeSummary.razor).
 //
-// FLAG - route addition: not one of the five original stub routes; added as
-// 'project-management/cost-code-summary/:projectId'. Please splice into app.routes.ts.
-// FLAG - exports: same PDF/Excel-needs-a-new-library gap as cash-flow-report - see that
-// component's header comment; Copy/CSV are ported natively here too.
+// Its route, 'project-management/cost-code-summary/:projectId', is new. Copy and CSV work; PDF and
+// Excel need a library that isn't approved yet, as on the Cash Flow Report.
 @Component({
   selector: 'app-cost-code-summary',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [PageService, SortService, FilterService],
   templateUrl: './cost-code-summary.component.html',
   styleUrl: './cost-code-summary.component.scss',
@@ -25,10 +23,9 @@ import { CurrentCostSummaryViewModel, CostCodeSummaryRecord } from '../../../cor
 export class CostCodeSummaryComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private costCodeService = inject(ProjectCostCodeService);
-  // FIX (2026-09-23, Mike Smith - "Phase not showing in Current Cost Code Summary report"): the
-  // dropdown/grid data arrived (Job list, Phase list, summary rows all loaded into `model`) but the
-  // view never re-rendered, so the Phase select (and Job/Cost Code/summary boxes) stayed empty.
-  // Same remedy other pages here use (see po-tab.component.ts): render explicitly after each load.
+  // The Job, Phase and summary data loaded into `model`, but the page never re-rendered, so the
+  // dropdowns and boxes stayed empty (Mike Smith, 2026-09-23: "Phase not showing in Current Cost Code
+  // Summary report"). It now renders after each load, like the other pages (see po-tab.component.ts).
   private cdr = inject(ChangeDetectorRef);
 
   projectId = 0;
@@ -64,10 +61,22 @@ export class CostCodeSummaryComponent implements OnInit {
       this.cdr.detectChanges();
     });
     this.costCodeService.getCurrentCostSummaryViewModel(this.selectedProjectId).subscribe((m) => {
-      this.model = { ...this.model, ...m };
+      this.mergeSummary(m);
       this.appliedPhaseLabel = 'All phases';
       this.setRows(this.withPhase(m.costCodeSummaryModel?.costCodeSummary ?? []));
     });
+  }
+
+
+  /** Adds a summary response to the model without letting empty lists wipe ones already loaded (a failed call returns empty lists). */
+  private mergeSummary(m: CurrentCostSummaryViewModel): void {
+    this.model = {
+      ...this.model,
+      ...m,
+      jobs: m.jobs?.length ? m.jobs : this.model.jobs,
+      costCodes: m.costCodes?.length ? m.costCodes : this.model.costCodes,
+      phases: m.phases?.length ? m.phases : this.model.phases,
+    };
   }
 
   private setRows(rows: CostCodeSummaryRecord[]): void {
@@ -75,10 +84,9 @@ export class CostCodeSummaryComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // NEW (2026-09-23, Mike Smith - "Phase not showing in Current Cost Code Summary report"): the
-  // grid now has a Phase column. SPCostSummary returns one row per cost code (summed over the
-  // phase filter, and it treats phase 0/"None" as "no filter"), so the column shows the phase the
-  // rows were run under - "All phases" when none was chosen.
+  // The grid has a Phase column (Mike Smith, 2026-09-23). SPCostSummary returns one row per cost code
+  // for the phase filter (phase 0, "None", means no filter), so the column shows the phase the rows
+  // were run for, or "All phases" when none was picked.
   private appliedPhaseLabel = 'All phases';
 
   private currentPhaseLabel(): string {
@@ -109,7 +117,7 @@ export class CostCodeSummaryComponent implements OnInit {
     this.costCodeService
       .getCurrentCostSummaryViewModel(this.selectedProjectId, this.selectedCostCodes, this.selectedPhaseId, this.startDate, this.endDate)
       .subscribe((m) => {
-        this.model = { ...this.model, ...m };
+        this.mergeSummary(m);
         this.appliedPhaseLabel = label;
         this.setRows(this.withPhase(m.costCodeSummaryModel?.costCodeSummary ?? []));
       });

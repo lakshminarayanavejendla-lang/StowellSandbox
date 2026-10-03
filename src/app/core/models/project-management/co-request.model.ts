@@ -1,7 +1,6 @@
-// NEW - Stowell PO Module (from the "Stowell PO Module" Moqups design spec, page
-// FORM-CO Request). Mirrors po-request.model.ts - the CO Request form is the same
-// items/back-charges line-item pattern as the PO Request form, plus a Purchase Order picker that
-// links the change order back to an existing PO for the selected job.
+// PO module, built from the Moqups design (page FORM-CO Request). Works like po-request.model.ts:
+// the same items and back-charges lines, plus a Purchase Order picker that links the CO to one of
+// the job's POs.
 export interface CoRequestItem {
   item: string;
   remainingBudget: number;
@@ -26,15 +25,13 @@ export interface CoRequestSubmission {
   dateRequested: string;
   requiredOnSite: string;
   totalCoAmount: number;
-  // NEW (2026-09-14) - see po-request.model.ts's PoRequestSubmission.createdBy comment; same
-  // fix, same reason (distinct from `requester`, a free-text field).
+  // The signed-in user, not `requester`, which is just a typed name (2026-09-14; see po-request.model.ts).
   createdBy: string;
   items: CoRequestItem[];
   backCharges: CoBackCharge[];
 }
 
-// Real backend response shapes - see po-request.model.ts's PoSaveResult/PoSubmitResult for why
-// these replace the previous (wrong) Observable<boolean> typing.
+// What the save and submit calls return (see PoSaveResult and PoSubmitResult in po-request.model.ts).
 export interface CoSaveResult {
   saved: boolean;
   draftId?: number;
@@ -43,27 +40,30 @@ export interface CoSaveResult {
 
 export interface CoSubmitResult {
   submitted: boolean;
+  /** Submitted COs now wait for Accounting approval: this is the approval request id (coId is only set once Sage creates the CO). */
+  requestId?: number;
+  status?: string;
   coId?: string;
   coRecNum?: number;
   error?: string;
 }
 
-// NEW - edit-on-click for an already-submitted CO (see co-queue.component.html/po-tab's
-// "Master Job CO ID" link). No backend endpoint exists for GetCoById/UpdateCo yet - see
-// co-request.service.ts's getCoById/updateCo header comment. Shape assumed to match
-// CoRequestSubmission (the same fields the create form already edits) plus the real coId.
+// For editing a submitted CO from the "Master Job CO ID" link (GetCoById and UpdateCo). The same
+// fields as CoRequestSubmission plus the coId.
 export interface CoDetail extends CoRequestSubmission {
   coId: string;
 }
 
 export interface CoUpdateResult {
   saved: boolean;
+  /** True when the edit was saved as a change request: the Sage change order only changes once Accounting approves. */
+  pendingApproval?: boolean;
+  requestId?: number;
   error?: string;
 }
 
-// NEW - mockup update, page FORM-CO Request Approval. Mirrors po-request.model.ts's
-// PoApprovalDetail/PoApprovalActionResult - see that file's comment (distinct from CoDetail
-// above, the separate edit-on-click feature).
+// For the CO approval view (Moqups page FORM-CO Request Approval). Same idea as PoApprovalDetail in
+// po-request.model.ts, and separate from CoDetail above.
 export interface CoApprovalDetail {
   coId: string;
   jobId: string;
@@ -83,4 +83,18 @@ export interface CoApprovalDetail {
 export interface CoApprovalActionResult {
   succeeded: boolean;
   error?: string;
+}
+
+/** A submitted CO waiting for Accounting approval (Accounting > CO Queue). */
+export interface PendingCoApproval {
+  requestId: number;
+  jobId: string;
+  jobName: string;
+  purchaseOrderId: string;
+  vendor: string;
+  coReason: string;
+  requester: string;
+  createdBy: string;
+  totalAmount: number;
+  submittedDate: string;
 }

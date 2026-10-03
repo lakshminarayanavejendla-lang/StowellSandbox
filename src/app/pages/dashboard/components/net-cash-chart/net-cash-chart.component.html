@@ -1,13 +1,31 @@
 <h4>Net Cash Out</h4>
-<ejs-chart [primaryXAxis]="primaryXAxis" [primaryYAxis]="primaryYAxis" height="320px">
-  <e-series-collection>
-    <e-series
-      [dataSource]="chartData"
-      type="Column"
-      xName="category"
-      yName="value"
-      name="Net Cash Out"
-      fill="#3767ad"
-    ></e-series>
-  </e-series-collection>
-</ejs-chart>
+@if (chartData.length) {
+  <ejs-chart
+    [theme]="chartTheme()"
+    background="transparent"
+    [chartArea]="chartArea"
+    [primaryXAxis]="primaryXAxis"
+    [primaryYAxis]="primaryYAxis"
+    [tooltip]="tooltip"
+    (axisLabelRender)="onAxisLabel($event)"
+    (tooltipRender)="onTooltip($event)"
+    (textRender)="onDataLabel($event)"
+    height="340px"
+  >
+    <e-series-collection>
+      <e-series
+        [dataSource]="chartData"
+        type="Bar"
+        xName="category"
+        yName="value"
+        name="Net Cash Out"
+        [fill]="colors.blue"
+        [cornerRadius]="rounded"
+        [marker]="marker"
+        columnWidth="0.5"
+      ></e-series>
+    </e-series-collection>
+  </ejs-chart>
+} @else {
+  <div class="chart-empty">No data to chart yet.</div>
+}

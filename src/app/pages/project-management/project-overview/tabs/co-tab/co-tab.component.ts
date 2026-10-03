@@ -12,30 +12,23 @@ import { CurrentCostSummaryViewModel, Phase } from '../../../../../core/models/p
 import { CoDraftSummary } from '../../../../../core/models/project-management/po-draft.model';
 
 /**
- * NEW tab - client-updated Moqups (page "TAB-Change Orders" - confirmed live against
- * app.moqups.com/.../view/page/ab12f772c), splitting Change Orders out of the "$ PO" tab's
- * combined view into its own tab per the updated mockup's tab bar (Overview / Details / Purchase
- * Orders / Change Orders / Invoices / Reporting / Documents).
+ * The Change Orders tab (Moqups page "TAB-Change Orders", checked against the live mockup). The
+ * updated mockup moved change orders off the "$ PO" tab onto their own tab, between Purchase Orders
+ * and Invoices.
  *
- * REBUILT (Mike Smith report, 2026-09-10 - "PO Tab - does not match Moqup", same root-cause pass
- * that rebuilt po-tab.component.ts): this tab used to be one flat "Change Order Queue" grid. The
- * real mockup has the identical 3-way structure po-tab.component.ts has - a Budget summary box +
- * THREE toggles (Show Draft COs / Show Active COs / Show Archived COs, all checked by default)
- * revealing three sections: "Draft Change Order Queue" (carries the New CO button), "Active
- * Change Order Queue", "Archived Change Order Queue". Mirrors po-tab.component.ts's
- * section/data-source pattern 1:1 - see that file's header comment for the fuller rationale.
+ * Rebuilt with the PO tab after "PO Tab - does not match Moqup" (Mike Smith, 2026-09-10). It used to
+ * be one flat grid. Like the PO tab it now has a budget box, three toggles (Show Draft COs, Show
+ * Active COs, Show Archived COs, all on by default) and three sections: Draft Change Order Queue
+ * (with New CO), Active Change Order Queue and Archived Change Order Queue. See po-tab.component.ts.
  *
- * Section data sources:
- *   - Draft: CoRequestService.getDrafts(), filtered client-side to this job
- *     (CoDraftSummary.jobId === String(projectId)) - no per-job draft endpoint exists.
- *   - Active: JobPoService.getJobPoOverview()'s changeOrderLog, filtered to coStatus === 'Open'.
- *   - Archived: same changeOrderLog, everything NOT 'Open' - same "no explicit Archived status
- *     modeled yet" caveat as the PO tab.
+ * Where each section's data comes from:
+ *   - Draft: CoRequestService.getDrafts(), filtered to this job because there's no per-job draft call.
+ *   - Active: changeOrderLog from JobPoService.getJobPoOverview() with coStatus 'Open'.
+ *   - Archived: the same list, everything not 'Open'. As on the PO tab, there's no real "Archived"
+ *     status yet.
  *
- * FLAG: the mockup's "CO Type" column has no backing field anywhere in ChangeOrderLogRecord/
- * CoDraftSummary - left blank rather than guessed at. Per-row selection checkboxes (mockup's only
- * defined use for them, like PO's, would be some bulk action against Draft rows) are not
- * implemented, same as po-tab.component.ts.
+ * The mockup's "CO Type" column has no field in the data, so it's blank. The row checkboxes aren't
+ * built, as on the PO tab.
  */
 @Component({
   selector: 'app-co-tab',
@@ -61,9 +54,8 @@ export class CoTabComponent implements OnChanges {
   archivedChangeOrders: ChangeOrderLogRecord[] = [];
   coDrafts: CoDraftSummary[] = [];
 
-  // See po-tab.component.ts's header comment on this same fix - EJ2 grids created with an empty
-  // dataSource and later reassigned real data get permanently stuck unrendered. Gating each
-  // <ejs-grid> on its data having actually arrived avoids the bug.
+  // Each <ejs-grid> is only created once its data has arrived, because a grid created empty and given
+  // data later stays stuck (see po-tab.component.ts).
   changeOrdersLoaded = false;
   draftsLoaded = false;
 
@@ -98,16 +90,16 @@ export class CoTabComponent implements OnChanges {
     });
   }
 
-  // NEW (2026-09-23, Mike Smith - "For PO, CO, Invoices tabs we need 2 options: show all phases
-  // together or show 1 phase at a time"). Same dropdown as po-tab.component.ts: "All phases"
-  // (default, as before) or one phase. A phase re-queries the budget box for that phase and filters
-  // the change order log to that phase's COs (prmchg.phsnum, via ChangeOrderLogRecord.coPhase).
+  // "For PO, CO, Invoices tabs we need 2 options: show all phases together or show 1 phase at a time"
+  // (Mike Smith, 2026-09-23). The same dropdown as the PO tab: "All phases" (the default) or one
+  // phase. Picking a phase reloads the budget box for it and shows only that phase's change orders
+  // (prmchg.phsnum, as ChangeOrderLogRecord.coPhase).
   phases: Phase[] = [];
   selectedPhaseId = '';
   private allChangeOrders: ChangeOrderLogRecord[] = [];
 
-  /** Phase-specific figures/filters apply only when the job really has more than one phase.
-   * (Mike Smith, 2026-09-23: with a single phase the amounts must NOT change when it is picked.) */
+  /** Phase figures and filters only apply when the job has more than one phase. With a single phase,
+   * the amounts mustn't change when it's picked (Mike Smith, 2026-09-23). */
   private get phaseFilterActive(): boolean {
     return this.selectedPhaseId !== '' && this.phases.length > 1;
   }
@@ -123,7 +115,7 @@ export class CoTabComponent implements OnChanges {
   }
 
   private applyPhaseToChangeOrders(): void {
-    // Rebuild the grids (loaded=false -> render -> loaded=true) - see the EJ2 note above.
+    // Rebuild the grids (loaded = false, render, loaded = true); see the EJ2 note above.
     this.changeOrdersLoaded = false;
     this.cdr.detectChanges();
     const phase = this.phaseFilterActive ? Number(this.selectedPhaseId) : null;
@@ -140,8 +132,8 @@ export class CoTabComponent implements OnChanges {
     this.applyPhaseToChangeOrders();
   }
 
-  // Budget box: budgetPayment isn't phase-aware, so once a phase is picked the figures come from
-  // the phase-filtered cost summary totals (same rule as po-tab.component.ts).
+  // budgetPayment doesn't know about phases, so with a phase picked the budget box uses that phase's
+  // cost summary totals (same as the PO tab).
   totalBudget(): number {
     const s = this.costSummary;
     return this.phaseFilterActive
@@ -168,7 +160,7 @@ export class CoTabComponent implements OnChanges {
     return Number.isFinite(n) ? n : 0;
   }
 
-  // See po-tab.component.ts's paidPercent() header comment - same reasoning.
+  // Same as paidPercent() in po-tab.component.ts.
   paidPercent(): number {
     const budget = this.totalBudget();
     const paid = this.totalPaid();
@@ -177,7 +169,7 @@ export class CoTabComponent implements OnChanges {
   }
 
   resumeDraft(draft: CoDraftSummary): void {
-    // Mirrors po-tab.component.ts's resumeDraft - same route/query-param contract.
+    // Same route and query parameters as resumeDraft in po-tab.component.ts.
     this.router.navigate(['/project-management/new-co-form'], { queryParams: { draftId: draft.draftId } });
   }
 

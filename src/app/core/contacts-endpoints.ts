@@ -1,27 +1,18 @@
-// Endpoint constants for the Contacts module (company directory / SecurityGroup lookups).
+// API routes for the Contacts module (company directory and security group lookups).
 //
-// This is a NEW, module-scoped file - it deliberately does NOT edit or extend the shared
-// core/global-endpoints.ts (owned by Phase 1 / used across modules) to avoid colliding with the
-// parallel Document Management/Reporting Dashboard/Phoenix Admin agents.
-//
-// Confirmed by direct read of Services/ContactService.cs - Common/GlobalEndpoints.cs has no
-// Contacts-specific entries at all (grepped, zero matches for "Contact"/"SecurityGroup"), so
-// ContactService.cs builds both routes as inline string literals rather than going through the
-// shared constants class - same "some routes centralized, most not" pattern flagged in every
-// other module's endpoints file so far. Reproduced here verbatim.
+// Kept separate from global-endpoints.ts. GlobalEndpoints.cs has nothing for contacts, so these are
+// copied exactly from the plain strings in ContactService.cs.
 export const ContactsEndpoints = {
   GetAllGroupsUrl: 'api/SecurityGroup/GetAllGroups',
   GetGroupUsersUrl: 'api/SecurityGroup/GetGroupUsers',
-  // New endpoint added to SecurityGroupController.cs (not present in the original Blazor
-  // source) - fetches specific users by email/UPN directly via Graph, bypassing the
-  // GetAllGroups + per-group GetGroupUsers fan-out entirely. Added because this tenant has
-  // ~280 groups and the full fan-out (2 sequential Graph calls per member, no parallelism
-  // within a group) made the directory page impractically slow; the business need was to
-  // show a small, specific set of people (leadership), not the whole tenant.
+  // Added to SecurityGroupController.cs (not in the Blazor app). Looks up specific users by email
+  // through Graph. Going through all ~280 groups one by one made the directory far too slow, and
+  // the page only needed a few people (leadership).
   GetUsersByEmailUrl: 'api/SecurityGroup/GetUsersByEmail',
-  // Also added to SecurityGroupController.cs - lists every enabled member-type user in the
-  // tenant directly via Graph /users (paginated), skipping group enumeration entirely. ~14
-  // users in this tenant, ~13s round trip including per-user photo fetches - fine for a full
-  // directory view, unlike the ~280-group fan-out this replaces.
+  // Also added to SecurityGroupController.cs. Lists every enabled member user from Graph /users,
+  // page by page, without going through groups. About 14 users here, around 13 seconds with photos,
+  // which is fine for the full directory.
   GetAllUsersUrl: 'api/SecurityGroup/GetAllUsers',
+  // A small profile photo for one user (image/jpeg; 404 when there is none).
+  UserPhotoUrl: 'api/SecurityGroup/UserPhoto',
 } as const;

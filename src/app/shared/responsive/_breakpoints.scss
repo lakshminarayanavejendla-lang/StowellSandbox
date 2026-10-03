@@ -1,0 +1,38 @@
+// Shared breakpoints. Keep them the same as viewport.service.ts.
+//
+//   >= 1600     large desktop     expanded layouts
+//   1280-1599   standard laptop   primary portal layout (1440x900 is the design/QA target)
+//   1024-1279   small laptop / tablet landscape   compact navigation, reduced columns
+//   768-1023    tablet portrait   drawer navigation, 1-2 column content
+//   480-767     large phone / small tablet   single column
+//   < 480       phone             essential content and actions only
+//
+// Layout rule: reflow, don't shrink (4 columns -> 2 -> 1). Prefer grid auto-fit/minmax() and container queries; use these
+// media-query mixins for page-shell changes. Tables/grids scroll horizontally or drop secondary columns rather than squeeze.
+
+$bp-large-desktop: 1600px;
+$bp-desktop: 1280px;
+$bp-compact: 1024px;
+$bp-tablet: 768px;
+$bp-phone: 480px;
+
+/// Applies below the given width (e.g. `@include below($bp-desktop)` = "< 1280px").
+@mixin below($width) {
+  @media (max-width: #{$width - 1px}) {
+    @content;
+  }
+}
+
+/// Applies at/above the given width.
+@mixin at-least($width) {
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+/// Touch-first devices (smart pads/tablets): use for 44-48px targets and no hover-only actions.
+@mixin touch {
+  @media (pointer: coarse) {
+    @content;
+  }
+}

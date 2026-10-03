@@ -1,20 +1,18 @@
-// Matches stowelldashboard.proserv360.tech's live "New PO Form" page (Blazor) - font, header
-// colors and dashed rule pulled from that page's computed styles rather than this app's own
-// navy Stowell-branded theme, per direction to keep this ported form visually identical to its
-// live counterpart during the migration.
+// Matches the production "New PO Form" page in Blazor: the font, header colours and dashed line
+// were taken from that page instead of this app's navy theme, so the form looks the same during the move.
 .wrapper {
-  background: #fff;
+  background: var(--sh-surface);
   padding: 20px;
   border-radius: 4px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #212529;
+  color: var(--sh-ink);
 }
 
-h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
+h2 { color: var(--sh-ink); font-weight: 700; font-size: 24px; margin: 0 0 16px; }
 
-.dashed { border-top: 1px dashed #e7eaec; margin: 15px 0 25px 0; }
+.dashed { border-top: 1px dashed var(--sh-line); margin: 15px 0 25px 0; }
 
-.section-header { margin-top: 25px; color: #28363c; font-weight: 700; font-size: 18px; }
+.section-header { margin-top: 25px; color: var(--sh-ink); font-weight: 700; font-size: 18px; }
 
 .section-header-row {
   display: flex;
@@ -29,7 +27,7 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
     gap: 6px;
     margin-top: 25px;
     font-weight: 600;
-    color: #555;
+    color: var(--sh-ink);
     cursor: pointer;
   }
 }
@@ -41,9 +39,9 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
   gap: 10px;
   margin-bottom: 10px;
 
-  label { font-weight: 400; color: #212529; }
+  label { font-weight: 400; color: var(--sh-ink); }
   input, select, textarea {
-    border: 1px solid #ced4da;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 12px;
   }
@@ -61,8 +59,8 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  background: #f7f7f7;
-  border: 1px solid #dcdcdc;
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
   padding: 14px;
   margin-bottom: 4px;
@@ -86,23 +84,23 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
   margin: 15px 0;
 
   .drop-zone {
-    border: 1px dashed #c7c7c7;
+    border: 1px dashed var(--sh-line);
     border-radius: 4px;
     padding: 14px;
-    color: #888;
+    color: var(--sh-ink-3);
     display: flex;
     align-items: center;
     gap: 10px;
 
     &.dragging {
-      border-color: #0479cc;
+      border-color: var(--sh-blue);
       background-color: rgba(4, 121, 204, 0.05);
-      color: #0479cc;
+      color: var(--sh-blue);
     }
   }
 
   .browse-link {
-    color: #0d6efd;
+    color: var(--sh-blue);
     cursor: pointer;
     text-decoration: underline;
   }
@@ -118,10 +116,10 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
     align-items: center;
     gap: 10px;
     padding: 6px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--sh-line);
   }
 
-  a { color: #0d6efd; }
+  a { color: var(--sh-blue); }
 }
 
 .actions {
@@ -134,19 +132,19 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
 .status-message { color: #2e7d32; font-weight: 600; }
 .status-message.error { color: #c62828; }
 
-.empty-row { text-align: center; color: #888; font-style: italic; }
+.empty-row { text-align: center; color: var(--sh-ink-3); font-style: italic; }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   margin: 15px 0;
 
-  th { background-color: #0479cc; color: #fff; font-weight: 700; padding: 8px 10px; text-align: left; }
-  td { padding: 8px 10px; border: 1px solid #dcdcdc; }
+  th { background-color: var(--sh-blue); color: #fff; font-weight: 700; padding: 8px 10px; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid var(--sh-line); }
 }
 
 .btn-primary, .btn-secondary, .btn-sm {
-  background-color: #0479cc;
+  background-color: var(--sh-blue);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -156,7 +154,7 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
 
 .btn-sm { padding: 3px 10px; margin-right: 6px; }
 
-// Approval-mode actions - mirrors the mockup's Reject (red)/Approved (green) button pair.
+// Approval mode buttons: red Reject and green Approved, as in the mockup.
 .btn-reject {
   background-color: #f4b8ac;
   color: #7a2c1d;
@@ -169,7 +167,7 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
 }
 
 .btn-approve {
-  background-color: #7cb342;
+  background-color: #14915b;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -180,10 +178,10 @@ h2 { color: #28363c; font-weight: 700; font-size: 24px; margin: 0 0 16px; }
 .reject-reason-box {
   margin-top: 10px;
   padding: 14px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
-  background: #fafafa;
+  background: var(--sh-surface-2);
 
   label { display: block; font-weight: 600; margin-bottom: 8px; }
-  textarea { width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; padding: 8px; }
+  textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--sh-line); border-radius: 4px; padding: 8px; }
 }

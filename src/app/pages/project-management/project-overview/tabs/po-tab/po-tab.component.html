@@ -7,10 +7,10 @@
     <label>Job Name</label>
     <input type="text" [value]="bidModel?.jobName" readonly />
   </div>
-  <!-- NEW (2026-09-23, Mike Smith - "figure out how to see second phase... dropdown to select the
-       phase at top"). Phase list comes from the same cost-summary call as the budget box; picking
-       a phase re-queries it for that phase. Always shown (as in Mike's mockup), even for a job with
-       a single phase - there it just lists "All phases" and that one phase. -->
+  <!-- The phase dropdown (Mike Smith, 2026-09-23: "figure out how to see second phase... dropdown to
+       select the phase at top"). The phases come from the same cost summary call as the budget box,
+       and picking one reloads it for that phase. It's always shown, as in Mike's mockup; a job with
+       one phase just lists "All phases" and that phase. -->
   <div class="field">
     <label>Phase</label>
     <select [ngModel]="selectedPhaseId" (ngModelChange)="onPhaseChange($event)">
@@ -66,19 +66,16 @@
       <a [routerLink]="['/project-management/new-po-form']" [queryParams]="{ jobId: projectId }" class="btn-primary new-po-btn">
         New PO
       </a>
-      <!-- FLAG: "Duplicate PO" isn't implemented yet - no backend endpoint exists for cloning a
-           PO/draft, and doing it properly needs the per-row selection checkboxes the mockup
-           shows (also not implemented yet). See po-tab.component.ts's header comment. -->
+      <!-- Duplicate PO isn't built: there's no API to copy a PO or draft, and it needs the row checkboxes
+           from the mockup, which aren't built either (see the component header). -->
       <button type="button" class="btn-secondary" disabled title="Not yet implemented">Duplicate PO</button>
     </div>
   </div>
   <hr class="dashed" />
   @if (draftsLoaded) {
-    <!-- FIX (2026-09-10): gated on draftsLoaded rather than always present - a confirmed EJ2
-         Angular Grid bug means a grid created with an empty dataSource and later reassigned real
-         data via [dataSource] gets permanently stuck (aria-busy="true", 0 rows painted) even
-         though its own internal state is correct and .refresh()/.dataBind() do nothing. Creating
-         the grid fresh, already holding its final data, avoids the bug entirely. -->
+    <!-- Only created once draftsLoaded is true. An EJ2 grid created empty and given data later gets
+         stuck showing no rows, even with refresh() or dataBind(). Creating it with its data avoids
+         that (2026-09-10). -->
     <ejs-grid class="black-grid" [dataSource]="poDrafts" [allowPaging]="true" [allowSorting]="true" [pageSettings]="pageSettings">
       <e-columns>
         <e-column headerText="PO ID" width="120">

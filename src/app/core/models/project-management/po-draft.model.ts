@@ -1,5 +1,5 @@
-// NEW - Stowell PO Module. Backs the "Draft Purchase Orders" / "Draft Change Orders" sections
-// on PO/CO Queue Home, added after Save PO/CO turned out to have no way back into the UI.
+// The Draft Purchase Orders and Draft Change Orders lists on the PO and CO queues, added because a
+// saved PO or CO had no way back into the app.
 import { PoRequestItem } from './po-request.model';
 
 export interface PoDraftSummary {
@@ -12,7 +12,7 @@ export interface PoDraftSummary {
   createdBy: string;
   createdDate: string;
   status: string;
-  // Sage phase the draft was saved under (null/absent = none chosen) - the PO tab filters drafts by it.
+  // The Sage phase the draft was saved under (missing if none). The PO tab filters drafts by it.
   phaseNumber?: number | null;
 }
 

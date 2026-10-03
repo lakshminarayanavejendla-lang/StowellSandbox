@@ -1,41 +1,30 @@
 import { Routes } from '@angular/router';
-import { PhoenixAdminIndexComponent } from './phoenix-admin-index/phoenix-admin-index.component';
-import { AdminPanelComponent } from './admin-panel/admin-panel.component';
-import { DisconnectUsersComponent } from './disconnect-users/disconnect-users.component';
-import { ApiLogComponent } from './api-log/api-log.component';
 
 /**
- * Phoenix Admin ("StowellAdmin" in the Blazor source) module routes - merged into
- * app.routes.ts's children array by whoever owns that file (per this phase's
- * collision-avoidance rules, this file does not edit app.routes.ts directly - it's already
- * imported there as `STOWELL_ADMIN_ROUTES`, replacing the old 'stowell-admin'
- * PlaceholderComponent stub for NavMenu.razor's "Phoenix Admin" link).
+ * Phoenix Admin routes ("StowellAdmin" in Blazor), imported in app.routes.ts as STOWELL_ADMIN_ROUTES.
  *
- * Path mapping from the real @page directives:
- *   @page "/StowellAdmin"                    -> 'stowell-admin'                  (landing page)
- *   @page "/StowellAdmin/AdminPanel"         -> 'stowell-admin/admin-panel'      (Project Access Management)
- *   @page "/StowellAdmin/DisconnectUsers"    -> 'stowell-admin/disconnect-users' (force-disconnect all users)
+ *   /StowellAdmin                  -> 'stowell-admin'                   (landing page)
+ *   /StowellAdmin/AdminPanel       -> 'stowell-admin/admin-panel'       (Project Access Management)
+ *   /StowellAdmin/DisconnectUsers  -> 'stowell-admin/disconnect-users'  (disconnect all users)
  *
- * 'stowell-admin' matches the Phase 1 placeholder path 1:1; the other two are NEW routes not in
- * the original stub list - Phase 1 only stubbed the top-level nav link, not the two sub-pages
- * reachable only from the tiles on the StowellAdmin landing page itself.
+ * The two sub-pages are only reached from the tiles on the landing page.
  */
 export const STOWELL_ADMIN_ROUTES: Routes = [
-  { path: 'stowell-admin', component: PhoenixAdminIndexComponent, data: { title: 'Stowell Admin' } },
+  { path: 'stowell-admin', loadComponent: () => import('./phoenix-admin-index/phoenix-admin-index.component').then((m) => m.PhoenixAdminIndexComponent), data: { title: 'Stowell Admin' } },
   {
     path: 'stowell-admin/admin-panel',
-    component: AdminPanelComponent,
+    loadComponent: () => import('./admin-panel/admin-panel.component').then((m) => m.AdminPanelComponent),
     data: { title: 'Stowell Admin - Project Access Management' },
   },
   {
     path: 'stowell-admin/disconnect-users',
-    component: DisconnectUsersComponent,
+    loadComponent: () => import('./disconnect-users/disconnect-users.component').then((m) => m.DisconnectUsersComponent),
     data: { title: 'Stowell Admin - Disconnect Users' },
   },
-  // NEW (2026-09-24) - every API call and error, from every user (dbo.ApiCallLog).
+  // Every API call and error from every user (dbo.ApiCallLog), added 2026-09-24.
   {
     path: 'stowell-admin/api-log',
-    component: ApiLogComponent,
+    loadComponent: () => import('./api-log/api-log.component').then((m) => m.ApiLogComponent),
     data: { title: 'Stowell Admin - API Success & Errors' },
   },
 ];

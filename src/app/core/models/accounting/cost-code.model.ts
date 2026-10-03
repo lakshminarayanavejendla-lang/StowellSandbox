@@ -1,6 +1,5 @@
-// Mirrors StowellCoApp.Models.CostCodeList (Models/CostCodeList.cs) - the cost-code
-// description autocomplete source for the budget approval grids
-// (IAccountingService.GetCostCodes(filter)).
+// Matches Models/CostCodeList.cs: the cost code descriptions for the autocomplete in the budget
+// approval grids (GetCostCodes(filter)).
 export interface CostCodeList {
   id: number;
   costCodeDescription: string;

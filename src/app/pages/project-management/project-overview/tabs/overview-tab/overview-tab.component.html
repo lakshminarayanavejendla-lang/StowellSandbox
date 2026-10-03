@@ -13,12 +13,10 @@
     @if (projectFolderLibraryUrl) {
       <a [href]="projectFolderLibraryUrl" target="_blank"><i class="bi bi-folder"></i> Project Folder Library</a>
     }
-    <!-- FIX (2026-09-16) - was '/Estimation/EditBidForm/' + jobId, the dead Blazor route (404).
-         BidFormComponent at estimation/edit-bid/:jobId is the real, already-built, already-routed
-         Angular port of that page (see its header comment) - just never linked to. Also fixed a
-         real bug found while testing this: Bids_Update had no insert fallback, so a project
-         created via Win Bid (which never touches dbo.Bids) silently failed to save every
-         top-level field here (Bidder/Phase/BidStatus/Division/Department/etc.) - now upserts. -->
+    <!-- Opens estimation/edit-bid/:jobId, the Edit Project page. It used to link to the Blazor route
+         /Estimation/EditBidForm/, which gave a 404 (2026-09-16). While testing this, Bids_Update was
+         also fixed: it had no insert, so for a project created by Win Bid (with no dbo.Bids row) every
+         field here failed to save without an error. It now inserts or updates. -->
     <a [routerLink]="['/estimation/edit-bid', model.selectedJobId]" class="btn-link">Update</a>
   </div>
 

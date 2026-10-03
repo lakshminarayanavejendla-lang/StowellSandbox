@@ -11,27 +11,29 @@ import {
   PoUpdateResult,
   PoApprovalDetail,
   PoApprovalActionResult,
+  PendingPoApproval,
 } from '../models/project-management/po-request.model';
+import { AuthService } from './auth.service';
 import { PoDraftSummary, PoDraftDetail } from '../models/project-management/po-draft.model';
 
-// FIX (2026-09-24): the API's error body is camelCase ({ message, details }) - read both spellings
-// so the real reason shows instead of the generic HTTP text (see co-budget-allocation.service.ts).
+// The API's error body may be { message, details } or PascalCase. Read both so the real reason
+// shows (2026-09-24; see co-budget-allocation.service.ts).
 function backendErrorMessage(err: HttpErrorResponse): string {
   const e = err.error;
   return e?.details || e?.Details || e?.message || e?.Message || err.message || 'Request failed.';
 }
 
 /**
- * NEW service - Stowell PO Module (not a Blazor port; built from the "Stowell PO Module" Moqups
- * design spec, page FORM-PO Request).
+ * Purchase order requests, built from the Moqups design (page FORM-PO Request), not ported from
+ * Blazor.
  *
- * Backend endpoints now implemented: PoQueueController.SavePoRequest (writes a SAGESBQ-only
- * draft, safe/reversible) and .SubmitPoRequest (creates a real, permanent, numbered PO in
- * StowellSandbox.dbo.pchord/pcorln). See po_module_write_side.sql for the write design.
+ * SavePoRequest saves a draft in SAGESBQ, which is safe to undo. SubmitPoRequest creates a real,
+ * permanent, numbered PO in StowellSandbox (pchord and pcorln). See po_module_write_side.sql.
  */
 @Injectable({ providedIn: 'root' })
 export class PoRequestService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private base = environment.apiBaseUrl;
 
   savePo(payload: PoRequestSubmission): Observable<PoSaveResult> {
@@ -67,22 +69,21 @@ export class PoRequestService {
       );
   }
 
-  /** NEW - see project-management-endpoints.ts's GetPoByIdUrl header comment: backend not confirmed. */
+  /** Loads a submitted PO for editing (PoQueueController.GetPoById). */
   getPoById(poId: string): Observable<PoDetail | null> {
     return this.http
       .get<PoDetail>(`${this.base}${ProjectManagementEndpoints.GetPoByIdUrl}/${poId}`)
       .pipe(catchError(() => of(null)));
   }
 
-  /** NEW - see project-management-endpoints.ts's UpdatePoUrl header comment: backend not confirmed. */
+  /** Saves changes to a submitted PO (PoQueueController.UpdatePo). */
   updatePo(poId: string, payload: PoRequestSubmission): Observable<PoUpdateResult> {
     return this.http
       .put<PoUpdateResult>(`${this.base}${ProjectManagementEndpoints.UpdatePoUrl}/${poId}`, payload)
       .pipe(catchError((err: HttpErrorResponse) => of({ saved: false, error: backendErrorMessage(err) })));
   }
 
-  // NEW - mockup update, page FORM-PO Request Approval. See project-management-endpoints.ts's
-  // "not backend-implemented yet" note for these 3 methods.
+  // PO approval (Moqups page FORM-PO Request Approval), in PoQueueController.
   getForApproval(poId: string): Observable<PoApprovalDetail | null> {
     return this.http
       .get<PoApprovalDetail>(`${this.base}${ProjectManagementEndpoints.GetPoRequestForApprovalUrl}/${poId}`)
@@ -91,13 +92,20 @@ export class PoRequestService {
 
   approveRequest(poId: string): Observable<PoApprovalActionResult> {
     return this.http
-      .post<PoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.ApprovePoRequestUrl}`, { poId })
+      .post<PoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.ApprovePoRequestUrl}`, { poId, decidedBy: this.auth.getLoggedInUserEmail() })
       .pipe(catchError((err: HttpErrorResponse) => of({ succeeded: false, error: backendErrorMessage(err) })));
   }
 
   rejectRequest(poId: string, reason: string): Observable<PoApprovalActionResult> {
     return this.http
-      .post<PoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.RejectPoRequestUrl}`, { poId, reason })
+      .post<PoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.RejectPoRequestUrl}`, { poId, reason, decidedBy: this.auth.getLoggedInUserEmail() })
       .pipe(catchError((err: HttpErrorResponse) => of({ succeeded: false, error: backendErrorMessage(err) })));
+  }
+
+  /** POs waiting for Accounting approval (Accounting > PO Queue). */
+  getPendingApprovals(): Observable<PendingPoApproval[]> {
+    return this.http
+      .get<PendingPoApproval[]>(`${this.base}api/PoQueue/GetPendingPoApprovals`)
+      .pipe(catchError(() => of([])));
   }
 }

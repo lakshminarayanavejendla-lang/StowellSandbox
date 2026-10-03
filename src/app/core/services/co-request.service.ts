@@ -11,27 +11,29 @@ import {
   CoUpdateResult,
   CoApprovalDetail,
   CoApprovalActionResult,
+  PendingCoApproval,
 } from '../models/project-management/co-request.model';
 import { CoDraftSummary, CoDraftDetail } from '../models/project-management/po-draft.model';
+import { AuthService } from './auth.service';
 
-// FIX (2026-09-24): the API's error body is camelCase ({ message, details }) - read both spellings
-// so the real reason shows instead of the generic HTTP text (see co-budget-allocation.service.ts).
+// The API's error body may be { message, details } or PascalCase. Read both so the real reason
+// shows (2026-09-24; see co-budget-allocation.service.ts).
 function backendErrorMessage(err: HttpErrorResponse): string {
   const e = err.error;
   return e?.details || e?.Details || e?.message || e?.Message || err.message || 'Request failed.';
 }
 
 /**
- * NEW service - Stowell PO Module (not a Blazor port; built from the "Stowell PO Module" Moqups
- * design spec, page FORM-CO Request). Mirrors po-request.service.ts.
+ * Change order requests, built from the Moqups design (page FORM-CO Request), not ported from
+ * Blazor. Works like po-request.service.ts.
  *
- * Backend endpoints now implemented: CoQueueController.SaveCoRequest (writes a SAGESBQ-only
- * draft, safe/reversible) and .SubmitCoRequest (creates a real, permanent, numbered CO in
- * StowellSandbox.dbo.prmchg/sbcgln). See po_module_write_side.sql for the write design.
+ * SaveCoRequest saves a draft in SAGESBQ, which is safe to undo. SubmitCoRequest creates a real,
+ * permanent, numbered CO in StowellSandbox (prmchg and sbcgln). See po_module_write_side.sql.
  */
 @Injectable({ providedIn: 'root' })
 export class CoRequestService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService);
   private base = environment.apiBaseUrl;
 
   saveCo(payload: CoRequestSubmission): Observable<CoSaveResult> {
@@ -68,13 +70,8 @@ export class CoRequestService {
   }
 
   /**
-   * FIX - edit form loading nothing for CO ids that contain a literal '/' (e.g. '10064-46/60' -
-   * some historical chgnum values are formatted this way). RouterLink already encodes that '/'
-   * correctly when building the link (confirmed: browser URL shows '10064-46%2F60', and
-   * ActivatedRoute decodes it back to the raw id with the slash) - the bug was here instead:
-   * concatenating the raw id into this URL string sends the literal '/' straight to the server,
-   * where it's read as an extra path segment rather than part of {coId}, so the real endpoint
-   * 404s and this silently resolves to null. encodeURIComponent keeps it one segment on the wire.
+   * Some old CO numbers contain a slash, such as '10064-46/60'. Without encodeURIComponent the server
+   * reads the slash as another path segment, returns 404, and the edit form loads nothing.
    */
   getCoById(coId: string): Observable<CoDetail | null> {
     return this.http
@@ -82,15 +79,14 @@ export class CoRequestService {
       .pipe(catchError(() => of(null)));
   }
 
-  /** NEW - see project-management-endpoints.ts's UpdateCoUrl header comment: backend not confirmed. */
+  /** Saves changes to a submitted CO (CoQueueController.UpdateCo). */
   updateCo(coId: string, payload: CoRequestSubmission): Observable<CoUpdateResult> {
     return this.http
       .put<CoUpdateResult>(`${this.base}${ProjectManagementEndpoints.UpdateCoUrl}/${encodeURIComponent(coId)}`, payload)
       .pipe(catchError((err: HttpErrorResponse) => of({ saved: false, error: backendErrorMessage(err) })));
   }
 
-  // NEW - mockup update, page FORM-CO Request Approval. Mirrors po-request.service.ts's
-  // approval methods.
+  // CO approval (Moqups page FORM-CO Request Approval). Works like the PO approval methods.
   getForApproval(coId: string): Observable<CoApprovalDetail | null> {
     return this.http
       .get<CoApprovalDetail>(`${this.base}${ProjectManagementEndpoints.GetCoRequestForApprovalUrl}/${encodeURIComponent(coId)}`)
@@ -99,13 +95,20 @@ export class CoRequestService {
 
   approveRequest(coId: string): Observable<CoApprovalActionResult> {
     return this.http
-      .post<CoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.ApproveCoRequestUrl}`, { coId })
+      .post<CoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.ApproveCoRequestUrl}`, { coId, decidedBy: this.auth.getLoggedInUserEmail() })
       .pipe(catchError((err: HttpErrorResponse) => of({ succeeded: false, error: backendErrorMessage(err) })));
   }
 
   rejectRequest(coId: string, reason: string): Observable<CoApprovalActionResult> {
     return this.http
-      .post<CoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.RejectCoRequestUrl}`, { coId, reason })
+      .post<CoApprovalActionResult>(`${this.base}${ProjectManagementEndpoints.RejectCoRequestUrl}`, { coId, reason, decidedBy: this.auth.getLoggedInUserEmail() })
       .pipe(catchError((err: HttpErrorResponse) => of({ succeeded: false, error: backendErrorMessage(err) })));
+  }
+
+  /** COs waiting for Accounting approval (Accounting > CO Queue). */
+  getPendingApprovals(): Observable<PendingCoApproval[]> {
+    return this.http
+      .get<PendingCoApproval[]>(`${this.base}api/CoQueue/GetPendingCoApprovals`)
+      .pipe(catchError(() => of([])));
   }
 }

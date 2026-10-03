@@ -10,16 +10,13 @@ import { BidInfoDto, SubmitToSageResponse } from '../models/accounting/bid-info.
 import { AuthService } from './auth.service';
 
 /**
- * Port of IAccountingService/AccountingService.cs. As in JobService (Phase 1), the Blazor
- * version resolved the caller's email server-side (GetUserEmail() off the ClaimsPrincipal) for
- * GetRecords/BudgetApproveRequest/BudgetRejectRequest; here that has to come from the signed-in
- * MSAL account. TODO wire up a real user-email source once auth is fully in place (see
- * JobService's identical TODO from Phase 1) - the placeholder below mirrors that pattern.
+ * Ported from AccountingService.cs. Blazor got the user's email on the server for GetRecords and
+ * the budget approve and reject calls. Here it has to come from the MSAL account.
+ * TODO: use the real user's email once sign-in is fully wired (same as JobService).
  *
- * GetApproveBudgetData/GetModifyBudgetData/BudgetApproveRequestAsync/BudgetRejectRequest are
- * intentionally identical-shaped pairs - see budget-approval.component.ts, which drives both
- * the "new" and "modify" flows through a single component parameterized by mode, mirroring the
- * near-duplicate ApproveNewBudgetBase.cs / ApproveModifyBudgetBase.cs in the original.
+ * The new-budget and modify-budget methods come in matching pairs because one component,
+ * budget-approval.component.ts, handles both modes. The original had two near-copies,
+ * ApproveNewBudgetBase.cs and ApproveModifyBudgetBase.cs.
  */
 @Injectable({ providedIn: 'root' })
 export class AccountingService {
@@ -27,8 +24,7 @@ export class AccountingService {
   private authService = inject(AuthService);
   private base = environment.apiBaseUrl;
 
-  // TODO: replace with the real signed-in user's email/UPN from the MSAL account once auth is
-  // fully wired - see JobService's identical placeholder from Phase 1.
+  // TODO: use the signed-in user's email from the MSAL account once sign-in is fully wired (same as JobService).
   private placeholderEmail = this.authService.getLoggedInUserEmail() ?? '';
 
   getRecords(email: string = this.placeholderEmail): Observable<AccountingItem[]> {

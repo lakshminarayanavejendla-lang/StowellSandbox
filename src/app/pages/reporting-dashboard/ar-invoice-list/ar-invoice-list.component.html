@@ -1,6 +1,4 @@
-<h3>AR Invoice List</h3>
-<hr />
-
+<app-page-header title="AR Invoice List"></app-page-header>
 <div class="filters">
   <div class="field">
     <label>Job Number</label>
@@ -27,9 +25,8 @@
 </div>
 
 <!--
-  Syncfusion GridComponent replaces the plain <table>. Column/field pairing intentionally
-  mirrors the source's apparent bug (see component header comment) - "Invoice#" is field
-  `jobName`, "Job" is field `invNum`, reproduced exactly, not corrected.
+  "Invoice#" shows jobName and "Job" shows invNum, as in Blazor, even though they look swapped
+  (see the component header).
 -->
 @if (filteredJobs.length > 0) {
   <ejs-grid #arInvoiceGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">

@@ -8,10 +8,12 @@ import {
 import {
   CategoryService,
   ChartModule,
+  DataLabelService,
   LegendService,
   StackingColumnSeriesService,
-  TooltipService
+  TooltipService,
 } from '@syncfusion/ej2-angular-charts';
+import { CHART_AREA, CHART_COLORS, DATA_LABEL, LEGEND, ROUNDED_TOP, TOOLTIP, categoryAxis, moneyAxis, onAxisLabel, onDataLabel, onTooltip, useChartTheme } from '../../../../shared/charts/chart-style';
 
 import { JobService } from '../../../../core/services/job.service';
 import { MsalService } from '@azure/msal-angular';
@@ -27,12 +29,7 @@ interface RetainStackedPoint {
   selector: 'app-retain-stacked-chart',
   standalone: true,
   imports: [ChartModule],
-  providers: [
-    StackingColumnSeriesService,
-    CategoryService,
-    LegendService,
-    TooltipService
-  ],
+  providers: [StackingColumnSeriesService, CategoryService, LegendService, TooltipService, DataLabelService],
   templateUrl: './retain-stacked-chart.component.html'
 })
 export class RetainStackedChartComponent implements OnInit {
@@ -45,24 +42,19 @@ export class RetainStackedChartComponent implements OnInit {
 
   private userEmail = this.authservice.getLoggedInUserEmail();
 
-  primaryXAxis = {
-    valueType: 'Category' as const,
-    labelIntersectAction: 'Rotate45',
-    labelRotation: -45
-  };
-
-  primaryYAxis = {
-    labelFormat: '{value}',
-    minimum: 0
-  };
-
-  legendSettings = {
-    visible: true
-  };
-
-  tooltipSettings = {
-    enable: true
-  };
+  readonly chartTheme = useChartTheme();
+  readonly colors = CHART_COLORS;
+  readonly chartArea = CHART_AREA;
+  readonly legendSettings = LEGEND;
+  readonly tooltip = TOOLTIP;
+  readonly rounded = ROUNDED_TOP;
+  /** only the highest and lowest columns carry a label (zero points get none) */
+  readonly marker = { dataLabel: DATA_LABEL('Top') };
+  readonly primaryXAxis = categoryAxis({ labelIntersectAction: 'Rotate45', labelRotation: -45 });
+  readonly primaryYAxis = moneyAxis({ minimum: 0 });
+  readonly onAxisLabel = onAxisLabel;
+  readonly onTooltip = onTooltip;
+  readonly onDataLabel = onDataLabel;
 
   ngOnInit(): void {
 

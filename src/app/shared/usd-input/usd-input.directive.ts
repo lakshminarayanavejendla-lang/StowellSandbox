@@ -2,21 +2,19 @@ import { Directive, ElementRef, Input, OnChanges, booleanAttribute, forwardRef, 
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 /**
- * NEW (2026-09-23, Mike Smith - Change Order Budget Allocation: "All $ fields need to be formatted
- * for $US"). Browsers can't show "$1,500,000.00" in a type="number" input, so this puts a plain text
- * input into US-dollar display format ("$1,234.50") while still giving ngModel/formControl a clean
- * number (or null when empty).
+ * Shows a text input as US dollars ("$1,234.50") while ngModel or formControl gets a plain number,
+ * or null when it's empty. A type="number" input can't show "$1,500,000.00". Mike Smith asked for
+ * this on Change Order Budget Allocation, 2026-09-23: "All $ fields need to be formatted for $US".
  *
- *   - Not focused: shows the formatted value, e.g. $1,234.50.
- *   - Focused: shows the plain number (1234.5) so it's easy to edit.
- *   - Typing: "$" and "," are ignored; anything that isn't a number leaves the model unchanged.
+ *   Not focused: the formatted value, such as $1,234.50.
+ *   Focused: the plain number (1234.5), so it's easy to edit.
+ *   Typing: "$" and "," are ignored, and anything that isn't a number leaves the value as it was.
  *
  * Usage: <input type="text" appUsdInput [(ngModel)]="amount" />
  *
- * Debit style (2026-09-23, Mike Smith - "format the debit column to be -($0.00) in red font"): add
- * the `usdDebit` attribute and the field displays its value as -($1,234.00) in red when not focused
- * (an empty field stays empty). Display only - the underlying model value stays the positive number
- * the user typed, so nothing downstream (Budget Change Total, submit payload) changes.
+ * Add `usdDebit` to show the value as -($1,234.00) in red when not focused (Mike Smith, 2026-09-23:
+ * "format the debit column to be -($0.00) in red font"). An empty field stays empty. It only changes
+ * the display: the value stays the positive number typed, so totals and the submitted data are the same.
  *
  *   <input type="text" appUsdInput usdDebit [(ngModel)]="line.debit" />
  */
@@ -98,15 +96,15 @@ export class UsdInputDirective implements ControlValueAccessor, OnChanges {
       input.style.color = ''; // plain, normal-coloured number while editing
       return;
     }
-    // Rule (Mike Smith, 2026-09-23): a MINUS amount is red; 0 or more is normal. In Debit style the
-    // typed (positive) value is shown as a negative, -($1,234.00), so a debit of $0 stays $0.00 normal.
+    // A negative amount is red and 0 or more is normal (Mike Smith, 2026-09-23). In debit style the typed
+    // positive value shows as negative, -($1,234.00), so a $0 debit stays a normal $0.00.
     const shown = this.usdDebit ? -this.value : this.value;
     input.value = shown < 0 ? (this.usdDebit ? `-(${money})` : `-${money}`) : money;
     input.style.color = shown < 0 ? '#c0392b' : '';
   }
 
   ngOnChanges(): void {
-    // The usdDebit attribute can arrive after the first writeValue - re-render so it takes effect.
+    // usdDebit can be set after the first writeValue, so render again to apply it.
     this.render();
   }
 }

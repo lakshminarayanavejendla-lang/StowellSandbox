@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { GridModule } from '@syncfusion/ej2-angular-grids';
 import { MsalService } from '@azure/msal-angular';
@@ -13,24 +13,19 @@ import { AddBidNoteRequest, BidNote } from '../../../../../core/models/bids/bid-
 import { AuthService } from '../../../../../core/services/auth.service';
 
 /**
- * Port of BidQueueOverview.razor/BidQueueOverviewTabBase.cs - the "Overview" tab of
- * BidOverview.razor. Radzen's RadzenDataGrid/RadzenDropDown/RadzenButton/Popup/RadzenDatePicker/
- * RadzenNumeric are replaced with a plain table + a simple *ngIf-toggled modal overlay, matching
- * the rest of this module.
+ * The bid's Overview tab, from BidQueueOverview.razor. Radzen's grid, dropdowns, popup, date picker
+ * and number box are replaced with a plain table and a simple popup, like the rest of this module.
  *
- * FLAG - likely bug in the source, ported AS-IS below: BidQueueOverviewTabBase.OnInitializedAsync
- * assigns `_bidStatus = jobPhases` (the list "RFI, Estimate, Bid, Project") and
- * `_phases = bidStatuses` (the list "Open Bid, Won, Lost, Pending") - i.e. the "Bid Phase"
- * dropdown ends up showing status-like values and the "Bid Status" dropdown shows phase-like
- * values. The real GetAllBidPhases()/GetAllBidStatus() service calls exist on IBidService but
- * are commented out in favor of these hardcoded, apparently-swapped lists. Reproduced exactly
- * as observed (bidPhaseOptions/bidStatusOptions below) rather than silently "fixing" it -
- * confirm with the user whether this is intentional before changing it.
+ * Probably a bug in Blazor, kept as is: OnInitializedAsync sets _bidStatus to the job phases (RFI,
+ * Estimate, Bid, Project) and _phases to the bid statuses (Open Bid, Won, Lost, Pending). So Bid
+ * Phase shows status values and Bid Status shows phase values. GetAllBidPhases() and
+ * GetAllBidStatus() exist but are commented out. bidPhaseOptions and bidStatusOptions below copy
+ * that exactly. Ask the user before changing it.
  */
 @Component({
   selector: 'app-bid-summary-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, DatePipe, CurrencyPipe, GridModule],
+  imports: [ReactiveFormsModule, FormsModule, DatePipe, CurrencyPipe, GridModule],
   templateUrl: './bid-summary-tab.component.html',
   styleUrl: './bid-summary-tab.component.scss',
 })
@@ -39,6 +34,8 @@ export class BidSummaryTabComponent implements OnChanges {
   @Input({ required: true }) type!: string;
   @Input() bidRecord: BidRecord | null = null;
   @Output() bidChanged = new EventEmitter<void>();
+  /** Asks the bid page to switch to its Documents tab (the Bid Document Library link). */
+  @Output() openDocuments = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private bidService = inject(BidService);
@@ -48,13 +45,11 @@ export class BidSummaryTabComponent implements OnChanges {
   private router = inject(Router);
 
   readonly divisions = ['Orlando', 'Naples', 'Jacksonville', 'Tampa', 'Texas'];
-  // See class-level FLAG comment above re: this apparent swap - ported as observed.
+  // These look swapped; see the note at the top.
   readonly bidPhaseOptions = ['Open Bid', 'Won', 'Lost', 'Pending'];
   readonly bidStatusOptions = ['RFI', 'Estimate', 'Bid', 'Project'];
-  // FIX (2026-09-16, Mike Smith - "its still a textbox") - State was a free-text input here, the
-  // only place on the Overview tab still not a dropdown; matches new-bid.component.ts's states
-  // list (also expanded from Blazor's NC/SC/FL-only list to the full 50 + DC - see that file's fix
-  // comment for why).
+  // State is a dropdown, like everywhere else on the tab, with the same full list of 50 states plus
+  // DC as new-bid.component.ts (Mike Smith, 2026-09-16: "its still a textbox").
   readonly states = [
     'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL',
     'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME',
@@ -68,39 +63,31 @@ export class BidSummaryTabComponent implements OnChanges {
   newBidDate = '';
   newBidAmount: number | null = null;
   isSaving = false;
-  // FIX (2026-09-17, Mike Smith - "I was able to create a duplicate project by accident") -
-  // Bid Won/Bid Lost had no in-flight guard at all, so a double-click (or a slow response
-  // tempting a repeat click) fired convertBidToProject twice concurrently - sp_ConvertBidToProject
-  // itself has no locking either, so both requests could read IsProject=0 before either commits,
-  // each creating its own real Sage job/InsertActRec row. Backend locking fix is separate
-  // (sp_ConvertBidToProject); this stops the double-click at the source.
+  // A double-click on Bid Won or Bid Lost used to run convertBidToProject twice. The stored procedure
+  // has no locking, so both could create a Sage job (Mike Smith, 2026-09-17: "I was able to create a
+  // duplicate project by accident"). This blocks the second click; the procedure's locking is a
+  // separate fix.
   isConverting = false;
   isClosingLost = false;
   message = '';
 
-  // NEW - Notes table (see bid-note.model.ts header comment).
+  // The Notes table (see bid-note.model.ts).
   notes: BidNote[] = [];
   newNoteText = '';
 
-  // NEW - Notes table's "User" column, stamped from the signed-in MSAL account rather than
-  // typed in. getActiveAccount() returns null unless something has explicitly called
-  // setActiveAccount() after login - this app's app.config.ts never does (no
-  // MsalBroadcastService/handleRedirectPromise wiring), so it's null in practice. Falling back to
-  // getAllAccounts()[0] instead, which is safe for this app's single-account-per-browser usage.
-  // FIX (2026-09-16, Mike Smith - "Can we have user first and last name here instead of email
-  // address?") - was calling getLoggedInUserEmail() twice (a copy/paste leftover); switched to
-  // getLoggedInUserName(), which reads the MSAL account's display name claim instead of its
-  // username/email. Only affects notes added from now on - existing rows already stored the email.
+  // The Notes "User" column is filled from the signed-in MSAL account, not typed.
+  // getActiveAccount() is null unless setActiveAccount() was called after login, which this app never
+  // does, so it falls back to getAllAccounts()[0]. That's fine with one account per browser.
+  // It uses getLoggedInUserName(), the account's display name, instead of the email (Mike Smith,
+  // 2026-09-16: "Can we have user first and last name here instead of email address?"). Only new
+  // notes get the name; older rows still hold the email.
   get currentUserName(): string {
     return this.authservice.getLoggedInUserName() ?? this.authservice.getLoggedInUserEmail() ?? 'Unknown User';
   }
 
-  /** FIX (2026-09-20, Mike Smith - "user first and last name here instead of email address", Notes
-   * table) - the fix above only covered NEW notes; every note saved before it still carries an email
-   * address in enteredBy and was still shown as one. This is display-only (nothing stored is
-   * changed): an email is shown as the signed-in user's display name when it is theirs, otherwise as
-   * a name built from the address ("john.smith@stowellinc.com" -> "John Smith"). A value that isn't
-   * an email is shown as-is. */
+  /** Shows names instead of emails for older notes too (Mike Smith, 2026-09-20). Display only;
+   * nothing saved changes. The signed-in user's own email shows as their display name, other emails
+   * become a name ("john.smith@stowellinc.com" shows as "John Smith"), and anything else shows as is. */
   displayUser(value?: string | null): string {
     if (!value) return '';
     if (!value.includes('@')) return value;
@@ -119,8 +106,8 @@ export class BidSummaryTabComponent implements OnChanges {
     return words.length ? words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : value;
   }
 
-  // NEW - shown greyed-out next to currentUserName in the Notes toolbar so the user can see
-  // what will be stamped before they hit Add.
+  // Shown greyed out next to currentUserName in the Notes toolbar, so you can see what will be
+  // saved before you click Add.
   readonly today = new Date();
 
   form = this.fb.nonNullable.group({
@@ -146,7 +133,6 @@ ngOnChanges(changes: SimpleChanges): void {
   console.log('changes:', changes);
 
   if (changes['bidRecord']) {
-debugger;
 const displayBidID =
   (changes['bidRecord'].currentValue as BidRecord | null)?.displayBidID;
   console.log('Child received displayBidID:', displayBidID);
@@ -203,19 +189,16 @@ const displayBidID =
         clientName: this.bidRecord.clientName,
         department: this.bidRecord.department,
         division: value.division,
-        // FIX (Mike Smith report, 2026-09-10): this tab's form has no GC_Address1/GC_Address2
-        // fields (those live on the Details tab) - this used to send value.address1/value.address2
-        // (the job site address) here instead. Since UpdateBidDetails does a full overwrite,
-        // saving from this Overview tab was silently clobbering the Client (GC) address with the
-        // job address on every save, which is what wiped out whatever was just entered on the
-        // Details tab. Preserving the already-loaded bidRecord.gcAddress1/2 instead.
+        // This tab has no GC address fields (they're on the Details tab), but it used to send the job
+        // site address in them. UpdateBidDetails overwrites everything, so each save here replaced the
+        // Client address with the job address (Mike Smith, 2026-09-10). It now sends the loaded
+        // bidRecord.gcAddress1 and gcAddress2.
         GC_Address1: this.bidRecord.gcAddress1,
         GC_Address2: this.bidRecord.gcAddress2,
         GC_City: this.bidRecord.gcCity,
         GC_SalesTaxDistrict: this.bidRecord.gcSalesTaxDistrict,
         GC_State: this.bidRecord.gcState,
-        // Ported CORRECTLY (from gcZipCode), not replicating the source's apparent copy/paste
-        // bug - see bid-record.model.ts's UpdateBidDetailsRequest header comment.
+        // From gcZipCode, not the job ZipCode as in Blazor (see UpdateBidDetailsRequest in bid-record.model.ts).
         GC_ZipCode: this.bidRecord.gcZipCode,
         insuranceType: this.bidRecord.insuranceType,
         invoiceSubmittal: this.bidRecord.invoiceSubmittal,
@@ -226,12 +209,9 @@ const displayBidID =
         state: value.state,
         taxExempt: this.bidRecord.taxExempt,
         zipCode: value.zipCode,
-        // FIX (2026-09-16, Mike Smith - "Bid Phase, Bid Status and Address 2 not saving") - real
-        // root cause, confirmed live: this request never included ModifiedBy at all, which the
-        // backend's model binding requires - every save from this Overview tab 400'd immediately.
-        // The failure was invisible because updateBidDetails()'s Observable re-throws on error and
-        // this subscribe had no error handler, so isSaving just stayed stuck true (Save Bid button
-        // permanently disabled) with no message shown - looked exactly like a silent no-op.
+        // The request had no ModifiedBy, which the API requires, so every save from this tab failed
+        // with a 400 (Mike Smith, 2026-09-16: "Bid Phase, Bid Status and Address 2 not saving"). There
+        // was no error handler, so isSaving stayed true, Save Bid stayed disabled and nothing was shown.
         modifiedBy: this.authservice.getLoggedInUserEmail() ?? 'System',
       })
       .subscribe({
@@ -267,8 +247,7 @@ const displayBidID =
           this.isConverting = false;
           this.message = `Unable to create project: ${res.message || 'unknown error'}`;
         }
-        // FIX (2026-09-23): re-render, otherwise the button stayed on "Creating Project..." and the
-        // message never appeared after a failed conversion.
+        // Re-render, or the button stays on "Creating Project..." and the message never shows after a failure (2026-09-23).
         this.cdr.detectChanges();
       });
   }
@@ -278,7 +257,7 @@ const displayBidID =
       return;
     }
     this.isClosingLost = true;
-    // FIX (2026-09-24, Mike Smith - B2600023 stayed in Current Bids): see bid-details-tab.component.ts getBidLost.
+    // See getBidLost in bid-details-tab.component.ts (Mike Smith, 2026-09-24: B2600023 stayed in Current Bids).
     this.bidService.closeBidAsLost({ internalBidID: this.bidRecord.internalBidID, modifiedBy: this.authservice.getLoggedInUserEmail() ?? undefined }).subscribe((res) => {
       if (res === 'Success') {
         this.message = 'Bid marked as Lost and moved to Closed Bids.';
@@ -292,7 +271,6 @@ const displayBidID =
   }
 
   openAddAmount(): void {
-    debugger;
     console.log('******** ADD BID CLICKED ********');
 
   this.newBidDate = '';
@@ -307,7 +285,6 @@ const displayBidID =
   }
 
 saveNewAmount(): void {
-debugger;
   if (!this.bidRecord) {
     console.error('bidRecord is null');
     return;
@@ -341,7 +318,6 @@ debugger;
     next: (response) => {
 
       console.log('Mapped response:', response);
-debugger;
       if (response.newId > 0) {
 
         console.log(
@@ -425,7 +401,6 @@ deleteAmount(item: BidAmount): void {
           'DeleteBidAmount result:',
           message
         );
-debugger;
         if (
           message &&
           message.toLowerCase() !== 'error'
@@ -484,7 +459,7 @@ debugger;
   });
 }
 
-  // NEW - Notes table (see bid-note.model.ts header comment).
+  // The Notes table (see bid-note.model.ts).
   private loadNotes(): void {
     if (!this.bidId) return;
 

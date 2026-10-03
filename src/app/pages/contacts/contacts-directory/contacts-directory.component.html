@@ -1,63 +1,86 @@
-<app-page-header title="Contacts"></app-page-header>
+<header class="head">
+  <div>
+    <h1>Contacts</h1>
+    <p>Find people at Stowell by group.</p>
+  </div>
+  @if (selectedGroup) {
+    <label class="search">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input type="search" placeholder="Search name, title or email" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Search this group" />
+    </label>
+  }
+</header>
 
 @if (!groupsLoaded) {
-  <p>Loading ...</p>
+  <div class="chips" aria-hidden="true">
+    @for (s of [1, 2, 3, 4, 5]; track s) {
+      <span class="chip skeleton"></span>
+    }
+  </div>
+  <div class="grid" aria-busy="true">
+    @for (s of skeletons; track s) {
+      <div class="card skeleton-card"><span class="av skeleton"></span><span class="line skeleton"></span><span class="line short skeleton"></span></div>
+    }
+  </div>
 } @else if (groups.length === 0) {
-  <p>No groups found.</p>
+  <div class="empty"><i class="bi bi-people" aria-hidden="true"></i><p>No groups found.</p></div>
 } @else {
-  <div class="group-tabs">
+  <div class="chips" role="tablist" aria-label="Groups">
     @for (group of groups; track group.id) {
-      <button
-        type="button"
-        class="group-tab"
-        [class.active]="group.id === selectedGroup?.id"
-        (click)="selectGroup(group)"
-      >
+      <button type="button" role="tab" class="chip" [class.active]="group.id === selectedGroup?.id" [attr.aria-selected]="group.id === selectedGroup?.id" (click)="selectGroup(group)">
         {{ group.displayName }}
       </button>
     }
   </div>
 
   @if (selectedGroup) {
-    <div class="group-panel">
-      <h3 class="group-heading">{{ selectedGroup.displayName }}</h3>
-
-      @if (!membersLoaded) {
-        <p>Loading members...</p>
-      } @else if (groupMembers.length === 0) {
-        <p>No members in this group.</p>
-      } @else {
-        <div class="contact-grid">
-          @for (member of groupMembers; track member.id) {
-            <div class="contact-box">
-              <div class="contact-photo">
-                <img [src]="avatarSrc(member)" alt="{{ member.displayName }} avatar" />
-                <div class="job-title">{{ member.jobTitle || ' ' }}</div>
-              </div>
-              <div class="contact-details">
-                <h3><strong>{{ member.displayName }}</strong></h3>
-                @if (member.streetAddress) {
-                  <div class="street">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <a [href]="member.streetAddress" target="_blank">{{ member.streetAddress }}</a>
-                  </div>
-                }
-                <address>
-                  @if (hasCityStateZip(member)) {
-                    <span>{{ member.city }}, {{ member.state }} {{ member.postalCode }}<br /></span>
-                  }
-                  @if (member.phone) {
-                    <span class="phone-label" title="Phone">P: {{ member.phone }}<br /></span>
-                  }
-                  @if (member.mail) {
-                    <a href="mailto:{{ member.mail }}">{{ member.mail }}</a>
-                  }
-                </address>
-              </div>
-            </div>
-          }
-        </div>
+    <div class="summary">
+      <h2>{{ selectedGroup.displayName }}</h2>
+      @if (membersLoaded) {
+        <span class="count">{{ shown().length }} {{ shown().length === 1 ? 'person' : 'people' }}@if (query()) { found }</span>
       }
     </div>
+
+    @if (!membersLoaded) {
+      <div class="grid" aria-busy="true">
+        @for (s of skeletons; track s) {
+          <div class="card skeleton-card"><span class="av skeleton"></span><span class="line skeleton"></span><span class="line short skeleton"></span></div>
+        }
+      </div>
+    } @else if (members().length === 0) {
+      <div class="empty"><i class="bi bi-people" aria-hidden="true"></i><p>No members in this group.</p></div>
+    } @else if (shown().length === 0) {
+      <div class="empty"><i class="bi bi-search" aria-hidden="true"></i><p>Nobody matches "{{ query() }}".</p></div>
+    } @else {
+      <div class="grid">
+        @for (member of shown(); track member.id) {
+          <article class="card">
+            @if (photo(member); as src) {
+              <img class="av" [src]="src" [alt]="member.displayName" loading="lazy" />
+            } @else {
+              <span class="av initials" [style.background]="tone(member).background" [style.color]="tone(member).color" aria-hidden="true">{{ initials(member) }}</span>
+            }
+            <h3>{{ member.displayName }}</h3>
+            <p class="role">{{ member.jobTitle || ' ' }}</p>
+
+            @if (place(member)) {
+              <p class="place"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ place(member) }}</p>
+            }
+
+            <div class="actions">
+              @if (member.mail) {
+                <a class="act" [href]="'mailto:' + member.mail" [title]="member.mail"><i class="bi bi-envelope" aria-hidden="true"></i><span>{{ member.mail }}</span></a>
+                <button type="button" class="act icon" (click)="copy(member.mail)" [attr.aria-label]="'Copy ' + member.mail" [title]="copied() === member.mail ? 'Copied' : 'Copy email'">
+                  <i class="bi" [class.bi-clipboard]="copied() !== member.mail" [class.bi-check2]="copied() === member.mail" aria-hidden="true"></i>
+                </button>
+              }
+              @if (member.phone) {
+                <a class="act" [href]="phoneHref(member)"><i class="bi bi-telephone" aria-hidden="true"></i><span>{{ member.phone }}</span></a>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
   }
 }

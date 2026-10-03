@@ -1,0 +1,92 @@
+<header class="topbar" role="banner">
+  <button class="icon-btn nav-toggle" [class.always]="showMenu()" type="button" title="Menu" aria-label="Open navigation menu" (click)="menuToggle.emit()">
+    <i class="bi bi-list" aria-hidden="true"></i>
+  </button>
+
+  <div class="search-wrap">
+    <i class="bi bi-search search-ico" aria-hidden="true"></i>
+    <input
+      #searchInput
+      type="text"
+      placeholder="Search jobs, POs and COs"
+      aria-label="Search"
+      autocomplete="off"
+      (input)="onSearchInput($any($event.target).value)"
+      (keydown)="onSearchKey($event)"
+      (focus)="onSearchInput($any($event.target).value)"
+    />
+    <span class="kbd" aria-hidden="true">Ctrl K</span>
+
+    @if (searchOpen()) {
+      <div class="drop search-drop" role="listbox">
+        @for (r of results(); track r.type + r.label; let i = $index) {
+          <button type="button" class="hit" [class.act]="i === activeHit()" role="option" (click)="open(r)" (mouseenter)="activeHit.set(i)">
+            <span class="hit-type">{{ r.type }}</span>
+            <span class="hit-text"><strong>{{ r.label }}</strong><small>{{ r.sub }}</small></span>
+          </button>
+        } @empty {
+          <div class="drop-empty">No results for "{{ query() }}"</div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="top-icons">
+    <app-quick-shortcut class="hide-sm"></app-quick-shortcut>
+
+    <button class="icon-btn hide-sm" type="button" [title]="'Density: ' + density.density() + ' (click to change)'" [attr.aria-label]="'UI density: ' + density.density()" (click)="density.cycle()">
+      <i class="bi bi-distribute-vertical" aria-hidden="true"></i>
+    </button>
+
+    <button class="icon-btn hide-sm" type="button" title="Copilot" aria-label="Copilot">
+      <img src="https://brandlogo.org/wp-content/uploads/2025/05/Microsoft-365-Copilot-Logo-2025.png" width="24" height="24" alt="" />
+    </button>
+
+    <button class="icon-btn hide-sm" type="button" title="Document Management" aria-label="Document Management">
+      <i class="bi bi-file-earmark-richtext" aria-hidden="true"></i>
+    </button>
+
+    <button class="icon-btn hide-sm" type="button" title="Password Management" aria-label="Password Management" (click)="goToPasswordPage()">
+      <i class="fas fa-key" aria-hidden="true"></i>
+    </button>
+
+    <button class="icon-btn hide-sm" type="button" title="Support" aria-label="Support" (click)="emailSupport()">
+      <i class="fas fa-handshake" aria-hidden="true"></i>
+    </button>
+
+    <div class="notif-wrap">
+      <button class="icon-btn" type="button" title="Notifications" aria-label="Notifications" [attr.aria-expanded]="notifOpen()" (click)="toggleNotifications()">
+        <i class="bi bi-bell" aria-hidden="true"></i>
+        @if (notices().length) {
+          <span class="notif-dot"></span>
+        }
+      </button>
+      @if (notifOpen()) {
+        <div class="drop notif-drop">
+          <div class="drop-head">Notifications</div>
+          @for (n of notices(); track n.title) {
+            <button type="button" class="notice" (click)="goTo(n.route)">
+              <strong>{{ n.title }}</strong>
+              <small>{{ n.sub }}</small>
+            </button>
+          } @empty {
+            <div class="drop-empty">You are all caught up.</div>
+          }
+        </div>
+      }
+    </div>
+
+    <button class="icon-btn" type="button" [title]="themeService.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'" aria-label="Switch light or dark theme" (click)="themeService.toggle()">
+      <i class="bi" [class.bi-moon]="themeService.theme() === 'light'" [class.bi-sun]="themeService.theme() === 'dark'" aria-hidden="true"></i>
+    </button>
+
+    <!-- Ported as-is from MainLayout.razor: a plain external link, not the app's own logout route -->
+    <a class="icon-btn" title="Logout" aria-label="Logout" href="javascript:void(0)" role="button" (click)="logout()">
+      <i class="fas fa-sign-out" aria-hidden="true"></i>
+    </a>
+
+    <button class="icon-btn launcher-toggle" type="button" title="Show or hide the application launcher" aria-label="Show or hide the application launcher" (click)="launcherToggle.emit()">
+      <i class="bi bi-layout-sidebar-inset-reverse" aria-hidden="true"></i>
+    </button>
+  </div>
+</header>

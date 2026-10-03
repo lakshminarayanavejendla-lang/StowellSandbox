@@ -1,9 +1,8 @@
-// NEW model - Stowell PO Module (not a Blazor port; designed from the "Stowell PO Module"
-// Moqups spec, pages NAV-PO Queue Home / TAB-Job PO Overview). No backend endpoint exists for
-// this yet - see po-queue.service.ts's header comment.
+// PO module, built from the Moqups design (pages NAV-PO Queue Home and TAB-Job PO Overview), not
+// ported from Blazor. See po-queue.service.ts for where the data comes from.
 export interface PoQueueRecord {
-  /** Composite display value as shown in the mockup, e.g. "P220112345 (11 of 24)" or
-   *  "P220145676 (Add-on)" - format/parsing of the "(n of m)" suffix is not yet specified. */
+  /** The value as the mockup shows it, such as "P220112345 (11 of 24)" or "P220145676 (Add-on)".
+   *  How the "(n of m)" part is built isn't decided yet. */
   masterJobPoId: string;
   poStatus: string;
   jobName: string;

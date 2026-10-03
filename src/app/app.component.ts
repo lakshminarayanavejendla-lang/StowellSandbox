@@ -9,8 +9,7 @@ import { PageTitleService } from './core/services/page-title.service';
   template: `<router-outlet></router-outlet>`,
 })
 export class AppComponent implements OnInit {
-  // NEW - see PageTitleService's header comment: nothing was setting document.title on
-  // navigation, so every page showed index.html's static "Stowell App" tab title.
+  // Sets the browser tab title on each page (see PageTitleService).
   private pageTitleService = inject(PageTitleService);
 
   ngOnInit(): void {

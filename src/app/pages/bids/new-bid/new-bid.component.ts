@@ -5,17 +5,16 @@ import { BidService } from '../../../core/services/bid.service';
 import { CreateBidRequest } from '../../../core/models/bids/create-bid-request.model';
 import { ToastModule, ToastComponent } from '@syncfusion/ej2-angular-notifications';
 import { AuthService } from '../../../core/services/auth.service';
-// Port of NewBid.razor/NewBidBase.cs. Reactive Forms replace Blazor's <EditForm>+@bind; the
-// hardcoded Department/Division/State option lists are ported as-is from the source (no
-// dedicated lookup endpoints were used there either).
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
+// The New Bid page, from NewBid.razor, using a reactive form. The Department, Division and State
+// lists are fixed, as in Blazor.
 //
-// CreatedBy is left unset here - the Blazor version set it server-side via
-// BidService.CreateNewBid -> GetUserEmail(); see BidService's header comment for the
-// MSAL-identity open question carried over from Phase 1's JobService/CurrentJobsComponent.
+// CreatedBy isn't set here. Blazor set it on the server from the signed-in user; see the note at
+// the top of bid.service.ts.
 @Component({
   selector: 'app-new-bid',
   standalone: true,
-  imports: [  
+  imports: [PageHeaderComponent,   
     ReactiveFormsModule,
     ToastModule],
   templateUrl: './new-bid.component.html',
@@ -35,10 +34,8 @@ toast!: ToastComponent;
 
   readonly departments = ['Drywall', 'Block/Concrete'];
   readonly divisions = ['Orlando', 'Naples', 'Jacksonville', 'Tampa', 'Texas'];
-  // FIX (2026-09-16, Mike Smith - "the states from blazor") - the Blazor source only ever
-  // hardcoded NC/SC/FL here too (confirmed in NewBid.razor), but that's clearly incomplete for a
-  // real US-wide bid form - it couldn't even represent his own test bid ("Texas BBQ House",
-  // Dallas, TX). Expanded to the full 50 states + DC.
+  // All 50 states plus DC. Blazor only had NC, SC and FL, which couldn't even hold Mike's test bid
+  // in Dallas, TX (Mike Smith, 2026-09-16: "the states from blazor").
   readonly states = [
     'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL',
     'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME',
@@ -125,9 +122,8 @@ constructor(
   }
 
   private loadNextBidId(): void {
-    debugger;
       const userEmail = this.authService.getLoggedInUserEmail();
-    // The Blazor original passes GetUserEmail() as createdBy - see the class-level auth note.
+    // Blazor passed the signed-in user as createdBy (see the note at the top).
     //this.bidService.getNextDisplayBidId(userEmail).subscribe((id) => (this.nextBidId = id));
     this.bidService.getNextDisplayBidId(this.authService.getLoggedInUserEmail() ?? '')
   .subscribe(displayBidID => {

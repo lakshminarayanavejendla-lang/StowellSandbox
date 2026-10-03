@@ -23,7 +23,7 @@
         <label>Bid Name</label>
         <input type="text" [value]="bidRecord.bidName" readonly />
       </div>
-      <a class="doc-link" [routerLink]="['/bids/documents', bidId]"><i class="fas fa-folder"></i> Bid Document Library</a>
+      <a class="doc-link" href="#" (click)="$event.preventDefault(); openDocuments.emit()"><i class="fas fa-folder"></i> Bid Document Library</a>
     </div>
 
      <div class="section-header">
@@ -39,8 +39,7 @@
     </div>
     <div class="hr-line-dashed"></div>
 
-    <!-- See bid-summary-tab's header comment re: conditionally including the Action e-column
-         with @if - isClosed is fixed for this tab's lifetime, same flag applies here. -->
+    <!-- The Action column is added with @if; see the note in bid-summary-tab's template. -->
     <ejs-grid [dataSource]="bidAccessSummary" width="auto">
       <e-columns>
         @if (!isClosed) {
@@ -97,11 +96,10 @@
             }
           </select>
         </div>
-        <!-- FIX (2026-09-17, Mike Smith - "General contractor address not saving") - these were
-             hardcoded readonly, so a user could never type a GC address directly - only ever set
-             indirectly by picking a matching Client from the dropdown above. Now editable (same
-             [readonly]="isClosed" pattern as every other field on this tab), while still
-             auto-filling on Client selection via onClientChange(). -->
+        <!-- These used to be always read-only, so a GC address could only come from picking a
+             Client (Mike Smith, 2026-09-17: "General contractor address not saving"). They're
+             editable now, read-only only when isClosed like the other fields, and still fill in
+             when a Client is picked (onClientChange()). -->
         <div class="form-group row">
           <label>Address</label>
           <input type="text" placeholder="Enter address" formControlName="GC_Address1" [readonly]="isClosed" />

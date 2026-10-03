@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject,ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { GridModule } from '@syncfusion/ej2-angular-grids';
 import { BidService } from '../../../../../core/services/bid.service';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -11,19 +11,17 @@ import { Employee } from '../../../../../core/models/bids/employee.model';
 import { ContractorClient } from '../../../../../core/models/bids/contractor-client.model';
 
 /**
- * Port of BidProjectDetailsTab.razor/BidProjectDetailsTabBase.cs - the "Details" tab of
- * BidOverview.razor.
+ * The bid's Details tab, from BidProjectDetailsTab.razor.
  *
- * The "Client" (General Contractor) dropdown is populated via BidService.getAllContractorClients()
- * (a duplicated cross-module call into what's really the Estimation module's
- * GetAllContractorClients route - see bids-endpoints.ts's comment on GetAllContractorClientsUrl
- * and contractor-client.model.ts). Selecting a client fills the read-only GC address fields via
- * BidService.getContractorClientByName, same as BidProjectDetailsTabBase.OnClientChange.
+ * The Client (General Contractor) dropdown comes from BidService.getAllContractorClients(), which
+ * calls Estimation's GetAllContractorClients route (see bids-endpoints.ts and
+ * contractor-client.model.ts). Picking a client fills the read-only GC address fields through
+ * getContractorClientByName, as OnClientChange did.
  */
 @Component({
   selector: 'app-bid-details-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, GridModule],
+  imports: [ReactiveFormsModule, FormsModule, GridModule],
   templateUrl: './bid-details-tab.component.html',
   styleUrl: './bid-details-tab.component.scss',
 })
@@ -32,6 +30,8 @@ export class BidDetailsTabComponent implements OnChanges {
   @Input({ required: true }) type!: string;
   @Input() bidRecord: BidRecord | null = null;
   @Output() bidChanged = new EventEmitter<void>();
+  /** Asks the bid page to switch to its Documents tab (the Bid Document Library link). */
+  @Output() openDocuments = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
   private bidService = inject(BidService);
@@ -98,7 +98,7 @@ export class BidDetailsTabComponent implements OnChanges {
         GC_Address2: this.bidRecord.gcAddress2 ?? '',
         GC_City: this.bidRecord.gcCity ?? '',
         GC_State: this.bidRecord.gcState ?? '',
-        // FIX (2026-09-24): GC zip was never loaded into the form, so any re-save blanked it.
+        // Load the GC zip into the form, or a re-save blanks it (2026-09-24).
         GC_ZipCode: this.bidRecord.gcZipCode ?? '',
         GC_SalesTaxDistrict: this.bidRecord.gcSalesTaxDistrict ?? '',
         insuranceType: this.bidRecord.insuranceType ?? '',
@@ -118,7 +118,6 @@ onClientChange(name: string): void {
   }
 
   this.bidService.getContractorClientByName(name).subscribe((client) => {
-    debugger;
 
     if (client && this.bidRecord) {
 
@@ -128,8 +127,7 @@ onClientChange(name: string): void {
         GC_Address2: client.address2 ?? '',
         GC_City: client.city ?? '',
         GC_State: client.state ?? '',
-        // FIX (2026-09-17) - GC_ZipCode was never patched here, so selecting a Client left
-        // whatever zip was already in the field (usually blank/stale).
+        // Set GC_ZipCode too, or picking a Client left the old (often blank) zip (2026-09-17).
         GC_ZipCode: client.zipCode ?? ''
       });
 
@@ -154,7 +152,6 @@ saveBidData(): void {
 
   this.isSaving = true;
   this.message = '';
-debugger;
   const value = this.form.getRawValue();
 console.log("Final values:",value);
 const request: UpdateBidDetailsRequest = {
@@ -176,7 +173,7 @@ const request: UpdateBidDetailsRequest = {
 
   clientName: value.clientName,
 
-  // IMPORTANT: match your existing interface
+  // Must match the existing interface.
   GC_Address1: value.GC_Address1,
   GC_Address2: value.GC_Address2,
   GC_City: value.GC_City,
@@ -190,10 +187,8 @@ const request: UpdateBidDetailsRequest = {
   invoiceSubmittal: value.invoiceSubmittal,
   certifiedPayroll: value.certifiedPayroll,
 
-  // FIX (2026-09-17, Mike Smith - "Net Terms date [not saving]") - was
-  // this.bidRecord.netTermsDate, the STALE value from when the record was first loaded, not the
-  // form control's current value - so any edit the user made here was silently discarded on
-  // save, every time, regardless of what they typed.
+  // Use the form's current value, not this.bidRecord.netTermsDate from when the record loaded, which
+  // threw away every edit on save (Mike Smith, 2026-09-17: "Net Terms date [not saving]").
   netTermsDate: value.netTermsDate || undefined,
 
   retainagePercentage: value.retainagePercentage ?? 0,
@@ -215,7 +210,7 @@ const request: UpdateBidDetailsRequest = {
       if (success) {
         this.message = 'Bid details saved successfully';
 
-        // Tell parent component that bid was updated
+        // Tell the parent component the bid was updated.
         this.bidChanged.emit();
 
       } else {
@@ -240,17 +235,16 @@ const request: UpdateBidDetailsRequest = {
   });
 }
 
-  // FIX (2026-09-17, Mike Smith - "I was able to create a duplicate project by accident") -
-  // same fix as bid-summary-tab.component.ts's getBidWon/getBidLost (see that file's comment) -
-  // this tab has its own separate copy of these buttons/handlers, so it needed its own guard too.
+  // Blocks double-clicks on Bid Won and Bid Lost, like bid-summary-tab.component.ts. This tab has its
+  // own copy of those buttons, so it needs its own guard (Mike Smith, 2026-09-17).
   getBidWon(): void {
     if (!this.bidRecord || this.isConverting) {
       return;
     }
 
     this.isConverting = true;
-    // FIX (2026-09-23): modifiedBy was being sent the bid's modifiedDate; use the signed-in user
-    // (same as bid-summary-tab.component.ts) so BidLog records who converted it.
+    // Send the signed-in user as modifiedBy (it used to get the bid's modifiedDate), so BidLog records
+    // who converted it, as in bid-summary-tab.component.ts (2026-09-23).
     this.bidService.convertBidToProject({ internalBidID: this.bidRecord.internalBidID, modifiedBy: this.authService.getLoggedInUserEmail() ?? undefined }).subscribe((res) => {
       if (res.newProjectID) {
         this.message = `${res.newProjectID} created successfully.`;
@@ -259,8 +253,7 @@ const request: UpdateBidDetailsRequest = {
         this.isConverting = false;
         this.message = `Unable to create project: ${res.message || 'unknown error'}`;
       }
-      // FIX (2026-09-23): re-render, otherwise the button stayed on "Creating Project..." forever
-      // after a failed conversion and the reason never showed.
+      // Re-render, or the button stays on "Creating Project..." and the reason never shows after a failure (2026-09-23).
       this.cdr.detectChanges();
     });
   }
@@ -270,10 +263,10 @@ const request: UpdateBidDetailsRequest = {
       return;
     }
     this.isClosingLost = true;
-    // FIX (2026-09-24, Mike Smith - B2600023 "clicked Lost and it stayed in the Current Bids queue"): the request
-    // went without modifiedBy, the API answered 400, and the failed call was treated as success (the service
-    // returns 'Error', which is truthy) - so the page went back to the queue with the bid untouched. Send the
-    // signed-in user, and only leave the page when the API really answered "Success".
+    // Clicking Lost on B2600023 left it in Current Bids (Mike Smith, 2026-09-24). The request had no
+    // modifiedBy, so the API returned 400, but the service returns 'Error', which is truthy, so it was
+    // treated as success and the page went back to the queue. Now it sends the signed-in user and only
+    // leaves the page when the API says "Success".
     this.bidService.closeBidAsLost({ internalBidID: this.bidRecord.internalBidID, modifiedBy: this.authService.getLoggedInUserEmail() ?? undefined }).subscribe((res) => {
       if (res === 'Success') {
         this.message = 'Bid marked as Lost and moved to Closed Bids.';

@@ -1,27 +1,58 @@
+:host {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 8px;
-}
-
-.page-header-logo {
-  height: 40px;
-  width: auto;
-  flex-shrink: 0;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
 }
 
 .page-header-title {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
-  font-size: 20px;
-  font-weight: 500;
-  color: #00355f;
-  text-align: right;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--sh-ink);
+  text-wrap: balance;
 }
 
-.page-header-rule {
-  margin: 0 0 20px;
-  border: none;
-  border-top: 1px solid #333;
+.page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+// the Stowell mark sits quietly at the end of the row
+.page-header-logo {
+  height: 30px;
+  width: auto;
+  flex-shrink: 0;
+  padding: 3px 6px;
+  background: #fff;
+  border: 1px solid var(--sh-line);
+  border-radius: 8px;
+}
+
+@media (max-width: 639px) {
+  .page-header-title {
+    flex: 1 1 100%;
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .page-header-logo {
+    display: none;
+  }
 }

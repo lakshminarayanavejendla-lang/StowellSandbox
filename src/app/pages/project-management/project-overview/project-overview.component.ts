@@ -10,41 +10,31 @@ import { InvoicesTabComponent } from './tabs/invoices-tab/invoices-tab.component
 import { ReportingTabComponent } from './tabs/reporting-tab/reporting-tab.component';
 import { DocumentsTabComponent } from './tabs/documents-tab/documents-tab.component';
 import { BudgetTabComponent } from './tabs/budget-tab/budget-tab.component';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// 'po' - NEW tab added per the original "Stowell PO Module" Moqups design spec (page
-// TAB-Job PO Overview), not part of the original Blazor source.
+// 'po' comes from the Moqups design (page TAB-Job PO Overview); Blazor didn't have it.
 //
-// 'co' / 'invoices' / 'documents' - NEW tabs added per the CLIENT-UPDATED Moqups (17-page
-// refresh of the same "Stowell PO/CO Module" design doc). That update's tab bar is
-// Overview/Details/Purchase Orders/Change Orders/Invoices/Reporting/Documents - i.e. it splits
-// Change Orders and Invoices out of the old combined "$ PO" tab and adds Documents. 'financials'
-// is kept as its own tab regardless (removing an existing, working tab is a bigger call than
-// adding new ones).
+// 'co', 'invoices' and 'documents' come from the updated Moqups. Its tab bar is Overview, Details,
+// Purchase Orders, Change Orders, Invoices, Reporting and Documents, which splits Change Orders and
+// Invoices off the old "$ PO" tab and adds Documents. 'financials' stays, since removing a working
+// tab is a bigger decision than adding new ones.
 //
-// 'budget' - NEW tab, confirmed by Mike Smith directly ("Don't forget budget tab like in
-// moqup") rather than left as an open flag: the mockup's page TAB-Budget/Financials (Total
-// Budget/Total Paid/Total Remaining + Set Budget + Budget Log) had no home in the tab bar -
-// this closes that gap. See budget-tab.component.ts's header comment for the data source.
+// 'budget' was asked for by Mike Smith ("Don't forget budget tab like in moqup"). The mockup's
+// TAB-Budget/Financials page (Total Budget, Total Paid, Total Remaining, Set Budget and Budget Log)
+// had no tab before. See budget-tab.component.ts for its data.
 type TabKey = 'overview' | 'details' | 'budget' | 'po' | 'co' | 'invoices' | 'reporting' | 'documents';
 
-// Port of Components/Pages/ProjectManagement/ProjectOverView.razor
-// (@page "/ProjectManagement/ProjectOverview/{ProjectId:int}"). Renders Overview/Details/
-// Financials/Reporting as in-place tabs (a client-side switch, not four separate routes) -
-// exactly how the Blazor source does it via its `ActiveTab`/`SwitchTab` state, just moved from
-// server-rendered @switch to an Angular @switch over a signal-free plain field.
+// The Project Overview page (/ProjectManagement/ProjectOverview/{ProjectId:int} in Blazor). The tabs
+// switch in place, not as separate routes, like Blazor's ActiveTab and SwitchTab.
 //
-// Route param: this app's stub used ":jobId" (see app.routes.ts) where the Blazor source uses
-// "{ProjectId:int}" - read via the "jobId" name to match the existing stub/shell routing.
+// The route parameter is called "jobId" here (Blazor used ProjectId) to match the existing routes.
 //
-// FLAG - dead code not ported: ProjectOverView.razor.cs (class ProjectOverviewBase) defines an
-// entirely separate ProjectOverviewModel/OnInitializedAsync/SetTab, but ProjectOverView.razor
-// has NO `@inherits ProjectOverviewBase` directive - it defines its own inline @code block
-// instead (ActiveTab/SwitchTab, both no-op re: data fetching, which is commented out in the
-// source). ProjectOverView.razor.cs looks like an orphaned/superseded file; not ported.
+// Not ported: ProjectOverView.razor.cs (ProjectOverviewBase) has its own model and loading code, but
+// the .razor page never inherits it and uses its own @code block, so it looks like a leftover file.
 @Component({
   selector: 'app-project-overview',
   standalone: true,
-  imports: [
+  imports: [PageHeaderComponent, 
     OverviewTabComponent,
     ProjectDetailsTabComponent,
     BudgetTabComponent,
@@ -69,8 +59,8 @@ export class ProjectOverviewComponent implements OnInit {
   ngOnInit(): void {
     this.projectId = Number(this.route.snapshot.paramMap.get('jobId')) || 0;
 
-    // NEW - job access audit trail (see job-access-log.component.ts header comment).
-    // Fire-and-forget: a logging failure shouldn't block viewing the job itself.
+    // Record the visit in the job access log (see job-access-log.component.ts). It doesn't wait for the
+    // result, so a logging failure never stops anyone viewing the job.
     if (this.projectId) {
       const userEmail = this.authService.getLoggedInUserEmail() ?? 'Unknown User';
       this.jobAccessLogService.logAccess(String(this.projectId), userEmail).subscribe();

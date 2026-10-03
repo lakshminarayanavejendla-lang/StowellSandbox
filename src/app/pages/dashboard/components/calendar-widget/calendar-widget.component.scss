@@ -1,22 +1,357 @@
-.widget-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+:host {
+  display: block;
 }
 
-// Syncfusion Schedule renders its own header/view-navigator/toolbar chrome (via the bootstrap5
-// theme CSS loaded globally in index.html) - the old agenda/flat-list rules are no longer needed.
-ejs-schedule {
-  display: block;
-  width: 100%;
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--sh-ink);
+  }
 }
-// .e-schedule .e-month-view .e-appointment{
-//   background: #ff4601 !important;
-// }
-// .e-schedule .e-month-view .e-appointment .e-appointment-details{
-//   background: #ff4601 !important;
-// }
-.e-content-wrap{
-  height: 450px !important;
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nav-btn,
+.today-btn {
+  color: var(--sh-ink-2);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--sh-ink);
+    background: var(--sh-surface-2);
+    border-color: var(--sh-line);
+  }
+}
+
+.nav-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+}
+
+.today-btn {
+  height: 34px;
+  padding: 0 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dow {
+  padding-bottom: 4px;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sh-ink-3);
+}
+
+.day {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-height: 38px;
+  padding: 0.35rem 0.45rem;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--sh-ink-2);
+  background: var(--sh-surface-2);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.12s;
+
+  &:hover {
+    border-color: var(--sh-blue-2);
+  }
+
+  &.outside {
+    opacity: 0.4;
+  }
+
+  // a dot marks days that have events
+  &.ev::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 7px;
+    width: 5px;
+    height: 5px;
+    background: var(--sh-acc);
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.sel {
+    border-color: var(--sh-blue);
+    box-shadow: 0 0 0 2px var(--sh-blue-soft);
+  }
+
+  &.today {
+    color: #fff;
+    background: var(--sh-blue);
+
+    &.ev::after {
+      background: #fff;
+    }
+  }
+}
+
+.agenda-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1.4rem 0 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--sh-ink);
+  }
+
+  .count {
+    font-size: 0.8rem;
+    color: var(--sh-ink-3);
+  }
+}
+
+.agenda {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ag {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
+  border-radius: 14px;
+
+  .bar {
+    flex: none;
+    width: 4px;
+    background: var(--sh-blue);
+    border-radius: 4px;
+
+    &.alt {
+      background: var(--sh-acc);
+    }
+  }
+
+  .t {
+    flex: none;
+    min-width: 62px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--sh-ink-2);
+  }
+
+  .ag-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+
+    strong {
+      font-size: 0.9rem;
+      color: var(--sh-ink);
+      overflow-wrap: anywhere;
+    }
+
+    small {
+      color: var(--sh-ink-3);
+    }
+  }
+}
+
+.none {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--sh-ink-3);
+}
+
+.agenda-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 34px;
+  padding: 0 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sh-ink);
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: 12px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--sh-blue-2);
+  }
+}
+
+// ---- Add event dialog ----
+.dlg-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: rgba(6, 13, 25, 0.5);
+}
+
+.dlg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1310;
+  width: min(440px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  color: var(--sh-ink);
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: 18px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+  }
+
+  .x {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    color: var(--sh-ink-2);
+    background: none;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--sh-surface-2);
+    }
+  }
+
+  .fld {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+
+    span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--sh-ink-2);
+    }
+
+    input {
+      height: 42px;
+      padding: 0 0.75rem;
+      color: var(--sh-ink);
+      background: var(--sh-surface-2);
+      border: 1px solid var(--sh-line);
+      border-radius: 11px;
+
+      &:focus {
+        outline: 2px solid var(--sh-blue);
+        outline-offset: 0;
+      }
+    }
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .err {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c2410c;
+  }
+
+  footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+  }
+
+  .btn {
+    height: 40px;
+    padding: 0 1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--sh-ink);
+    background: var(--sh-surface);
+    border: 1px solid var(--sh-line);
+    border-radius: 12px;
+    cursor: pointer;
+
+    &.primary {
+      color: #fff;
+      background: var(--sh-blue);
+      border-color: var(--sh-blue);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
 }

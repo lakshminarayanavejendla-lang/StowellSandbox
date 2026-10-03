@@ -4,26 +4,21 @@ import { RouterLink } from '@angular/router';
 import { GridModule, PageService, SortService, FilterService } from '@syncfusion/ej2-angular-grids';
 import { EstimationService } from '../../../core/services/estimation.service';
 import { BidItem } from '../../../core/models/estimation/bid-item.model';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of BidQueue.razor / BidQueueBase.cs - three grids (Open/Closed/Pending bids), each
- * row's Project Number linking to EditBidForm for that job.
+ * The Bid Queue, from BidQueue.razor: three grids (Open, Closed and Pending bids). Each row's Project
+ * Number opens Edit Bid for that job.
  *
- * FLAG: the original BidQueue.razor has a search box + page-size dropdown in its markup, but
- * both are entirely commented out (`@* ... *@`) - dead markup, not live in the shipped page.
- * The only live filtering/sorting was Radzen's built-in per-column grid chrome
- * (AllowSorting/AllowFiltering="true", AllowPaging="false" - so no paging at all). Rather than
- * silently reproducing the commented-out search box as if it were live, or dropping search
- * entirely, this port adds ONE lightweight client-side search per section reusing
- * BidQueueBase.FilterBidQueues' exact predicate (Address/JobID/BidStatus) - consistent with
- * the search UX already established for Current Jobs in Phase 1, but this is a UX judgment
- * call, not a faithful port of live source behavior. Flag if you'd rather match the dead
- * source exactly (no search control at all).
+ * The Blazor page's search box and page-size dropdown were commented out, so it only had the grid's
+ * own sorting and filtering, with no paging. This version adds a simple search for each section,
+ * using the same fields as BidQueueBase.FilterBidQueues (Address, JobID, BidStatus), like Current
+ * Jobs. That's a design choice, not something the old page did; remove it if you want an exact match.
  */
 @Component({
   selector: 'app-bid-queue',
   standalone: true,
-  imports: [RouterLink, DatePipe, GridModule],
+  imports: [PageHeaderComponent, RouterLink, DatePipe, GridModule],
   providers: [PageService, SortService, FilterService],
   templateUrl: './bid-queue.component.html',
   styleUrl: './bid-queue.component.scss',
@@ -45,9 +40,7 @@ export class BidQueueComponent implements OnInit {
   closedSearchTerm = '';
   pendingSearchTerm = '';
 
-  // Shared page-size config for all three grids - none of these had paging before (the source's
-  // AllowPaging="false" - see class comment), so this is new functionality via Grid's built-in
-  // pager rather than a straight port of prior behavior.
+  // Page size for all three grids. The Blazor grids had no paging (AllowPaging="false"), so this is new.
   pageSettings = { pageSize: 10, pageSizes: [10, 20, 50] };
 
   ngOnInit(): void {
@@ -62,7 +55,6 @@ export class BidQueueComponent implements OnInit {
     };
 
     this.estimationService.getOpenBids().subscribe((bids) => {
-      debugger;
       this.openBids = bids;
       this.filteredOpenBids = bids;
       done();

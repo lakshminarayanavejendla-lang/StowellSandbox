@@ -1,6 +1,5 @@
 <a class="back-link" [routerLink]="['/estimation/bid-queue']">&larr; Back to Bid Queue</a>
-<h3>{{ isEditMode ? 'Edit Bid/Project' : 'New Bid/Project' }}</h3>
-<hr />
+<app-page-header [title]="isEditMode ? 'Edit Bid/Project' : 'New Bid/Project'" [breadcrumbs]="[{ label: 'Estimation', route: '/estimation/bid-queue' }, { label: isEditMode ? 'Edit Bid/Project' : 'New Bid/Project' }]"></app-page-header>
 
 @if (isLoading) {
   <div class="busy-overlay"></div>
@@ -119,6 +118,9 @@
     <div class="field">
       <label>Contract Amount</label>
       <input type="number" step="0.01" min="0" formControlName="contractAmount" placeholder="Enter contract amount" />
+      @if (isEditMode) {
+        <small class="field-note">The contract amount can't be changed here once the project is submitted. Ask accounting to update it in Sage100.</small>
+      }
     </div>
   </div>
 

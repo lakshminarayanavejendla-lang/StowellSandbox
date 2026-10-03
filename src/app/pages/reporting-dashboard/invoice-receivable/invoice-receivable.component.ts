@@ -6,18 +6,16 @@ import { ProjectCostCodeService } from '../../../core/services/project-cost-code
 import { CostCodeRecord, recJobNumber } from '../../../core/models/project-management/cost-code.model';
 import { InvoiceReceivable } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// Port of Components/Pages/ReportingDashboard/InvoiceReceivable.razor + InvoiceReceivableBase.cs
-// (@page "/InvoiceReceivable"). Job dropdown (GetAllUserJobs) feeds
-// ICostCodeService.GetInvoiceReceivable(jobNumber), already ported as
-// ProjectCostCodeService.getInvoiceReceivable.
+// Invoice Receivable (/InvoiceReceivable in Blazor). Pick a job (GetAllUserJobs) to see its
+// receivables (getInvoiceReceivable).
 //
-// FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
-// message - see report-export.util.ts's header comment.
+// PDF, Excel and Word export work (see report-export.util.ts).
 @Component({
   selector: 'app-invoice-receivable',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [SortService, PdfExportService, ExcelExportService],
   templateUrl: './invoice-receivable.component.html',
   styleUrl: './invoice-receivable.component.scss',

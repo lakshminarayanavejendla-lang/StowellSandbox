@@ -1,6 +1,4 @@
-<h3>Job Summary Report</h3>
-<hr />
-
+<app-page-header title="Job Summary Report"></app-page-header>
 <div class="filters">
   <div class="field">
     <label>Job Number</label>
@@ -26,7 +24,7 @@
   </div>
 </div>
 
-<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredJobs` data source. -->
+<!-- The report grid, using `filteredJobs`. -->
 @if (filteredJobs.length > 0) {
   <ejs-grid #jobSummaryGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowExcelExport]="true"
 [allowPdfExport]="true">

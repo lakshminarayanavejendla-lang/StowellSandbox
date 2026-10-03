@@ -1,120 +1,31 @@
+<!-- Portal shell (Portal Responsive Display Standard): sidebar / navigation, top bar, workspace and application launcher are separate
+     components under core/layout; this component only composes them and owns the open/close state of the drawer and launcher. -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <div class="layout-wrapper">
-  <!-- LEFT SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">
-      <img alt="brand" class="sidebar-logo-white" src="assets/images/stowell-logo-white.png" />
-    </div>
-   <!-- USER PROFILE -->
-<div class="user-profile">
+  <app-sidebar
+    [open]="navOpen"
+    [profileName]="profileName"
+    [profileRole]="profileRole"
+    [photoUrl]="profilePhotoUrl"
+    (linkClicked)="closeNav()"
+  ></app-sidebar>
 
-  <div class="profile-image-wrapper">
-    <img
-      [src]="profilePhotoUrl"
-      [alt]="profileName"
-      class="profile-image"
-    />
-  </div>
+  <!-- Dims the page behind the navigation drawer (below 1024px, or while Auto-hide is on) -->
+  @if (navOpen) {
+    <div class="nav-backdrop" (click)="closeNav()"></div>
+  }
 
-  <div class="profile-name">
-    {{ profileName }}
-  </div>
-
-  <div class="profile-role">
-    {{ profileRole }}
-  </div>
-
-</div>
-    <app-nav-menu></app-nav-menu>
-  </aside>
-
-  <!-- MAIN AREA -->
   <div class="main-area">
-    <header class="topbar">
-      <input type="text" placeholder="Search for anything..." />
-
-      <div class="top-icons">
-        <app-quick-shortcut></app-quick-shortcut>
-
-        <button class="icon-btn" title="Copilot">
-          <img src="https://brandlogo.org/wp-content/uploads/2025/05/Microsoft-365-Copilot-Logo-2025.png" width="24" height="24" alt="Copilot" />
-        </button>
-
-        <button class="icon-btn" title="Document Management" aria-label="Document Management">
-          <i class="bi bi-file-earmark-richtext"></i>
-        </button>
-
-        <button class="icon-btn" title="Password Management" aria-label="Password Management" (click)="goToPasswordPage()">
-          <i class="fas fa-key"></i>
-        </button>
-
-        <button class="icon-btn" title="Support" aria-label="Support" (click)="emailSupport()">
-          <i class="fas fa-handshake"></i>
-        </button>
-
-        <!-- Ported as-is from MainLayout.razor: a plain external link, not the app's own logout route -->
-        <a class="icon-btn" title="Logout" aria-label="Logout" href="javascript:void(0)" (click)="logout()">
-          <i class="fas fa-sign-out"></i>
-        </a>
-
-        <button class="icon-btn" title="Toggle Right Menu" (click)="toggleRightMenu()">
-          <i class="bi bi-layout-sidebar-inset-reverse"></i>
-        </button>
-      </div>
-    </header>
+    <app-topbar [showMenu]="sidebarState.autoHide()" (menuToggle)="toggleNav()" (launcherToggle)="toggleRightMenu()"></app-topbar>
 
     <div class="content-right-wrapper">
-      <main class="content-wrapper">
+      <app-workspace>
         <router-outlet></router-outlet>
-      </main>
+      </app-workspace>
 
       @if (rightMenuOpen) {
-        <aside class="right-bar">
-          <!-- FIX (2026-09-17, Mike Smith - "the Right hand applications do not work") - these
-               all hardcoded an absolute https://stowellsandbox.proserv360.tech/img/... URL, a
-               path that only ever existed under the old Blazor app's wwwroot/img/ (Blazor's
-               static-file convention) - the Angular app serves its static files from
-               assets/images/, so every link 404'd regardless of which environment it ran in. 6 of
-               the 8 .rdp files referenced also didn't exist anywhere in this project at all
-               (only QuickBid.rdp/Stowel Excel.rdp did) - copied the missing ones over from the
-               Blazor source's wwwroot/img/. Links are now relative, so they resolve correctly
-               under whichever origin the app is actually deployed to. -->
-          <a href="assets/images/cpub-BuzzBUILTBuzzBIDClient__1_-SAGE-CmsRdsh.rdp" target="_blank">
-            <img class="rounded-circle" width="60" src="assets/images/BuzzBID.ico" alt="BuzzBID" />
-            <div class="text-xs">BuzzBID</div>
-          </a>
-          <a href="assets/images/On-Screen-Takeoff.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/onscreen-DG7iRAsP.png" alt="OST" />
-            <div class="text-xs">OST</div>
-          </a>
-          <a href="assets/images/QuickBid.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/QuickBid-D_-1Ufnc.ico" alt="QuickBid" />
-            <div class="text-xs">QuickBid</div>
-          </a>
-          <a href="assets/images/Stowell%20Sage100.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/ProductIcon.ico" alt="SAGE 100" />
-            <div class="text-xs">SAGE 100</div>
-          </a>
-          <a href="assets/images/Stowell%20Outlook.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/outlook-icon-ComIkiQ6.jpeg" alt="Outlook" />
-            <div class="text-xs">Outlook</div>
-          </a>
-          <a href="assets/images/Stowell%20OneDrive.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/onedrive-icon.png" alt="OneDrive" />
-            <div class="text-xs">OneDrive</div>
-          </a>
-          <a href="assets/images/Stowell%20Word.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/Word-BgPwIVfT.ico" alt="Word" />
-            <div class="text-xs">Word</div>
-          </a>
-          <a href="assets/images/Stowel%20Excel.rdp" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/Excel-CA07Fto9.ico" alt="Excel" />
-            <div class="text-xs">Excel</div>
-          </a>
-          <a href="https://complete.corpay.com/login" target="_blank">
-            <img class="rounded-circle" width="50" src="assets/images/Corpay.png" alt="Corpay" />
-            <div class="text-xs">Corpay</div>
-          </a>
-        </aside>
+        <app-launcher></app-launcher>
       }
     </div>
 
@@ -122,7 +33,7 @@
       <a href="#">About</a>
       <a href="#">License</a>
       <a href="#">Documentation</a>
-      <a href="https://wrapbootstrap.com/user/MyOrange" target="_blank"><i class="fas fa-question-circle"></i></a>
+      <a href="https://wrapbootstrap.com/user/MyOrange" target="_blank" rel="noopener" aria-label="Help"><i class="fas fa-question-circle" aria-hidden="true"></i></a>
     </footer>
   </div>
 </div>

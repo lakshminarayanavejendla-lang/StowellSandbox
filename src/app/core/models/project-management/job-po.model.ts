@@ -1,6 +1,5 @@
-// NEW model - Stowell PO Module (not a Blazor port; designed from the "Stowell PO Module"
-// Moqups spec, page TAB-Job PO Overview - the new "$ PO" tab on the Project Overview page). No
-// backend endpoint exists for this yet - see job-po.service.ts's header comment.
+// PO module, built from the Moqups design (page TAB-Job PO Overview, the "$ PO" tab on Project
+// Overview), not ported from Blazor. See job-po.service.ts for where the data comes from.
 export interface PurchaseOrderRecord {
   poId: string;
   poDescription: string;
@@ -8,7 +7,7 @@ export interface PurchaseOrderRecord {
   dateSubmitted: string;
   requiredOnsite: string;
   vendor: string;
-  // Sage phase number - lets the PO tab show one phase at a time (null/absent = no phase recorded).
+  // Sage phase number, so the PO tab can show one phase at a time (missing if no phase was recorded).
   poPhase?: number | null;
 }
 
@@ -18,7 +17,7 @@ export interface ChangeOrderLogRecord {
   coAmount: number;
   coStatus: string;
   coReason: string;
-  // Sage phase number - lets the CO tab show one phase at a time (null/absent = no phase recorded).
+  // Sage phase number, so the CO tab can show one phase at a time (missing if no phase was recorded).
   coPhase?: number | null;
 }
 

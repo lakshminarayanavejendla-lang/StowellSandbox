@@ -3,14 +3,11 @@ import { FileBrowserComponent } from '../../../../document-management/components
 import { DocumentManagementService } from '../../../../../core/services/document-management.service';
 
 /**
- * NEW tab - client-updated Moqups (page TAB-Documents). Reuses the existing Document Management
- * module's <app-file-browser> + DocumentManagementService.getProjectFolderDetails() - the exact
- * same pair project-file-manager.component.ts (document-management/project/:projectId route)
- * already uses - rather than duplicating that folder-resolution logic. Not a copy of
- * ProjectFileManagerComponent itself: that component reads its project id from the ROUTE
- * (":projectId" param), but this tab lives inside Project Overview's own routed component (param
- * name "jobId") and isn't itself router-outlet-mounted, so it takes projectId as an @Input like
- * every other tab on this page instead.
+ * The Documents tab (Moqups page TAB-Documents). It uses <app-file-browser> and
+ * DocumentManagementService.getProjectFolderDetails(), the same pair as project-file-manager.component.ts,
+ * instead of repeating the folder logic. That component reads the project id from its route, but
+ * this tab sits inside Project Overview (whose parameter is "jobId"), so it takes projectId as an
+ * @Input like the other tabs.
  */
 @Component({
   selector: 'app-documents-tab',

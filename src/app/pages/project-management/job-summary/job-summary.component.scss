@@ -6,7 +6,7 @@
   gap: 10px;
   margin-bottom: 10px;
 
-  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid var(--sh-line); border-radius: 4px; }
 }
 
 .actions { display: flex; gap: 5px; }
@@ -18,15 +18,15 @@
   color: #fff;
 }
 
-.btn-primary { background-color: #007bff; }
-.btn-secondary { background-color: #6c757d; }
+.btn-primary { background-color: var(--sh-blue); }
+.btn-secondary { background-color: var(--sh-ink-3); }
 .btn-secondary[disabled] { opacity: 0.5; cursor: not-allowed; }
 
 .grid-table {
   width: 100%;
   border-collapse: collapse;
 
-  th { background-color: #0d47a1; color: #fff; text-align: left; padding: 10px; }
-  td { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
-  .empty { text-align: center; color: #888; }
+  th { background-color: var(--sh-blue); color: #fff; text-align: left; padding: 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--sh-line); }
+  .empty { text-align: center; color: var(--sh-ink-3); }
 }

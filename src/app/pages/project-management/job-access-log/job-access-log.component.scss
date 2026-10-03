@@ -1,10 +1,9 @@
-// Reuses co-queue.component.scss's black-grid header styling for visual consistency across grid
-// pages in this app.
+// Uses the same grid header style as co-queue.component.scss, so the grid pages match.
 .black-grid {
   .e-gridheader,
   .e-gridheader .e-columnheader,
   .e-gridheader .e-headercell {
-    background-color: #00355f !important;
+    background-color: var(--sh-blue) !important;
     color: #ffffff !important;
   }
 
@@ -16,7 +15,7 @@
 
   .e-gridheader .e-headercell:hover,
   .e-gridheader .e-headercell:hover .e-headertext {
-    background-color: #00355f !important;
+    background-color: var(--sh-blue) !important;
     color: #ffffff !important;
     opacity: 1 !important;
     visibility: visible !important;

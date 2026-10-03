@@ -1,6 +1,5 @@
 <div class="wrapper">
-  <h2>{{ pageTitle }}</h2>
-  <hr class="dashed" />
+  <app-page-header [title]="pageTitle" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'PO Form' }]"></app-page-header>
 
   <div class="header-grid">
     <div class="col">
@@ -22,9 +21,9 @@
         <input type="text" [(ngModel)]="jobName" placeholder="Placeholder" [readonly]="mode === 'approval'" />
       </div>
       <div class="field">
-        <!-- NEW (2026-09-23, Moqups FORM-PO Request: "User must select Project Phase"): the job's
-             phases (Sage's plus any added in the app). Required to submit; saved on the PO
-             (pchord.phsnum) and on drafts. A single-phase job is selected automatically. -->
+        <!-- "User must select Project Phase" (Moqups, 2026-09-23). The job's phases, from Sage plus any added
+             in the app. Required to submit, and saved on the PO (pchord.phsnum) and on drafts. A job
+             with one phase gets it picked automatically. -->
         <label>Phase</label>
         <select [ngModel]="selectedPhase" (ngModelChange)="selectedPhase = $any($event)" [disabled]="mode === 'approval'">
           <option [ngValue]="null">Select phase</option>
@@ -232,7 +231,7 @@
   <div class="form-row actions">
     @if (mode === 'approval') {
       <button type="button" class="btn-reject" (click)="openRejectReason()">Reject</button>
-      <button type="button" class="btn-approve" (click)="approve()">Approved</button>
+      <button type="button" class="btn-approve" (click)="approve()">Approve</button>
     } @else if (isEditMode) {
       <button type="button" class="btn-primary" (click)="saveEdits()">Save Changes</button>
     } @else {

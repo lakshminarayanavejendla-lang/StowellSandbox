@@ -1,0 +1,88 @@
+<div class="cr-card">
+  <h3>{{ title }}</h3>
+  <p class="cr-note">
+    A project manager asked to change something that is already in Sage. Nothing in Sage changes until you approve.
+    Open a request to compare it with what Sage has now.
+  </p>
+
+  @if (message) {
+    <div class="cr-msg" [class.bad]="messageIsError" role="status">{{ message }}</div>
+  }
+
+  @if (loadFailed) {
+    <div class="cr-msg bad" role="alert">
+      The list of waiting changes could not be loaded, so do not assume nothing is waiting.
+      <button type="button" class="cr-retry" (click)="load()">Try again</button>
+    </div>
+  } @else if (loaded && !requests.length) {
+    <p class="cr-note">No changes are waiting for approval.</p>
+  }
+
+  @for (r of requests; track r.id) {
+    <div class="cr-row" [class.open]="openId === r.id">
+      <button type="button" class="cr-head" (click)="toggle(r)" [attr.aria-expanded]="openId === r.id">
+        <span class="cr-id">#{{ r.id }}</span>
+        <span class="cr-kind">{{ kind(r) }}</span>
+        <span class="cr-what">{{ r.summary }}</span>
+        <span class="cr-job">{{ r.jobName || r.jobId }}</span>
+        <span class="cr-by">{{ r.requestedBy }} · {{ r.requestedAt | date: 'MMM d, h:mm a' }}</span>
+      </button>
+
+      @if (openId === r.id && review) {
+        <div class="cr-body">
+          @if (r.applyError) {
+            <div class="cr-msg bad">The last attempt to apply this failed: {{ r.applyError }}</div>
+          }
+
+          <table class="cr-compare">
+            <thead>
+              <tr><th></th><th>In Sage now</th><th>{{ review.isDelete ? 'After approval' : 'Requested change' }}</th></tr>
+            </thead>
+            <tbody>
+              @for (f of review.fields; track f.label) {
+                <tr [class.changed]="f.changed">
+                  <th>{{ f.label }}</th>
+                  <td>{{ f.before || '–' }}</td>
+                  <td>{{ f.after || '–' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (!review.isDelete) {
+            <div class="cr-lines">
+              <div>
+                <h4>Lines in Sage now</h4>
+                @for (l of review.beforeLines; track $index) {
+                  <div class="cr-line"><span>{{ l.item || '–' }}</span><span>{{ l.cost === null ? '' : (l.cost | currency) }}</span></div>
+                } @empty { <p class="cr-note">No lines.</p> }
+              </div>
+              <div>
+                <h4>Requested lines</h4>
+                @for (l of review.afterLines; track $index) {
+                  <div class="cr-line"><span>{{ l.item || '–' }}</span><span>{{ l.cost === null ? '' : (l.cost | currency) }}</span></div>
+                } @empty { <p class="cr-note">No lines.</p> }
+              </div>
+            </div>
+          }
+
+          @if (rejectingId === r.id) {
+            <div class="cr-reject">
+              <label for="reason-{{ r.id }}">Why is it being rejected? (required)</label>
+              <textarea id="reason-{{ r.id }}" rows="2" [(ngModel)]="rejectReason" placeholder="The project manager will see this"></textarea>
+              <div class="cr-actions">
+                <button type="button" class="btn-reject" [disabled]="!rejectReason.trim() || busyId === r.id" (click)="confirmReject(r)">Confirm rejection</button>
+                <button type="button" class="btn-plain" (click)="cancelReject()">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="cr-actions">
+              <button type="button" class="btn-approve" [disabled]="busyId === r.id" (click)="approve(r)">{{ busyId === r.id ? 'Applying…' : 'Approve and update Sage' }}</button>
+              <button type="button" class="btn-reject" [disabled]="busyId === r.id" (click)="startReject(r)">Reject</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

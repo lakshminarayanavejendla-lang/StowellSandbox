@@ -8,8 +8,8 @@
 .message {
   padding: 8px 12px;
   margin-bottom: 12px;
-  background-color: #e6f7ec;
-  border: 1px solid #b7e4c7;
+  background-color: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
   color: #1a7f3c;
 }
@@ -41,7 +41,7 @@ margin-right: 5px;
   }
   label {
     font-weight: 600;
-    color: #777;
+    color: var(--sh-ink-3);
     white-space: nowrap;
   }
 
@@ -55,7 +55,7 @@ margin-right: 5px;
     box-sizing: border-box;
 
     &[readonly] {
-      background-color: #f7f7f7;
+      background-color: var(--sh-surface-2);
       cursor: not-allowed;
     }
   }
@@ -67,12 +67,12 @@ margin-right: 5px;
 
 h2 {
   font-weight: 700;
-  color: #00355f;
+  color: var(--sh-ink);
   margin-top: 20px;
 }
 
 .hr-line-dashed {
-  border-top: 1px dashed #c7c7c7;
+  border-top: 1px dashed var(--sh-line);
   margin: 15px 0 25px 0;
 }
 
@@ -96,7 +96,7 @@ h2 {
 }
 
 .btn-primary {
-  background-color: #00355f;
+  background-color: var(--sh-blue);
   color: #fff;
 }
 
@@ -111,7 +111,7 @@ h2 {
 }
 
 .btn-success {
-  background-color: #5cb85c;
+  background-color: #14915b;
   color: #fff;
 }
 
@@ -147,7 +147,7 @@ h2 {
   width: 500px;
   max-width: 90vw;
 
-  background: #ffffff;
+  background: var(--sh-surface);
 
   border-radius: 6px;
 
@@ -163,7 +163,7 @@ h2 {
 
   padding: 15px 20px;
 
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--sh-line);
 }
 
 .add-bid-header h4 {
@@ -198,7 +198,7 @@ h2 {
   margin-bottom: 6px;
 
   font-weight: 600;
-  color: #333;
+  color: var(--sh-ink);
 }
 
 .add-bid-control {
@@ -210,10 +210,10 @@ h2 {
 
   padding: 6px 10px;
 
-  border: 1px solid #ccc;
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
 
-  background: #fff;
+  background: var(--sh-surface);
 
   font-size: 14px;
 }
@@ -226,17 +226,17 @@ h2 {
 
   padding: 15px 20px;
 
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--sh-line);
 }
 .e-grid .e-headercelldiv{
   font-size: 15px;
 }
 .e-grid .e-columnheader .e-headercell{
-  background: #00355f;
+  background: var(--sh-blue);
   color: #fff;
 }
 
-// NEW - Notes table (see bid-note.model.ts header comment).
+// The Notes table (see bid-note.model.ts).
 .notes-section {
   margin-top: 20px;
 }
@@ -249,7 +249,7 @@ h2 {
 
   label {
     font-weight: 600;
-    color: #777;
+    color: var(--sh-ink-3);
     white-space: nowrap;
   }
 
@@ -274,8 +274,8 @@ h2 {
   input[type='text'].readonly-field {
     flex: none;
     width: 140px;
-    background-color: #eaeaea;
-    color: #555;
+    background-color: var(--sh-surface-2);
+    color: var(--sh-ink);
     cursor: not-allowed;
   }
 }
@@ -284,14 +284,14 @@ h2 {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
-  border: 1px solid #00355f;
+  border: 1px solid var(--sh-blue);
 
   th {
     text-align: left;
-    background-color: #f3f6fb;
-    color: #00355f;
+    background-color: var(--sh-surface-2);
+    color: var(--sh-ink);
     padding: 8px 12px;
-    border-bottom: 1px solid #00355f;
+    border-bottom: 1px solid var(--sh-blue);
   }
 
   th:nth-child(1),
@@ -306,16 +306,15 @@ h2 {
 
   td {
     padding: 8px 12px;
-    border-top: 1px solid #eaeaea;
-    // FIX (2026-09-10, live testing): table-layout:fixed truncates cells to their column width,
-    // but an email address (User column) has no spaces to wrap on, so it visually overflowed
-    // into the Note column instead of wrapping ("p360admin@stowellinc.com" running into "test").
+    border-top: 1px solid var(--sh-line);
+    // An email in the User column has no spaces to wrap at, so with table-layout: fixed it ran into
+    // the Note column ("p360admin@stowellinc.com" over "test"). This lets it break (2026-09-10).
     overflow-wrap: break-word;
     word-break: break-word;
   }
 
   .empty-row {
     text-align: center;
-    color: #888;
+    color: var(--sh-ink-3);
   }
 }

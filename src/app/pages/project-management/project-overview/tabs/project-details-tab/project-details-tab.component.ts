@@ -7,14 +7,10 @@ import { FormsModule } from '@angular/forms';
 import { ProjectOverviewService } from '../../../../../core/services/project-overview.service';
 import { BidInfoDto, EmployeeDetails, ContractorClient } from '../../../../../core/models/project-management/bid-info.model';
 
-// Port of Components/Pages/ProjectManagement/ProjectDetailsTab.razor + ProjectDetailsTabBase.cs.
-// NOTE: Components/Pages/ProjectManagement/DetailsTab.razor (a bare "<h4>Project Details</h4>"
-// stub inheriting a near-empty ProjectTabBase) is a separate, unused file - ProjectOverView.razor
-// switches to THIS component ("details" case renders <ProjectDetailsTab>), not DetailsTab.razor.
-// Skipped porting DetailsTab.razor/ProjectTabBase.cs as dead duplicates.
-// The "Project Resources" employees list is a small, unpaginated grid (no sort/filter in the
-// source) - kept simple with just the base ejs-grid (no Page/Sort/Filter services) rather than
-// adding paging chrome to a handful of rows.
+// The Details tab, from ProjectDetailsTab.razor. DetailsTab.razor, just an "<h4>Project Details</h4>"
+// heading, isn't used by the Overview page, so it isn't ported.
+// The Project Resources list is a few rows with no sorting or filtering in Blazor, so it's a plain
+// ejs-grid without paging.
 @Component({
   selector: 'app-project-details-tab',
   standalone: true,
@@ -174,9 +170,7 @@ export class ProjectDetailsTabComponent implements OnChanges {
       });
   }
 
-  /**
-   * Load employees for the current project.
-   */
+  /** Loads the employees for the current project. */
   private loadEmployees(): void {
 
     if (!this.projectId) {
@@ -226,9 +220,7 @@ export class ProjectDetailsTabComponent implements OnChanges {
       });
   }
 
-  /**
-   * Delete employee.
-   */
+  /** Deletes an employee. */
   deleteEmployee(item: EmployeeDetails): void {
 
     if (!item || !item.id) {
@@ -267,14 +259,13 @@ export class ProjectDetailsTabComponent implements OnChanges {
             message
           );
 
-          debugger;
 
           if (
             message &&
             message.toLowerCase() !== 'error'
           ) {
 
-            // Reload employee grid after successful delete
+            // Reload the employee grid after the delete.
             this.loadEmployees();
 
             this.message =

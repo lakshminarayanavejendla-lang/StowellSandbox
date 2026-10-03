@@ -1,29 +1,23 @@
-// Mirrors StowellCoApp.DTO.FileDirectoryContent / FileDetails / ErrorDetails
-// (DTO/FileOperationDto.cs - confirmed, same DTO already used by the Bids module's file
-// manager, see core/models/bids/bid-file.model.ts). The Blazor DocumentManagement pages wired
-// Syncfusion's paid SfFileManager (see HANDOFF.md's "free component library" decision) straight
-// to api/DocumentManagement/* and api/RootDocumentManagement/* via FileManagerAjaxSettings; no
-// DocumentManagement controller exists in the staged source (Controllers/ only contains
-// AuthenticationController.cs), so the exact request/response contract is inferred from those
-// Ajax URLs + this DTO's shape, not confirmed against real handler code.
+// Matches FileDirectoryContent, FileDetails and ErrorDetails in DTO/FileOperationDto.cs, the same
+// DTO the bid file manager uses (see bid-file.model.ts). We don't have the DocumentManagement
+// controller, so the request and response shapes are worked out from the URLs and this DTO.
 //
-// Unlike Bids' flat per-bid file list, both DocumentManagement components pass FileDirectoryContent
-// (which includes HasChild/Path) and render Syncfusion's tree-capable file manager, so this port
-// supports folder navigation (see file-browser.component.ts) rather than a single flat table.
+// The entries include HasChild and Path, so the document pages support folders
+// (see file-browser.component.ts), not just a flat list like bids.
 export interface DocumentFileEntry {
   id?: string;
   name: string;
-  /** Virtual path to the file/folder within its scope's root - confirmed field on FileDirectoryContent. */
+  /** Path to the file or folder inside its root. */
   path?: string;
   /** Bytes; 0 for folders. */
   size: number;
   isFile: boolean;
-  /** File extension (e.g. ".pdf"), confirmed field name "Type" on FileDirectoryContent. */
+  /** File extension, such as ".pdf" ("Type" on FileDirectoryContent). */
   type?: string;
   hasChild?: boolean;
   dateCreated?: string;
   dateModified?: string;
-  /** Physical filter path (root folder path) - confirmed field, required by the GetFile route below. */
+  /** The root folder path. The GetFile route needs it. */
   filterPath?: string;
 }
 
@@ -32,22 +26,13 @@ export interface DocumentFileError {
   code?: string;
 }
 
-// Which of the two Blazor file-manager pages a request targets - see
-// document-management-endpoints.ts for the URL prefixes each maps to.
-//  - 'project': FileManagerComponent.razor (@page via DocManagementComponent.razor
-//    "/DocManagement/Project/{ProjectId}") - one project/job's document folder.
-//  - 'root': RootFileManagerComponent.razor (@page "/DocManagement/Main") - a single
-//    configured root share, browsing across everything rather than one project.
+// Which document page a request is for (document-management-endpoints.ts has the URLs):
+//  - 'project': one job's folder (/DocManagement/Project/{ProjectId} in Blazor).
+//  - 'root': the shared root folder across all jobs (/DocManagement/Main in Blazor).
 export type DocumentManagementScope = 'project' | 'root';
 
-// Mirrors StowellCoApp.DTO.Job (Services/IProjectOverviewService.cs's GetJobCodeDetails) just
-// enough to resolve the folder name FileManagerComponentBase.razor.cs needs
-// (Config["...RootSharePath"] + jobcodedetails.FullJob, same pattern as Bids'
-// BidFileManagerComponentBase). Deliberately NOT re-declared from scratch - reuses the shape
-// already confirmed in core/models/project-management/cost-summary.model.ts's `Job` interface
-// (fullJob/jobName/recnum) rather than keeping a second, possibly-drifting copy alive, same
-// reconciliation approach HANDOFF.md documents for BidInfoDto between Project Management and
-// Estimation.
+// The job fields needed to build a project's folder name (RootSharePath + FullJob, as the Blazor
+// file manager did). Reuses the Job interface from cost-summary.model.ts rather than a second copy.
 export interface ProjectFolderDetails {
   recnum: string;
   jobName: string;

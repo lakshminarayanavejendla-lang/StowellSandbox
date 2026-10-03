@@ -9,17 +9,14 @@ import { JobInvoiceRecord } from '../../../../../core/models/project-management/
 import { CurrentCostSummaryViewModel, Phase } from '../../../../../core/models/project-management/cost-summary.model';
 
 /**
- * NEW tab - client-updated Moqups (page TAB-Invoices). Mirrors po-tab.component.ts's/
- * co-tab.component.ts's header + single-grid pattern. "New Invoice" is rendered as a plain
- * disabled-look button rather than a routerLink, since the mockup shows the button but no
- * corresponding "New Invoice" form page exists anywhere in the 17-page mockup to link it to -
- * confirm with product whether that form is coming in a future mockup update.
+ * The Invoices tab (Moqups page TAB-Invoices), laid out like the PO and CO tabs. "New Invoice" is a
+ * plain button, not a link, because the mockup has no New Invoice form to open. Ask the product owner
+ * whether one is coming.
  *
- * FIX (2026-09-16, Mike Smith) - "budget needs to pull in here... and on PO, CO and Invoice
- * tabs" - this tab had no budget summary at all. Added the same Total Budget/Paid/Remaining +
- * pie summary PO/CO tabs already have (costSummary/asCurrency/paidPercent are verbatim copies of
- * po-tab.component.ts's), WITHOUT a "Set Budget" link - that action now lives only on the Budget
- * tab (also removed from PO/CO tabs, per the same feedback).
+ * It has the same Total Budget / Paid / Remaining box and pie as the PO and CO tabs (Mike Smith,
+ * 2026-09-16: "budget needs to pull in here... and on PO, CO and Invoice tabs"). costSummary,
+ * asCurrency and paidPercent are copied from po-tab.component.ts. There's no Set Budget link; that's
+ * only on the Budget tab now.
  */
 @Component({
   selector: 'app-invoices-tab',
@@ -60,8 +57,8 @@ export class InvoicesTabComponent implements OnChanges {
     });
   }
 
-  // Grid gated on this so it's built once already populated (EJ2 grids created empty and reassigned
-  // later can stay blank - see po-tab.component.ts). Rebuilt on every phase change, as on the PO tab.
+  // The grid is only created once its data is here, because EJ2 grids created empty can stay blank
+  // (see po-tab.component.ts). It's rebuilt on every phase change, as on the PO tab.
   invoicesLoaded = false;
   private allInvoices: JobInvoiceRecord[] = [];
 
@@ -74,16 +71,15 @@ export class InvoicesTabComponent implements OnChanges {
     this.cdr.detectChanges();
   }
 
-  // NEW (2026-09-23, Mike Smith - "For PO, CO, Invoices tabs we need 2 options: show all phases
-  // together or show 1 phase at a time"). Same dropdown/budget-box behavior as po-tab.component.ts.
-  // The invoice list (InvoicesController.GetJobInvoices, added 2026-09-23 - the endpoint used to 404)
-  // returns each invoice's Sage phase (acrinv.phsnum), so with a phase picked only that phase's
-  // invoices show.
+  // All phases or one phase at a time, with the same dropdown and budget box as the PO tab (Mike
+  // Smith, 2026-09-23: "For PO, CO, Invoices tabs we need 2 options: show all phases together or show
+  // 1 phase at a time"). InvoicesController.GetJobInvoices (added 2026-09-23; it used to return 404)
+  // gives each invoice's Sage phase (acrinv.phsnum), so a picked phase shows only its invoices.
   phases: Phase[] = [];
   selectedPhaseId = '';
 
-  /** Phase-specific figures apply only when the job really has more than one phase.
-   * (Mike Smith, 2026-09-23: with a single phase the amounts must NOT change when it is picked.) */
+  /** Phase figures only apply when the job has more than one phase. With a single phase the amounts
+   * mustn't change when it's picked (Mike Smith, 2026-09-23). */
   private get phaseFilterActive(): boolean {
     return this.selectedPhaseId !== '' && this.phases.length > 1;
   }

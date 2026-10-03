@@ -1,6 +1,4 @@
-<h3>Contract Summary Report</h3>
-<hr />
-
+<app-page-header title="Contract Summary Report"></app-page-header>
 <div class="filters">
   <div class="field">
     <label>Job Number</label>
@@ -26,11 +24,8 @@
   </div>
 </div>
 
-<!-- Syncfusion GridComponent replaces the plain <table>. The last three columns stay hardcoded
-     "$0.00" static templates - not bound to any field, see component header comment. FLAG: these
-     three e-column entries deliberately omit `field` (there's nothing to bind); not fully certain
-     that's valid on Syncfusion Grid 27.1.x for a template-only column vs. requiring some
-     placeholder field name - flagging rather than guessing a fake field. -->
+<!-- The last three columns always show "$0.00" from a template, with no field to bind (see the
+     component header). It's not certain Syncfusion is happy with a column that has no `field`. -->
 @if (filteredJobs.length > 0) {
   <ejs-grid #contractSummaryGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
     <e-columns>

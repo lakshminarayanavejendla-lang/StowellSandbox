@@ -9,12 +9,9 @@ import { CostCodeRecord } from '../../../core/models/stowell-admin/cost-code-rec
 import { StowellUser } from '../../../core/models/stowell-admin/stowell-user.model';
 import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// UI-only grouping of assignments by project (job number), plus an optional inline "add
-// assignment" Reactive Form - mirrors what AdminPanelBase.cs does with
-// `_projectManagementUsers = apiData.GroupBy(x => x.JobNumber)...`, and its per-project
-// "one in-progress new row at a time" (`if (project.Assignments.Any(a => a.IsNew)) return;`).
-// Deliberately kept OUT of ProjectManagementUser (core/models/stowell-admin/project-management-user.model.ts)
-// per that model file's header comment - none of this state round-trips through the API.
+// Assignments grouped by project (job number), plus an optional add-assignment form, as
+// AdminPanelBase.cs does with GroupBy(x => x.JobNumber). Each project allows one new row at a time.
+// This is UI state only, so it isn't on ProjectManagementUser (see project-management-user.model.ts).
 interface ProjectGroup {
   jobNumber: number;
   assignments: ProjectManagementUser[];
@@ -23,59 +20,24 @@ interface ProjectGroup {
 }
 
 /**
- * Port of AdminPanel.razor / AdminPanelBase.cs (@page "/StowellAdmin/AdminPanel") -
- * "Project Access Management": a per-project grid of (role, employee) assignments, with
- * inline add/save/cancel/delete. RadzenDataGrid (parent + nested child grid, single-row-expand)
- * replaced with a plain expandable HTML table; the inline "add assignment" row uses Angular
- * Reactive Forms (one FormGroup per project, created on "Add" and destroyed on Save/Cancel),
- * per this codebase's established convention (no template-driven ngModel, no modal library).
+ * Project Access Management (/StowellAdmin/AdminPanel in Blazor): each project's role and employee
+ * assignments, with add, save, cancel and delete. The add row uses a reactive FormGroup per project,
+ * created on Add and removed on Save or Cancel.
  *
- * SECURITY-RELEVANT, please read before trusting this page for real access changes:
- * 1. FIX (2026-09-16) - the "Employee" dropdown used to be sourced from
- *    ContactService.getGroupUsers() scoped to one hardcoded security-group GUID
- *    (`21e5091d-cb71-4bdb-8d63-f98d8bce3017`, reproduced from AdminPanelBase.OnAfterRenderAsync),
- *    which only had 5 members locally - reported as "not all users there" when trying to grant
- *    project access. Switched to AdminPanelService.getAdminPanelUsers() (dbo.StowellUsers, the
- *    real employee roster - 92 rows locally), which is what this class's own earlier flag here
- *    already suspected was the intended source (see stowell-user.model.ts's header comment: it's
- *    part of IAdminPanelService's real contract, just never wired up in the original Blazor page).
- * 2. `getUserRoles()` returns the full assignable-role list with NO filtering by the calling
- *    admin's own permissions (same flag as project-role.model.ts) - confirm server-side that
- *    role-granting is itself authorization-checked, since this client only checks "is a role
- *    selected", not "is the current user allowed to grant it".
- * 3. Save/Delete call insertProjectManagementUser/deleteProjectManagementUser directly with no
- *    extra client-side confirmation step (matching the Blazor source, which also has none for
- *    save; delete likewise has no confirm() in the source). Left as-is to match source behavior,
- *    unlike DisconnectUsers where a confirm() was deliberately added - flagging the inconsistency
- *    in case you want a confirm step here too before shipping.
+ * Security, read before trusting this page for real access changes:
+ * 1. The Employee dropdown used to come from one fixed security group, which had only 5 members, so
+ *    "not all users" showed up (2026-09-16). It now uses getAdminPanelUsers() (dbo.StowellUsers, the
+ *    full employee list, 92 rows locally). Blazor had that call commented out (see stowell-user.model.ts).
+ * 2. getUserRoles() returns every role, whatever the admin's own permissions. This page only checks
+ *    that a role was picked, so the server must check who can grant what.
+ * 3. Save and Delete call the API straight away with no confirmation, like Blazor. Disconnect Users
+ *    does ask first, so you may want a confirmation here too.
  *
- * SYNCFUSION GRID SWAP (replacing the free plain-<table> stand-in described above):
- * - Outer "one row per project" table -> a Syncfusion Grid bound to the same `pagedProjectGroups`
- *   slice this component already computes (custom search + page-size pager kept exactly as-is,
- *   NOT replaced by Grid's own PageService/Search toolbar item, so the existing "All" page-size
- *   option and search-by-assignment-email behavior aren't lost). The expand/collapse arrow is a
- *   column `template` calling the existing `toggleExpand()`.
- * - Deliberately NOT using Grid's own master-detail `detailTemplate`/DetailRowService for the
- *   per-project assignments panel: enforcing "only one project expanded at a time" (mirroring the
- *   source's RadzenDataGrid ExpandMode.Single) would need calling into that feature's row
- *   expand/collapse API, and this project isn't fully certain of those method names on
- *   ej2-angular-grids 27.1.x without being able to `ng build` and check. Instead, the expanded
- *   group's assignments panel is rendered as its own section right after the Grid (still governed
- *   by this component's own `expanded` flag/`toggleExpand()`, unchanged) - a real but purely
- *   visual difference from the old nested-<tr>-directly-under-the-project-row layout, flagged
- *   here rather than silently changed.
- * - Inner assignments table -> a second Syncfusion Grid bound to `group.assignments`, with an
- *   "Actions" column `template` for the delete button (per the task's "column templates for
- *   editable cells/action buttons" instruction).
- * - The inline "add assignment" Reactive Form (`group.addForm`) is NOT turned into a fake/virtual
- *   Grid row: it isn't part of `group.assignments` (the bound data), and Syncfusion Grid's
- *   supported way to edit/add rows in-place (Normal/Batch/Dialog edit modes) would mean giving up
- *   this codebase's established per-row FormGroup pattern for Grid's own edit template hooks -
- *   a bigger behavioral rewrite than "swap the markup, keep the behavior" calls for. Instead the
- *   exact same `[formGroup]="group.addForm"` markup (dropdowns + Save/Cancel) is kept, just moved
- *   to sit directly above the assignments Grid instead of inside its first `<tr>`. Flagging this
- *   as the one deliberate structural change in this component; all FormGroup/service-call logic
- *   in the class below is untouched.
+ * Layout: the project list is a plain table (see the .html header), with its own search and
+ * page-size pager, including "All" and search by assignment email. Only one project opens at a
+ * time, like Blazor's single-expand grid, and its panel opens right under its row. The assignments are a
+ * Syncfusion grid with a delete button in the Actions column. The add form sits above that grid
+ * instead of as a fake grid row, so it keeps the same FormGroup code.
  */
 @Component({
   selector: 'app-admin-panel',
@@ -102,21 +64,15 @@ export class AdminPanelComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  // FIX - assignments grid showing "No records to display" after a save/delete even though its
-  // dataSource array is correctly updated: Syncfusion's ejs-grid Angular wrapper renders the
-  // rows it's handed at creation time, but doesn't reliably re-render when [dataSource] is
-  // reassigned to a new array afterward (reproduced with real data both on this local dev server
-  // and the deployed build - dataSource/currentViewData report the right row count, but no .e-row
-  // elements exist in the DOM). Explicitly calling refresh() on the live grid instance(s) after
-  // any data change works around it. Only one project is ever expanded at a time (single-expand
-  // mode), so there's at most one ejs-grid in the DOM, but ViewChildren covers it regardless of
-  // that assumption changing later.
+  // After a save or delete the assignments grid could show "No records to display" even though its
+  // data was right: the Syncfusion grid doesn't always re-render when [dataSource] gets a new array.
+  // Calling refresh() on it after each change fixes that. Only one project is open at a time, so
+  // there's at most one grid, but ViewChildren handles more.
   @ViewChildren(GridComponent) private grids!: QueryList<GridComponent>;
 
   private refreshGrids(): void {
-    // ViewChildren reflects the post-render DOM, but the assignments grid for a just-expanded/
-    // just-reloaded group may not have finished rendering the very same tick detectChanges() ran
-    // in - defer one macrotask so the grid instance actually exists before calling refresh() on it.
+    // A grid for a project that just opened or reloaded may not exist yet in this tick, so wait one
+    // task before calling refresh().
     setTimeout(() => {
       this.grids?.forEach((grid) => grid.refresh());
     });
@@ -127,15 +83,8 @@ export class AdminPanelComponent implements OnInit {
     this.loadProjectEmails();
   }
 
-  // FIX (2026-09-16) - the "Employee" dropdown was scoped to ONE hardcoded security-group GUID
-  // (`21e5091d-cb71-4bdb-8d63-f98d8bce3017`) via ContactService.getGroupUsers(), which only had 5
-  // members locally - nowhere near the real Stowell employee roster, and the reason "not all
-  // users" showed up when granting project access. Switched to
-  // AdminPanelService.getAdminPanelUsers() (dbo.StowellUsers, 92 rows locally) - this is the
-  // source the class header's flag #1 already called out as the likely intended one
-  // (GetAdminPanelUsers is part of IAdminPanelService's real contract; the group-lookup was a
-  // stand-in the original Blazor source used instead, per that method's own "commented out" call
-  // site flagged in stowell-user.model.ts).
+  // The Employee dropdown uses getAdminPanelUsers() (dbo.StowellUsers, 92 rows locally). It used to
+  // use one fixed security group with only 5 members, so "not all users" showed up (2026-09-16).
   private loadLookups(): void {
     this.adminPanelService.getAdminPanelUsers().subscribe((users) => {
       this.stowellUsers = users;
@@ -146,14 +95,10 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  // FIX (2026-09-16) - was fed only from getProjectEmails() (dbo.ProjectManagementUsers), so a
-  // project with zero assignments so far - e.g. one just created via Win Bid - never appeared
-  // here at all: there was no group to expand and add a first assignment to (the "Add Line"
-  // form only exists per-group, on an already-rendered row). Now also loads getProjectIds() -
-  // the REAL full project list (StowellSandbox.dbo.actrec, same source Project Queue uses; see
-  // AdminPanelController.GetProjectIds's header comment for the DB-name bug that was also fixed
-  // there) - and unions it with the assignment rows so every real project gets a group, with an
-  // empty `assignments` array when nobody's been granted access yet.
+  // This also loads getProjectIds(), the full project list from StowellSandbox.dbo.actrec (the
+  // same source as the Project Queue), and merges it with the assignments. Before, it only used
+  // getProjectEmails(), so a project with no assignments yet, such as one just won from a bid, never
+  // showed up and there was nowhere to add its first one (2026-09-16).
   private loadProjectEmails(): void {
     forkJoin({
       assignments: this.adminPanelService.getProjectEmails(),
@@ -171,14 +116,13 @@ export class AdminPanelComponent implements OnInit {
       list.push(row);
       byJob.set(row.jobNumber, list);
     }
-    // Ensure every real project has a group, even with no assignments yet.
+    // Every real project gets a group, even with no assignments yet.
     for (const project of allProjects) {
       if (!byJob.has(project.recNum)) {
         byJob.set(project.recNum, []);
       }
     }
-    // Preserve previous expanded state across a reload so Save/Delete don't visually collapse
-    // the row the admin is actively working in.
+    // Keep the open project open after a reload, so Save and Delete don't collapse the row you're working in.
     const previouslyExpanded = new Set(this.projectGroups.filter((g) => g.expanded).map((g) => g.jobNumber));
     return Array.from(byJob.entries())
       .sort(([a], [b]) => a - b)
@@ -202,14 +146,10 @@ export class AdminPanelComponent implements OnInit {
     this.refreshPagedGroups();
   }
 
-  // FIX - was a getter (`get pagedProjectGroups()`) bound directly to the Grid's [dataSource].
-  // Angular re-evaluates a getter on EVERY change-detection cycle, so the Grid was handed a
-  // brand-new array (from .slice()) dozens of times a second even when nothing actually changed
-  // - Syncfusion Grid treats a new array reference as new data and re-renders/resets itself
-  // accordingly. That churn was the real cause of "expand not working": a re-render triggered
-  // mid-click could wipe out the very click event that was supposed to fire toggleExpand(), or
-  // reset the row before its (click) handler ran. Now a plain field, only reassigned when the
-  // underlying page/filter/data genuinely changes.
+  // This was a getter bound to the grid's [dataSource]. Angular runs getters on every change
+  // detection, so the grid got a new array many times a second and kept re-rendering, which could
+  // swallow the click that opens a row. It's a plain field now, set only when the page, filter or
+  // data changes.
   pagedProjectGroups: ProjectGroup[] = [];
 
   private refreshPagedGroups(): void {
@@ -228,13 +168,9 @@ export class AdminPanelComponent implements OnInit {
 
   private applyFilter(): void {
     const term = this.searchTerm.trim().toLowerCase();
-    // NOTE: AdminPanelBase.cs's FilterJobs() filters on `j.JobNumber` OR `j.EmailId` of the
-    // *grouped* parent object - but the parent object's EmailId is never set (only JobNumber +
-    // Assignments are assigned when building the group), so the "search by email" half of that
-    // filter is dead code in the source (always null, never matches). Reproduced the JobNumber
-    // half faithfully but additionally search each group's assignment emails too, since a search
-    // box next to an "email"-shaped filter that silently never works seems like a bug rather
-    // than intentional - flagging this as a deliberate improvement over the literal source.
+    // AdminPanelBase.cs filters on JobNumber or EmailId of the group, but the group's EmailId is never
+    // set, so searching by email never worked. This searches the job number as Blazor did and also the
+    // emails of each group's assignments. That's a deliberate improvement.
     this.filteredProjectGroups = !term
       ? this.projectGroups
       : this.projectGroups.filter(
@@ -247,18 +183,13 @@ export class AdminPanelComponent implements OnInit {
     this.refreshGrids();
   }
 
-  // FIX - expand not working, then opening at the bottom of the page: the outer list used to
-  // be an <ejs-grid> with this method wired to its (recordClick) - see the .html file's header
-  // comment for why the outer list is a plain <table> now instead, with (click) directly on
-  // each <tr>. toggleExpand() itself is unchanged; only what calls it moved.
+  // The project list used to be an <ejs-grid> calling this from (recordClick). Rows didn't open, or
+  // opened at the bottom of the page. It's a plain <table> with (click) on each row now (see the .html).
   toggleExpand(group: ProjectGroup): void {
-    // ngZone.run()/detectChanges(): a plain <tr> (click) is a completely standard Angular
-    // binding and doesn't strictly need this, but kept as cheap insurance since this component
-    // already had a real zone-related bug once (see project-management module's other fixes
-    // this session for the same class of issue) and the inner assignments Grid's
-    // (recordClick) -> deleteAssignment() path still benefits from it.
+    // A plain (click) doesn't really need ngZone.run() and detectChanges(), but they're cheap insurance
+    // and the delete path from the inner grid's (recordClick) still needs them.
     this.ngZone.run(() => {
-      // Mirrors RadzenDataGrid's ExpandMode.Single - only one project's assignments open at once.
+      // Only one project open at a time, like Blazor's single-expand grid.
       const willExpand = !group.expanded;
       for (const g of this.projectGroups) {
         if (g !== group) {
@@ -324,9 +255,8 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  // FIX - delete not working: see admin-panel.component.html's comment on the inner
-  // assignments <ejs-grid>. Only acts when the click landed in the "Actions" column - clicking
-  // Role/Employee cells does nothing (this grid has no other click behavior to conflict with).
+  // Delete only acts when the click is in the Actions column (see the comment on the inner grid in
+  // the .html). Clicking the Role or Employee cells does nothing.
   onAssignmentRecordClick(group: ProjectGroup, args: RecordClickEventArgs): void {
     if (args.column?.headerText !== 'Actions') return;
     const row = args.rowData as ProjectManagementUser | undefined;

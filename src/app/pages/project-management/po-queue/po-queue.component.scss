@@ -10,18 +10,18 @@
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  color: #333;
+  color: var(--sh-ink);
   cursor: pointer;
 }
 
 .note {
-  color: #888;
+  color: var(--sh-ink-3);
   font-style: italic;
-  border: 1px solid #dcdcdc;
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
   padding: 6px 10px;
   margin-bottom: 16px;
-  background-color: #f7f7f7;
+  background-color: var(--sh-surface-2);
 }
 
 .completed-header {
@@ -33,12 +33,12 @@
   border-collapse: collapse;
   margin: 0 0 20px;
 
-  th { background-color: #00355f; color: #fff; padding: 8px 10px; text-align: left; }
-  td { padding: 8px 10px; border: 1px solid #dcdcdc; }
+  th { background-color: var(--sh-blue); color: #fff; padding: 8px 10px; text-align: left; }
+  td { padding: 8px 10px; border: 1px solid var(--sh-line); }
 }
 
 .btn-sm {
-  background-color: #00355f;
+  background-color: var(--sh-blue);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -47,13 +47,12 @@
   cursor: pointer;
 }
 
-// Reuses bid-queue.component.scss's black-grid header styling for visual consistency across
-// queue pages in this app.
+// Uses the same grid header style as bid-queue.component.scss, so the queue pages match.
 .black-grid {
   .e-gridheader,
   .e-gridheader .e-columnheader,
   .e-gridheader .e-headercell {
-    background-color: #00355f !important;
+    background-color: var(--sh-blue) !important;
     color: #ffffff !important;
   }
 
@@ -65,7 +64,7 @@
 
   .e-gridheader .e-headercell:hover,
   .e-gridheader .e-headercell:hover .e-headertext {
-    background-color: #00355f !important;
+    background-color: var(--sh-blue) !important;
     color: #ffffff !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -79,13 +78,13 @@
   }
 
   .opportunity-link {
-    color: #00355f;
+    color: var(--sh-ink);
     text-decoration: none;
     font-weight: 500;
   }
 
   .opportunity-link:hover {
-    color: #1c84c6;
+    color: var(--sh-blue);
     text-decoration: underline;
   }
 }

@@ -7,16 +7,15 @@ import { CurrentCostSummaryViewModel, Job, Phase } from '../models/project-manag
 import { BidInfoDto, BidPhase, EmployeeDetails, ContractorClient } from '../models/project-management/bid-info.model';
 
 /**
- * Port of Services/IProjectOverviewService.cs + ProjectOverviewService.cs - backs the Project
- * Overview page's four tabs (Overview/Details/Financials/Reporting).
+ * Data for the Project Overview tabs (Overview, Details, Financials, Reporting). Ported from
+ * ProjectOverviewService.cs.
  */
 @Injectable({ providedIn: 'root' })
 export class ProjectOverviewService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
-  // `phase` (optional) filters the summary to one phase - the API already accepts it as a query
-  // param (ProjectOverviewController.GetCurrentCostSummaryViewModel); empty = all phases.
+  // `phase` limits the summary to one phase. Leave it empty for all phases.
   getCurrentCostSummaryViewModel(recnum: string, phase = ''): Observable<CurrentCostSummaryViewModel> {
     return this.http
       .get<CurrentCostSummaryViewModel>(
@@ -33,13 +32,9 @@ export class ProjectOverviewService {
   }
 
   /**
-   * These four calls belong, in the Blazor app, to IEstimationService (injected directly into
-   * OverviewTabBase/ProjectDetailsTabBase alongside IProjectOverviewService) - NOT to
-   * IProjectOverviewService itself. They're grouped here rather than duplicated because the
-   * Project Overview tabs are this module's responsibility and the Estimation module is being
-   * converted in parallel by another agent; once that phase ships its own Angular
-   * EstimationService, these four methods should be deleted here and the tab components should
-   * import that service instead, to avoid two divergent client implementations of the same API.
+   * In the Blazor app these four calls belong to IEstimationService, not IProjectOverviewService.
+   * They're here for the Project Overview tabs. Once the Estimation module's Angular service covers
+   * them, delete these and use that service, so there aren't two copies of the same calls.
    */
   getBidDetails(projectId: number): Observable<BidInfoDto> {
     return this.http
@@ -48,7 +43,7 @@ export class ProjectOverviewService {
   }
 
   getBidPhases(projectId: number): Observable<BidPhase[]> {
-    // Route INFERRED - see project-management-endpoints.ts header note.
+    // A guessed route (see project-management-endpoints.ts).
     return this.http
       .get<BidPhase[]>(`${this.base}${ProjectManagementEndpoints.GetEstimationPhasesUrl}/${projectId}`)
       .pipe(catchError(() => of([])));

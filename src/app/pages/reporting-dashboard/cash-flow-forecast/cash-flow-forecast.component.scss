@@ -11,19 +11,14 @@
   gap: 10px;
   margin-bottom: 10px;
 
-  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid var(--sh-line); border-radius: 4px; }
 }
 
 .actions {
   display: flex;
   gap: 5px;
-  // FIX (2026-09-22, alignment sweep) - without this, at narrower widths the flex row forced
-  // all 5 export buttons onto one line, shrinking them below their own text's width; since the
-  // buttons had no white-space:nowrap (see the paired FIX on .btn-primary/.btn-secondary), the
-  // shrunk buttons wrapped their OWN TEXT onto a second line, which the buttons' fixed
-  // height then clipped ("Copy to" cutting off "clipboard", "Export" cutting off "CSV" etc).
-  // Wrapping the row instead lets a button that doesn't fit drop to the next line as a whole,
-  // intact unit.
+  // Let the export buttons wrap onto the next line. Squeezed onto one line they shrank, their text
+  // wrapped and the fixed height cut it off ("Copy to" lost "clipboard") (2026-09-22).
   flex-wrap: wrap;
 }
 
@@ -33,15 +28,14 @@
   padding: 6px 14px;
   color: #fff;
   height: 38px;
-  white-space: nowrap; // FIX (2026-09-22) - see .actions' comment above.
+  white-space: nowrap; // keeps the label on one line (see .actions)
 }
 
-.btn-primary { background-color: #007bff; }
-.btn-secondary { background-color: #6c757d; }
+.btn-primary { background-color: var(--sh-blue); }
+.btn-secondary { background-color: var(--sh-ink-3); }
 .btn-secondary[disabled] { opacity: 0.5; cursor: not-allowed; }
 
-// Forecast grids have a variable, potentially large number of month columns - scroll
-// horizontally rather than squeezing/wrapping them.
+// The forecast grids can have many month columns, so they scroll sideways instead of squeezing.
 .table-scroll {
   overflow-x: auto;
   margin-bottom: 10px;
@@ -52,7 +46,7 @@
   border-collapse: collapse;
   white-space: nowrap;
 
-  th { background-color: #0d47a1; color: #fff; text-align: left; padding: 10px; }
-  td { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
-  .empty { text-align: center; color: #888; white-space: normal; }
+  th { background-color: var(--sh-blue); color: #fff; text-align: left; padding: 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--sh-line); }
+  .empty { text-align: center; color: var(--sh-ink-3); white-space: normal; }
 }

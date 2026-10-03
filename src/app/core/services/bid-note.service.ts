@@ -5,8 +5,8 @@ import { environment } from '../../../environments/environment';
 import { BidsEndpoints } from '../bids-endpoints';
 import { AddBidNoteRequest, AddBidNoteResponse, BidNote } from '../models/bids/bid-note.model';
 
-// NEW - see bid-note.model.ts header comment: not a Blazor port, endpoint contract unconfirmed.
-// Mirrors bid-amount.service.ts's shape for the sibling "Bids" sub-grid on the same tab.
+// Bid notes. Not from Blazor, and the API shape isn't confirmed (see bid-note.model.ts). Works like
+// bid-amount.service.ts, which handles the Bids grid on the same tab.
 @Injectable({ providedIn: 'root' })
 export class BidNoteService {
   private http = inject(HttpClient);

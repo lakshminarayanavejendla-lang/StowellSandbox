@@ -5,28 +5,22 @@ import { BidRecord } from '../../../core/models/bids/bid-record.model';
 import { BidSummaryTabComponent } from './components/bid-summary-tab/bid-summary-tab.component';
 import { BidDetailsTabComponent } from './components/bid-details-tab/bid-details-tab.component';
 import { BidFileManagerComponent } from './components/bid-file-manager/bid-file-manager.component';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of BidOverview.razor/BidOverviewBase.cs - the tab shell over BidQueueOverview.razor
- * ("Overview"), BidProjectDetailsTab.razor ("Details"), and BidFileManagerComponent.razor
- * ("Documents").
+ * The bid page with its Overview, Details and Documents tabs, from BidOverview.razor.
  *
- * Route: Blazor's @page "/Bids/BidOverview/{BidId}/{Type}" wasn't in the Phase 1 placeholder
- * stub list (only current-bids/bid-queue/new-bid were) - added as a NEW route
- * 'bids/bid-overview/:bidId/:type' since the source clearly needs it (every bid link from
- * CurrentBids/BidQueue points here). Flagged in the handoff report.
+ * Its route, 'bids/bid-overview/:bidId/:type' (/Bids/BidOverview/{BidId}/{Type} in Blazor), had no
+ * placeholder, but every bid link in Current Bids and the Bid Queue opens it.
  *
- * Consolidation flag: the Blazor original had BOTH BidQueueOverviewTabBase and
- * BidProjectDetailsTabBase independently call IBidService.GetBidById(BidId) on init (duplicate
- * fetch of the same record). This port fetches the BidRecord once here and passes it down to
- * both tabs as an @Input, re-fetching after a child's save/won/lost action reports success -
- * a deliberate small consolidation. Flagged in case the duplicate independent fetches in the
- * source were actually intentional (e.g. for per-tab staleness/isolation reasons).
+ * In Blazor the Overview and Details tabs each loaded the same bid with GetBidById. Here it loads
+ * once and is passed to both tabs, then reloads after a save, Won or Lost succeeds. If the separate
+ * loads were on purpose, change it back.
  */
 @Component({
   selector: 'app-bid-overview',
   standalone: true,
-  imports: [BidSummaryTabComponent, BidDetailsTabComponent, BidFileManagerComponent],
+  imports: [PageHeaderComponent, BidSummaryTabComponent, BidDetailsTabComponent, BidFileManagerComponent],
   templateUrl: './bid-overview.component.html',
   styleUrl: './bid-overview.component.scss',
 })

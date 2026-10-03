@@ -1,9 +1,6 @@
-// Mirrors StowellCoApp.DTO.ContractorClient (confirmed, DTO/CodeCodeSummaryRecord.cs -
-// despite the filename, that file is a grab-bag of several DTO classes including this one).
-// Double-duty in AddBid/EditBidForm: populates the General Contractor "Client" dropdown
-// (GetAllContractorClients) AND, confusingly, the Project Resources "Employee" dropdown
-// (GetAllEmployees also returns ContractorClient[], not EmployeeDetails[] - see
-// EstimationService notes). Ported as-is; flagged in the service.
+// Matches ContractorClient in DTO/CodeCodeSummaryRecord.cs. On Add Bid and Edit Bid it fills the
+// General Contractor dropdown (GetAllContractorClients) and, oddly, the Project Resources Employee
+// dropdown too, because GetAllEmployees also returns ContractorClient[] (see EstimationService).
 export interface ContractorClient {
   id: number;
   name: string;

@@ -5,18 +5,18 @@
   <title>Stowell App</title>
   <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="icon" type="image/jpeg" sizes="32x32" href="assets/images/stowell.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/jpeg" sizes="32x32" href="assets/images/stowell.jpg" />
 
-  <!-- Same third-party CSS the Blazor _Host.cshtml loaded, kept for visual parity in Phase 1 -->
+  <!-- The same third-party CSS the Blazor _Host.cshtml loaded, so the app looks the same -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-  <!-- Syncfusion Angular theme - bootstrap5, matching the Blazor app's
-       _content/Syncfusion.Blazor.Themes/bootstrap5.css for visual continuity. If your Syncfusion
-       account's licensed version differs from the ^27.1.48 pinned in package.json, update this
-       version segment to match (theme CSS version should track the ej2 package version). -->
-  <link href="https://cdn.syncfusion.com/ej2/27.1.48/bootstrap5.css" rel="stylesheet" type="text/css" />
+  <!-- The Syncfusion theme (bootstrap5, as the Blazor app used). ThemeService swaps it for the dark
+       version. Keep this version the same as the ej2 packages in package.json (34.2.6). -->
+  <link id="ej2-theme" href="https://cdn.syncfusion.com/ej2/34.2.6/bootstrap5.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
   <app-root></app-root>

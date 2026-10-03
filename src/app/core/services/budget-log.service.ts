@@ -6,11 +6,9 @@ import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { BudgetLogEntry } from '../models/project-management/budget-log.model';
 
 /**
- * NEW service - client-updated Moqups (page TAB-Budget/Financials, the "Budget Log" table under
- * the Total Budget/Paid/Remaining summary). Mirrors job-invoice.service.ts's pattern (single
- * GET-by-jobId, empty-array fallback). No backend endpoint or Sage table mapping has been
- * confirmed for this yet - GetBudgetLogUrl is a placeholder route name only, same status as
- * GetJobInvoicesUrl.
+ * The Budget Log table under the budget summary (Moqups page TAB-Budget/Financials). Works like
+ * job-invoice.service.ts: one GET by job id, and an empty list if it fails. There's no API or Sage
+ * table for it yet; GetBudgetLogUrl is a placeholder, like GetJobInvoicesUrl.
  */
 @Injectable({ providedIn: 'root' })
 export class BudgetLogService {

@@ -5,39 +5,27 @@ import { GridModule, GridComponent, SortService, PdfExportService, ExcelExportSe
 import { ReportingService } from '../../../core/services/reporting.service';
 import { CashFlowForecastRow } from '../../../core/models/project-management/cash-flow-query.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of Components/Pages/ReportingDashboard/CashFlowForecast.razor +
- * CashFlowForecastBase.razor.cs (@page "/CashFlowForecast"). This is the one page in this
- * whole module backed by IReportingService (ReportingService.getCashFlowForecastReportData) -
- * see that service's header comment and core/models/project-management/cash-flow-query.model.ts's
- * updated header comment for how CashFlowForecastResponse's real shape was confirmed against
- * Models/CostCodeList.cs during this phase.
+ * The Cash Flow Forecast report (/CashFlowForecast in Blazor). It's the only report here that uses
+ * ReportingService (see cash-flow-query.model.ts for the response).
  *
- * Two grids, both fed from the one response: "Cash Flow Budget" (BudgetForecast, columns
- * labeled "Budget Amount"/"Costs As Of"/"Remaining") and "Cash Flow Contract" (ContractForecast,
- * same three underlying fields labeled "Total Contract Amount"/"Billed As Of"/"Remaining"),
- * plus a set of dynamic month columns per grid built from that grid's first row's
- * ForecastMonths keys - reproduced the same way (columns computed from data instead of a fixed
- * column list, since the month range is server-driven).
+ * Two Syncfusion grids come from one response: Cash Flow Budget (BudgetForecast, shown as Budget
+ * Amount / Costs As Of / Remaining) and Cash Flow Contract (ContractForecast, the same three fields
+ * shown as Total Contract Amount / Billed As Of / Remaining). Each grid also gets a column per month,
+ * taken from its first row's ForecastMonths keys, because the server decides the months.
  *
- * FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
- * message - see report-export.util.ts's header comment. Two independent grids here means two
- * independent #ref/@ViewChild pairs and two sets of export methods (budget/contract).
+ * The month columns use templates that call monthValue(), not field="forecastMonths.Jan 2026",
+ * because labels like "Jan 2026" have spaces and the grid's dotted field lookup may not handle them.
  *
- * No Chart.js chart to swap here - despite the class comment above mentioning "two grids", this
- * page really is grid-only in the source; checked for a canvas/chart import and found none.
- * Syncfusion GridComponent replaces both plain <table>s. The month columns are still built
- * dynamically off each grid's own `forecastMonths` keys (server-driven month range, unchanged) -
- * rendered via per-column templates calling `monthValue()` rather than a dot-path `field` string,
- * since month labels like "Jan 2026" contain spaces and this project isn't 100% certain how
- * Syncfusion Grid 27.1.x's nested-field dot-notation lookup handles that - flagging that as the
- * reason for the template-based approach instead of `field="forecastMonths.Jan 2026"`.
+ * PDF, Excel and Word export work (see report-export.util.ts). With two grids there are two
+ * @ViewChild refs and two sets of export methods, one for budget and one for contract.
  */
 @Component({
   selector: 'app-cash-flow-forecast',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [SortService, PdfExportService, ExcelExportService],
   templateUrl: './cash-flow-forecast.component.html',
   styleUrl: './cash-flow-forecast.component.scss',
@@ -77,8 +65,7 @@ export class CashFlowForecastComponent implements OnInit {
       : this.budgetForecast.filter((r) => [r.jobNumber, r.jobName].some((f) => f?.toLowerCase().includes(t)));
   }
 
-  // Helper for the dynamic month e-column templates - equivalent to the original template's
-  // `(r.forecastMonths[m] ?? 0)`.
+  // Used by the month column templates; same as the old template's `(r.forecastMonths[m] ?? 0)`.
   monthValue(row: CashFlowForecastRow, month: string): number {
     return row.forecastMonths[month] ?? 0;
   }

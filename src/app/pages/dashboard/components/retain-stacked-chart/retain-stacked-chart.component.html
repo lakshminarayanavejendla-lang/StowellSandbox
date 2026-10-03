@@ -1,40 +1,24 @@
 <h4>Total Retain by File (Hi/Low Highlight)</h4>
-
-<ejs-chart
-  [primaryXAxis]="primaryXAxis"
-  [primaryYAxis]="primaryYAxis"
-  [legendSettings]="legendSettings"
-  height="320px">
-
-  <e-series-collection>
-
-    <e-series
-      [dataSource]="chartData"
-      type="StackingColumn"
-      xName="category"
-      yName="highest"
-      name="Highest"
-      fill="#3767ad">
-    </e-series>
-
-    <e-series
-      [dataSource]="chartData"
-      type="StackingColumn"
-      xName="category"
-      yName="lowest"
-      name="Lowest"
-      fill="gray">
-    </e-series>
-
-    <e-series
-      [dataSource]="chartData"
-      type="StackingColumn"
-      xName="category"
-      yName="regular"
-      name="Regular"
-      fill="#00355f">
-    </e-series>
-
-  </e-series-collection>
-
-</ejs-chart>
+@if (chartData.length) {
+  <ejs-chart
+    [theme]="chartTheme()"
+    background="transparent"
+    [chartArea]="chartArea"
+    [primaryXAxis]="primaryXAxis"
+    [primaryYAxis]="primaryYAxis"
+    [legendSettings]="legendSettings"
+    [tooltip]="tooltip"
+    (axisLabelRender)="onAxisLabel($event)"
+    (tooltipRender)="onTooltip($event)"
+    (textRender)="onDataLabel($event)"
+    height="340px"
+  >
+    <e-series-collection>
+      <e-series [dataSource]="chartData" type="StackingColumn" xName="category" yName="regular" name="Regular" [fill]="colors.blue" columnWidth="0.62"></e-series>
+      <e-series [dataSource]="chartData" type="StackingColumn" xName="category" yName="highest" name="Highest" [fill]="colors.accent" [marker]="marker" [cornerRadius]="rounded" columnWidth="0.62"></e-series>
+      <e-series [dataSource]="chartData" type="StackingColumn" xName="category" yName="lowest" name="Lowest" [fill]="colors.slate" [marker]="marker" [cornerRadius]="rounded" columnWidth="0.62"></e-series>
+    </e-series-collection>
+  </ejs-chart>
+} @else {
+  <div class="chart-empty">No data to chart yet.</div>
+}

@@ -2,6 +2,7 @@
   @if (ajaxSettings) {
     <ejs-filemanager
       [ajaxSettings]="ajaxSettings"
+      [navigationPaneSettings]="{ minWidth: '260px', maxWidth: '55%' }"
       height="520px"
       (fileOpen)="onFileOpen($event)"
       (beforeSend)="onBeforeSend($event)"

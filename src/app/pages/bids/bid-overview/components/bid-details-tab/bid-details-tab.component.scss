@@ -8,8 +8,8 @@
 .message {
   padding: 8px 12px;
   margin-bottom: 12px;
-  background-color: #e6f7ec;
-  border: 1px solid #b7e4c7;
+  background-color: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
   color: #1a7f3c;
 }
@@ -24,7 +24,7 @@
   label {
     width: 160px;
     font-weight: 600;
-    color: #777;
+    color: var(--sh-ink-3);
   }
 
   input,
@@ -36,7 +36,7 @@
     padding: 4px 10px;
 
     &[readonly] {
-      background-color: #f7f7f7;
+      background-color: var(--sh-surface-2);
       cursor: not-allowed;
     }
   }
@@ -71,12 +71,12 @@
 
 h2 {
   font-weight: 700;
-  color: #00355f;
+  color: var(--sh-ink);
   margin-top: 20px;
 }
 
 .hr-line-dashed {
-  border-top: 1px dashed #c7c7c7;
+  border-top: 1px dashed var(--sh-line);
   margin: 15px 0 25px 0;
 }
 
@@ -99,7 +99,7 @@ h2 {
 }
 
 .btn-primary {
-  background-color: #00355f;
+  background-color: var(--sh-blue);
   color: #fff;
 }
 
@@ -114,7 +114,7 @@ h2 {
 }
 
 .btn-success {
-  background-color: #5cb85c;
+  background-color: #14915b;
   color: #fff;
 }
 
@@ -149,7 +149,7 @@ h2 {
   width: 500px;
   max-width: 90%;
 
-  background: #ffffff;
+  background: var(--sh-surface);
 
   border-radius: 6px;
 
@@ -167,7 +167,7 @@ h2 {
 
   padding: 15px 20px;
 
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--sh-line);
 }
 
 .add-access-header h4 {
@@ -202,7 +202,7 @@ h2 {
   margin-bottom: 6px;
 
   font-weight: 600;
-  color: #333;
+  color: var(--sh-ink);
 }
 
 .add-access-control {
@@ -212,10 +212,10 @@ h2 {
 
   padding: 6px 10px;
 
-  border: 1px solid #ccc;
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
 
-  background: #fff;
+  background: var(--sh-surface);
 
   font-size: 14px;
 }
@@ -228,17 +228,17 @@ h2 {
 
   padding: 15px 20px;
 
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--sh-line);
 }
 .e-grid .e-headercelldiv{
   font-size: 15px;
 }
 .e-grid .e-columnheader .e-headercell{
-  background: #00355f;
+  background: var(--sh-blue);
   color: #fff;
 }
 .e-grid .e-gridheader tr{
-    background: #00355f;
+    background: var(--sh-blue);
   color: #fff;
 }
 .form-group.row.header-fields{

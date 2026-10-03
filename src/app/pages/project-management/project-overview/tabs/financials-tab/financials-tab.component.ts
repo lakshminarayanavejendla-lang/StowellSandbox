@@ -4,9 +4,8 @@ import { RouterLink } from '@angular/router';
 import { ProjectOverviewService } from '../../../../../core/services/project-overview.service';
 import { CurrentCostSummaryViewModel } from '../../../../../core/models/project-management/cost-summary.model';
 
-// Port of Components/Pages/ProjectManagement/FinancialsTab.razor + FinancialsTabBase.cs.
-// Invoicing/Change Orders/Purchase Orders tables are static shells with no data binding in the
-// Blazor source either (empty &nbsp; rows) - ported as-is rather than invented content.
+// The Financials tab, from FinancialsTab.razor. The Invoicing, Change Orders and Purchase Orders
+// tables are empty shells in Blazor too, so they're kept empty here.
 @Component({
   selector: 'app-financials-tab',
   standalone: true,
@@ -33,8 +32,8 @@ export class FinancialsTabComponent implements OnChanges {
     });
   }
 
-  // BudgetPayment's Budget/Paid/Balance fields are strings on the wire (see CashFlowRecord
-  // comment in cost-summary.model.ts) - parsed the same defensive way the Blazor markup does.
+  // Budget, Paid and Balance come as strings (see cost-summary.model.ts), so they're parsed carefully,
+  // as the Blazor page did.
   asCurrency(value: string | undefined): number {
     const n = Number(value);
     return Number.isFinite(n) ? n : 0;

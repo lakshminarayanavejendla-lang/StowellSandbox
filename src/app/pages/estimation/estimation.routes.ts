@@ -1,19 +1,16 @@
 import { Routes } from '@angular/router';
-import { BidQueueComponent } from './bid-queue/bid-queue.component';
-import { BidFormComponent } from './bid-form/bid-form.component';
 
 /**
- * Estimation module routes - to be merged into app.routes.ts's children array by whoever owns
- * that file (per this phase's collision-avoidance rules, this file does not edit
- * app.routes.ts directly).
+ * Estimation routes, added to app.routes.ts.
  *
- * 'estimation/bid-queue' and 'estimation/add-bid' match the Phase 1 placeholder paths 1:1.
- * 'estimation/edit-bid/:jobId' is a NEW route not present as a placeholder - the Blazor source
- * has `@page "/Estimation/EditBidForm/{JobId:int}"` (EditBidForm.razor), which the placeholder
- * stubs never accounted for. Flagging this discrepancy per the task instructions.
+ * 'estimation/bid-queue' and 'estimation/add-bid' are the paths the placeholders used.
+ * 'estimation/edit-bid/:jobId' is new; it's Blazor's /Estimation/EditBidForm/{JobId:int}, which had
+ * no placeholder.
  */
 export const ESTIMATION_ROUTES: Routes = [
-  { path: 'estimation/bid-queue', component: BidQueueComponent, data: { title: 'Estimation - Bid Queue' } },
-  { path: 'estimation/add-bid', component: BidFormComponent, data: { title: 'Estimation - New Job/Project Form' } },
-  { path: 'estimation/edit-bid/:jobId', component: BidFormComponent, data: { title: 'Estimation - Edit Bid' } },
+  { path: 'estimation/bid-queue', loadComponent: () => import('./bid-queue/bid-queue.component').then((m) => m.BidQueueComponent), data: { title: 'Estimation - Bid Queue' } },
+  { path: 'estimation/add-bid', loadComponent: () => import('./bid-form/bid-form.component').then((m) => m.BidFormComponent), data: { title: 'Estimation - New Job/Project Form' } },
+  // The Update Project button opens Edit Project (Mike Smith, 2026-09-26). BidFormComponent is unchanged:
+  // it still handles New Job/Project above, and its edit mode stays as the previous version of this page.
+  { path: 'estimation/edit-bid/:jobId', loadComponent: () => import('./edit-project/edit-project.component').then((m) => m.EditProjectComponent), data: { title: 'Estimation - Edit Project' } },
 ];

@@ -1,6 +1,4 @@
-<h3>Opportunity Overview</h3>
-<hr />
-
+<app-page-header title="Opportunity Overview"></app-page-header>
 <ul class="nav-tabs">
   <li>
     <a [class.active]="activeTab === 'overview'" (click)="switchTab('overview')">
@@ -22,10 +20,10 @@
 <div class="tab-content">
   @switch (activeTab) {
     @case ('overview') {
-      <app-bid-summary-tab [bidId]="bidId" [type]="type" [bidRecord]="bidRecord" (bidChanged)="loadBid()" />
+      <app-bid-summary-tab [bidId]="bidId" [type]="type" [bidRecord]="bidRecord" (bidChanged)="loadBid()" (openDocuments)="switchTab('documents')" />
     }
     @case ('details') {
-      <app-bid-details-tab [bidId]="bidId" [type]="type" [bidRecord]="bidRecord" (bidChanged)="loadBid()" />
+      <app-bid-details-tab [bidId]="bidId" [type]="type" [bidRecord]="bidRecord" (bidChanged)="loadBid()" (openDocuments)="switchTab('documents')" />
     }
     @case ('documents') {
       <app-bid-file-manager [bidId]="bidId" />

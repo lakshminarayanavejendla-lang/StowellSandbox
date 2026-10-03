@@ -12,17 +12,14 @@ import { EmployeeDetails, SubmitToSageResponse } from '../models/estimation/esti
 import { CostCodeService } from './cost-code.service';
 
 /**
- * Port of IEstimationService/EstimationService.cs (Services/EstimationService.cs), backing
- * BidQueue, AddBid and EditBidForm. Same auth caveat as JobService: the Blazor version
- * resolved the caller's email server-side (GetUserEmail() off the ClaimsPrincipal) for
- * GetLoggedUserEmail(); there is no HTTP call behind that method in the C# source at all, so
- * it is NOT ported here as a request - callers should resolve the signed-in user's email from
- * the MSAL account instead (see BidFormComponent's TODO, same placeholder pattern as
- * JobService/CurrentJobsComponent until real auth wiring lands).
+ * Ported from EstimationService.cs, for the Bid Queue, Add Bid and Edit Bid pages.
  *
- * GetAllPhases() is technically ICostCodeService/CostCodeService.cs, not IEstimationService,
- * but AddBid/EditBidForm need it (the "Additional Phases" popup's dropdown data), so it's
- * included here rather than left unported - flagged in estimation-endpoints.ts too.
+ * GetLoggedUserEmail() isn't here because it made no HTTP call; Blazor read the email from the
+ * signed-in user on the server. Get it from the MSAL account instead (see the TODO in
+ * BidFormComponent).
+ *
+ * GetAllPhases() really belongs to CostCodeService, but the Additional Phases popup needs it, so
+ * it's here too.
  */
 @Injectable({ providedIn: 'root' })
 export class EstimationService {
@@ -54,8 +51,7 @@ export class EstimationService {
       .pipe(catchError(() => of(null)));
   }
 
-  // See class-level note: ported for interface parity, not currently called by
-  // AddBid/EditBidForm.
+  // Ported to match the C# service. Add Bid and Edit Bid don't call it.
   getEmployees(jobId: number): Observable<EmployeeDetails[]> {
     return this.http
       .get<EmployeeDetails[]>(`${this.base}${EstimationEndpoints.GetEmployeesUrl}/${jobId}`)
@@ -68,9 +64,8 @@ export class EstimationService {
       .pipe(catchError(() => of([])));
   }
 
-  // NOTE: despite the name, this returns ContractorClient[] (the C# source calls it for the
-  // Project Resources "Employee" dropdown's data source, same shape as the Client dropdown -
-  // see ContractorClient model note). Ported as-is.
+  // Despite the name, this returns ContractorClient[], which fills the Project Resources Employee
+  // dropdown. Kept as it was in C#.
   getAllEmployees(): Observable<ContractorClient[]> {
     return this.http
       .get<ContractorClient[]>(`${this.base}${EstimationEndpoints.GetAllEmployeesUrl}`)
@@ -92,10 +87,8 @@ export class EstimationService {
       .pipe(catchError(() => of(null)));
   }
 
-  // Delegates to CostCodeService.getAllPhases() (api/CostCode/GetAllPhases) rather than
-  // duplicating the HTTP call here - see class-level note. recnum is optional on
-  // CostCodeService's Phase model but required on this service's; defaulted to '' when absent
-  // so the returned shape matches what this method has always returned.
+  // Uses CostCodeService.getAllPhases() instead of repeating the call. recnum is optional there and
+  // required here, so a missing one becomes ''.
   getAllPhases(): Observable<Phase[]> {
     return this.costCodeService.getAllPhases().pipe(
       map((phases) => phases.map((phase) => ({ ...phase, recnum: phase.recnum ?? '' })))

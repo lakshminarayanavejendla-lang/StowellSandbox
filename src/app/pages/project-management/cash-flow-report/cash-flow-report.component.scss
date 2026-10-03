@@ -5,10 +5,10 @@
   flex-wrap: wrap;
   margin-bottom: 15px;
 
-  label { font-weight: 600; color: #444; }
+  label { font-weight: 600; color: var(--sh-ink); }
   select, input {
     height: 38px;
-    border: 1px solid #c7c7c7;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 10px;
   }
@@ -22,7 +22,7 @@
   gap: 10px;
   margin-bottom: 10px;
 
-  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid var(--sh-line); border-radius: 4px; }
 }
 
 .actions {
@@ -37,20 +37,20 @@
   color: #fff;
 }
 
-.btn-primary { background-color: #00355f; }
-.btn-secondary { background-color: #6c757d; }
+.btn-primary { background-color: var(--sh-blue); }
+.btn-secondary { background-color: var(--sh-ink-3); }
 .btn-secondary[disabled] { opacity: 0.5; cursor: not-allowed; }
 
 .grid-table {
   width: 100%;
   border-collapse: collapse;
 
-  th { background-color: #00355f; color: #fff; text-align: left; padding: 10px; white-space: nowrap; }
-  td { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
-  tbody tr:hover { background: #f2f6ff; }
-  .empty { text-align: center; color: #888; }
+  th { background-color: var(--sh-blue); color: #fff; text-align: left; padding: 10px; white-space: nowrap; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--sh-line); }
+  tbody tr:hover { background: var(--sh-surface-2); }
+  .empty { text-align: center; color: var(--sh-ink-3); }
 }
 .e-grid .e-headercell, .e-grid .e-detailheadercell {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
     color: #fff;
 }

@@ -1,6 +1,4 @@
-<h3>Cash Flow Report</h3>
-<hr />
-
+<app-page-header title="Cash Flow Report"></app-page-header>
 <div class="form-row">
   <label>Status</label>
   <select [(ngModel)]="selectedStatusId" (ngModelChange)="onStatusChanged($event)">
@@ -60,5 +58,4 @@
     <e-column field="netCashInOut" headerText="Net Cash In/Out" width="150" format="C2"></e-column>
   </e-columns>
 </ejs-grid>
-<!-- The original empty-state message ("No data. Choose a job and click 'Get Data'.") is
-     superseded by Grid's own built-in empty-records display when filteredRecords is []. -->
+<!-- The grid's own empty message replaces Blazor's "No data. Choose a job and click 'Get Data'." -->

@@ -1,26 +1,235 @@
-<div class="dashboard-grid">
-  <section class="widget calendar-widget">
-    <app-calendar-widget></app-calendar-widget>
-  </section>
+<!-- Header: greeting, date and the three create actions -->
+<section class="head">
+  <div>
+    <div class="eyebrow">{{ today | date: 'EEEE, MMMM d' }}</div>
+    <h1>{{ greeting }}, {{ firstName }}</h1>
+    <p class="sub">Here is what is happening across your jobs, orders and cash today.</p>
+  </div>
+  <div class="actions">
+    <a class="btn" routerLink="/project-management/new-co-form"><i class="bi bi-arrow-left-right" aria-hidden="true"></i>New CO</a>
+    <a class="btn" routerLink="/project-management/new-po-form"><i class="bi bi-receipt" aria-hidden="true"></i>New PO</a>
+    <a class="btn primary" routerLink="/bids/new-bid"><i class="bi bi-plus-lg" aria-hidden="true"></i>New bid</a>
+  </div>
+</section>
 
-  <section class="widget jobs-widget">
-    <h4>Current Jobs</h4>
-    <app-current-jobs></app-current-jobs>
-  </section>
+<!-- Key figures (each links to the page behind it; numbers count up, trend lines draw in) -->
+<section class="kpis" aria-label="Key figures">
+  <a class="kpi" routerLink="/reporting-dashboard">
+    <span class="lab"><span class="ico"><i class="bi bi-cash-coin" aria-hidden="true"></i></span>Cash collected</span>
+    <span class="val" [appCountUp]="cashCollected()" format="money"></span>
+    <span class="hint">{{ cashPaidTotal() ? short(cashPaidTotal()) + ' paid out' : 'across current jobs' }}</span>
+    @if (cashSpark(); as sp) {
+      <svg class="spark" viewBox="0 0 120 38" aria-hidden="true">
+        <defs>
+          <linearGradient id="g-cash" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--sh-blue)" stop-opacity="0.3" />
+            <stop offset="1" stop-color="var(--sh-blue)" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path [attr.d]="sp.area" fill="url(#g-cash)" />
+        <path [attr.d]="sp.line" class="spark-line" pathLength="1" />
+        <circle [attr.cx]="sp.last.x" [attr.cy]="sp.last.y" r="3" class="spark-dot" />
+      </svg>
+    }
+  </a>
+  <a class="kpi" routerLink="/reporting-dashboard">
+    <span class="lab"><span class="ico"><i class="bi bi-safe" aria-hidden="true"></i></span>Retention held</span>
+    <span class="val" [appCountUp]="retainFiles().length ? retainTotal() : null" format="money"></span>
+    <span class="hint">{{ retainFiles().length }} files</span>
+    @if (retainSpark(); as sp) {
+      <svg class="spark" viewBox="0 0 120 38" aria-hidden="true">
+        <defs>
+          <linearGradient id="g-retain" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="var(--sh-blue)" stop-opacity="0.3" />
+            <stop offset="1" stop-color="var(--sh-blue)" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path [attr.d]="sp.area" fill="url(#g-retain)" />
+        <path [attr.d]="sp.line" class="spark-line" pathLength="1" />
+        <circle [attr.cx]="sp.last.x" [attr.cy]="sp.last.y" r="3" class="spark-dot" />
+      </svg>
+    }
+  </a>
+  <a class="kpi" routerLink="/project-management/po-queue">
+    <span class="lab"><span class="ico"><i class="bi bi-receipt" aria-hidden="true"></i></span>Active POs</span>
+    <span class="val" [appCountUp]="openPos().length"></span>
+    <span class="hint">in the PO queue</span>
+  </a>
+  <a class="kpi" routerLink="/project-management/co-queue">
+    <span class="lab"><span class="ico"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span>Active change orders</span>
+    <span class="val" [appCountUp]="openCos().length"></span>
+    <span class="hint">in the CO queue</span>
+  </a>
+  <a class="kpi" routerLink="/project-queue">
+    <span class="lab"><span class="ico"><i class="bi bi-diagram-3" aria-hidden="true"></i></span>Current jobs</span>
+    <span class="val" [appCountUp]="jobs().length"></span>
+    <span class="hint">{{ currentCount() }} in progress</span>
+  </a>
+</section>
 
-  <section class="widget chart-widget">
+<!-- Cash flow + job pipeline -->
+<section class="grid2">
+  <app-dashboard-card class="chart-card">
     <app-cash-collected-chart></app-cash-collected-chart>
-  </section>
+  </app-dashboard-card>
 
-  <section class="widget chart-widget">
-    <app-revenue-line-chart></app-revenue-line-chart>
-  </section>
+  <app-dashboard-card title="Job pipeline">
+    <p class="card-note">{{ statusUnset() ? 'Status is not set on these jobs yet' : 'Hover a status to focus it' }}</p>
+    <div class="donut-wrap">
+      <svg viewBox="0 0 150 150" role="img" aria-label="Current jobs by status">
+        <circle cx="75" cy="75" [attr.r]="donutRadius" fill="none" stroke="var(--sh-surface-2)" stroke-width="16" />
+        @for (s of pipeline(); track s.status) {
+          <circle
+            class="slice"
+            [class.hot]="hoveredStatus() === s.status"
+            [class.dim]="hoveredStatus() && hoveredStatus() !== s.status"
+            cx="75" cy="75" [attr.r]="donutRadius" fill="none"
+            [attr.stroke]="s.color" stroke-width="16"
+            [attr.stroke-dasharray]="s.dash" [attr.stroke-dashoffset]="s.offset"
+            [style.--dash]="s.dash"
+            transform="rotate(-90 75 75)"
+            (mouseenter)="hoveredStatus.set(s.status)" (mouseleave)="hoveredStatus.set(null)"
+          />
+        }
+        <text x="75" y="76" text-anchor="middle" class="d-num">{{ hoveredSlice()?.count ?? jobs().length }}</text>
+        <text x="75" y="93" text-anchor="middle" class="d-lab">{{ hoveredSlice()?.status ?? 'total jobs' }}</text>
+      </svg>
+      <ul class="d-list">
+        @for (s of pipeline(); track s.status) {
+          <li [class.on]="hoveredStatus() === s.status" (mouseenter)="hoveredStatus.set(s.status)" (mouseleave)="hoveredStatus.set(null)">
+            <i [style.background]="s.color"></i>{{ s.status }}
+            <span>{{ s.count }} <small>{{ (s.count / (jobs().length || 1)) * 100 | number: '1.0-0' }}%</small></span>
+          </li>
+        } @empty {
+          <li class="none">No current jobs to show.</li>
+        }
+      </ul>
+    </div>
+  </app-dashboard-card>
+</section>
 
-  <section class="widget chart-widget">
-    <app-net-cash-chart></app-net-cash-chart>
-  </section>
+<!-- Cash health, retention ranking and plain-language insights -->
+<section class="grid3-even">
+  <app-dashboard-card title="Cash health">
+    <p class="card-note">Cash paid out as a share of cash collected</p>
+    <div class="gauge-wrap">
+      <svg class="gauge" viewBox="0 0 140 140" role="img" [attr.aria-label]="'Paid out ' + paidRatio().toFixed(0) + ' percent of cash collected'">
+        <circle class="g-track" cx="70" cy="70" [attr.r]="gaugeRadius" [attr.stroke-dasharray]="gaugeTrack + ' 400'" transform="rotate(135 70 70)" />
+        <circle class="g-fill" cx="70" cy="70" [attr.r]="gaugeRadius" [attr.stroke-dasharray]="gaugeFill() + ' 400'" [style.--len]="gaugeFill()" transform="rotate(135 70 70)" />
+        <text x="70" y="76" text-anchor="middle" class="g-num">{{ paidRatio().toFixed(0) }}%</text>
+        <text x="70" y="94" text-anchor="middle" class="g-lab">paid out</text>
+      </svg>
+      <dl class="g-stats">
+        <div><dt><i class="dot blue"></i>Collected</dt><dd>{{ short(cashCollected()) }}</dd></div>
+        <div><dt><i class="dot soft"></i>Paid</dt><dd>{{ short(cashPaidTotal()) }}</dd></div>
+        <div><dt><i class="dot green"></i>Net position</dt><dd>{{ short(netCash()) }}</dd></div>
+      </dl>
+    </div>
+  </app-dashboard-card>
 
-  <section class="widget chart-widget">
-    <app-retain-stacked-chart></app-retain-stacked-chart>
-  </section>
-</div>
+  <app-dashboard-card title="Top retention files">
+    <p class="card-note">{{ retainFiles().length ? retainFiles().length + ' files hold ' + short(retainTotal()) : 'Retention held on open invoices' }}</p>
+    <ul class="bars">
+      @for (r of topRetain(); track r.file; let i = $index) {
+        <li>
+          <span class="rank">{{ i + 1 }}</span>
+          <div class="bar-body">
+            <div class="bar-top"><strong>File {{ r.file }}</strong><span>{{ short(r.value) }}</span></div>
+            <div class="track"><i [style.width.%]="r.pct" [style.animation-delay]="i * 90 + 'ms'"></i></div>
+          </div>
+        </li>
+      } @empty {
+        <li class="none">No retention data yet.</li>
+      }
+    </ul>
+  </app-dashboard-card>
+
+  <app-dashboard-card title="What stands out">
+    <p class="card-note">Drawn from the numbers on this page</p>
+    <ul class="insights">
+      @for (n of insights(); track n.text) {
+        <li><span class="ins-ico"><i class="bi" [class]="n.icon" aria-hidden="true"></i></span><span>{{ n.text }}</span></li>
+      } @empty {
+        <li class="none">Insights appear once data has loaded.</li>
+      }
+    </ul>
+  </app-dashboard-card>
+</section>
+
+<!-- Quick links -->
+<nav class="quick" aria-label="Quick links">
+  @for (a of quickActions; track a.route) {
+    <a class="q" [routerLink]="a.route">
+      <span class="ico"><i class="bi" [class]="a.icon" aria-hidden="true"></i></span>
+      <span class="q-text"><strong>{{ a.label }}</strong><small>{{ a.hint }}</small></span>
+      <i class="bi bi-chevron-right go" aria-hidden="true"></i>
+    </a>
+  }
+</nav>
+
+<!-- Calendar, jobs, and orders waiting -->
+<section class="grid3">
+  <app-dashboard-card class="calendar-widget">
+    <app-calendar-widget></app-calendar-widget>
+  </app-dashboard-card>
+
+  <app-dashboard-card class="jobs-widget" title="Current Jobs">
+    <app-current-jobs (jobSelected)="selectedJob.set($event)"></app-current-jobs>
+  </app-dashboard-card>
+
+  <app-dashboard-card title="Orders in progress">
+    <p class="card-note">Active purchase and change orders</p>
+    <ul class="todo">
+      @for (i of actionItems(); track i.kind + i.id) {
+        <li>
+          <span class="tag">{{ i.kind }}</span>
+          <span class="t-text"><strong>{{ i.id }}</strong><small>{{ i.job }} · {{ i.meta }}</small></span>
+          <a class="go-btn" [routerLink]="i.route">Open</a>
+        </li>
+      } @empty {
+        <li class="none">Nothing in progress right now.</li>
+      }
+    </ul>
+  </app-dashboard-card>
+</section>
+
+<h2 class="section-title">Financial snapshot</h2>
+<section class="charts">
+  <app-dashboard-card><app-revenue-line-chart></app-revenue-line-chart></app-dashboard-card>
+  <app-dashboard-card><app-net-cash-chart></app-net-cash-chart></app-dashboard-card>
+  <app-dashboard-card><app-retain-stacked-chart></app-retain-stacked-chart></app-dashboard-card>
+</section>
+
+<!-- Job details panel (opened from a row in Current Jobs) -->
+@if (selectedJob(); as job) {
+  <div class="panel-scrim" (click)="closeJob()"></div>
+  <aside class="job-panel" role="dialog" aria-modal="true" [attr.aria-label]="'Job ' + job.jobID">
+    <header>
+      <span class="panel-id">{{ job.jobID }}</span>
+      <button type="button" class="panel-close" aria-label="Close details" (click)="closeJob()"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    </header>
+    <div class="panel-body">
+      <h2>{{ job.jobName }}</h2>
+      <p class="panel-sub">{{ job.address || 'No address on file' }}</p>
+      <dl class="kv">
+        <div><dt>Status</dt><dd>{{ job.status || 'Not set' }}</dd></div>
+        <div><dt>Created by</dt><dd>{{ job.createdBy || 'Not set' }}</dd></div>
+      </dl>
+
+      <h3>Active orders on this job</h3>
+      <ul class="todo">
+        @for (o of selectedOrders(); track o.kind + o.id) {
+          <li><span class="tag">{{ o.kind }}</span><span class="t-text"><strong>{{ o.id }}</strong><small>{{ o.status }}</small></span></li>
+        } @empty {
+          <li class="none">No active purchase or change orders.</li>
+        }
+      </ul>
+
+      <div class="panel-actions">
+        <a class="btn primary" [routerLink]="['/project-management/project-overview', job.jobID]">Open project</a>
+        <a class="btn" routerLink="/project-management/new-po-form">New PO</a>
+        <a class="btn" routerLink="/project-management/new-co-form">New CO</a>
+      </div>
+    </div>
+  </aside>
+}

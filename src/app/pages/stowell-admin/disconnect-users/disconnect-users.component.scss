@@ -1,5 +1,5 @@
 .btn-primary {
-  background-color: #00355f;
+  background-color: var(--sh-blue);
   color: #fff;
   border: none;
   padding: 8px 16px;
@@ -19,11 +19,11 @@
 }
 
 .message.error {
-  background-color: #fdecea;
+  background-color: var(--sh-surface-2);
   color: #611a15;
 }
 
 .message.success {
-  background-color: #e6f4ea;
-  color: #1e4620;
+  background-color: var(--sh-surface-2);
+  color: var(--sh-ink);
 }

@@ -1,6 +1,5 @@
-// Mirrors the StowellCoApp.DTO classes confirmed in DTO/CodeCodeSummaryRecord.cs (Job,
-// CostCode, Phase, CostCodeSummaryRecord, CostCodeSummaryModel, BudgetPayment, CashFlowRecord,
-// CurrentCostSummaryViewModel).
+// Matches the DTOs in DTO/CodeCodeSummaryRecord.cs: Job, CostCode, Phase, CostCodeSummaryRecord,
+// CostCodeSummaryModel, BudgetPayment, CashFlowRecord and CurrentCostSummaryViewModel.
 
 export interface Job {
   fullJob: string;
@@ -30,10 +29,10 @@ export interface CostCodeSummaryRecord {
   toDate: number;
   thisPeriod: number;
   remaining: number;
-  // Open PO commitments against this cost code - already subtracted from `remaining`.
+  // Open PO amounts on this cost code. Already taken out of `remaining`.
   committed?: number;
-  // Client-side only: the phase filter these rows were run under ("All phases" when none). The
-  // summary procedure returns one row per cost code, not per phase, so it can't be a per-row value.
+  // Set in the app, not by the API: the phase filter used for these rows ("All phases" if none). The
+  // procedure returns one row per cost code, not per phase.
   phase?: string;
 }
 
@@ -44,9 +43,8 @@ export interface CostCodeSummaryModel {
   sumOfThisPeriod: number;
   sumOfRemaining: number;
   sumOfCommitted?: number;
-  // C# computed get-only property: (Budget+Changes - Remaining) / Budget+Changes * 100.
-  // Present on the wire since System.Text.Json serializes computed getters too - kept here
-  // as a plain field rather than recomputed, to match what the API actually returns.
+  // A calculated property in C#: (Budget + Changes - Remaining) / (Budget + Changes) * 100. The JSON
+  // includes it, so it's read as a field, not recalculated.
   percentage: number;
 }
 
@@ -57,11 +55,8 @@ export interface BudgetPayment {
   balance: string;
 }
 
-// NOTE ON CASING: ASP.NET Core's default JSON output policy only lowercases the FIRST
-// character of each property name - it does not touch embedded underscores/capitals further
-// in the name. So `A_REndBal_Today` serializes to `a_REndBal_Today`, not `aREndBalToday`.
-// Property names below intentionally mirror that exact wire format; verify against a live
-// response before assuming otherwise.
+// Casing: ASP.NET Core only lowercases the first letter of each name, so A_REndBal_Today arrives as
+// a_REndBal_Today. The names below follow that. Check a live response if in doubt.
 export interface CashFlowRecord {
   recNum: number;
   jobNumber: string;

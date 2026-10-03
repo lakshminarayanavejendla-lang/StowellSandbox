@@ -3,8 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-// NEW (2026-09-24) - backs the "API Success & Errors" page under Stowell Admin. Reads dbo.ApiCallLog through
-// StowellCoAPI's ApiLogController (Summary / Search / Detail). See db\api-call-log-2026-09-24.sql.
+// For the "API Success & Errors" page under Stowell Admin (2026-09-24). Reads dbo.ApiCallLog through
+// ApiLogController (Summary, Search, Detail). See db\api-call-log-2026-09-24.sql.
 
 export interface ApiLogSummary {
   total: number;
@@ -77,12 +77,12 @@ export class ApiLogService {
       .pipe(catchError(() => of(null)));
   }
 
-  // Errors are NOT swallowed here (unlike summary/detail) so the page can say what actually went wrong - see describeError().
+  // Unlike summary and detail, errors aren't hidden here, so the page can say what went wrong (see describeError()).
   search(f: ApiLogFilter): Observable<ApiLogPage> {
     return this.http.get<ApiLogPage>(`${this.base}api/ApiLog/Search`, { params: this.params(f, true) });
   }
 
-  /** Plain-language reason a call to the log endpoints failed (404 = API not updated, 500 = usually the table is missing, 0 = unreachable). */
+  /** A plain reason a log request failed: 404 means the API isn't updated, 500 usually means the table is missing, 0 means unreachable. */
   describeError(err: any): string {
     const status = err?.status;
     const body = err?.error;

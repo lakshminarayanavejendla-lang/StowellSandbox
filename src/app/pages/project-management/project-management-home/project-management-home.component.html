@@ -1,9 +1,5 @@
-<div class="card-header">
-  <h4 class="m-0">Current Jobs</h4>
-  <!-- FLAG: Document Management module isn't converted yet - target left as a plain link. -->
-  <a class="doclibrary" href="/DocManagement/Main" target="_blank">
-    <i class="bi bi-folder me-1"></i>
-    Project Document Library
-  </a>
-</div>
+<app-page-header title="Current Jobs" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'Current Jobs' }]">
+  <!-- A plain link, not an Angular route. -->
+  <a actions class="doclibrary" href="/DocManagement/Main" target="_blank" rel="noopener"><i class="bi bi-folder me-1"></i> Project Document Library</a>
+</app-page-header>
 <app-current-jobs></app-current-jobs>

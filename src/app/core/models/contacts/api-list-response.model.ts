@@ -1,8 +1,5 @@
-// Port of StowellCoApp.DTO.ApiListResponse<T> (DTO/ApiListResponse.cs) - CONFIRMED shape, but same
-// orphan flag as the other two models in this folder: not referenced by ContactService.cs or
-// Contacts/Index.razor + IndexBase.razor.cs (which call GetAllGroups/GetGroupUsers and get back
-// bare arrays, not this wrapper). Kept as a generic model port only, unused by this module's real
-// service calls today.
+// Matches ApiListResponse<T> in DTO/ApiListResponse.cs. Like the other models here it's unused:
+// GetAllGroups and GetGroupUsers return plain arrays, not this wrapper.
 export interface ApiListResponse<T> {
   data: T[];
 }

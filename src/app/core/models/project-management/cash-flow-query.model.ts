@@ -1,37 +1,18 @@
-// Mirrors StowellCoApp.DTO.CashFlowQueryInput (confirmed, DTO/CodeCodeSummaryRecord.cs).
+// Matches CashFlowQueryInput in DTO/CodeCodeSummaryRecord.cs.
 export interface CashFlowQueryInput {
   recnum: string;
   startDate: string; // ISO date string; C# side is DateTime
   endDate: string;
 }
 
-// RECONCILED during the Reporting Dashboard phase (Phase 3): the Project Management phase left
-// this as `unknown` because StowellCoApp.Models.CashFlowForecastResponse wasn't among its staged
-// files. It has since been found - it actually lives in Models/CostCodeList.cs (a grab-bag model
-// file whose name doesn't match most of its contents, same pattern as DTO/CodeCodeSummaryRecord.cs
-// flagged in HANDOFF.md). Confirmed shape, replacing the old `unknown` placeholder:
+// Matches CashFlowForecastResponse, which lives in Models/CostCodeList.cs despite the file name:
+// BudgetForecast and ContractForecast, both lists of rows with JobNumber, JobName, TotalAmount,
+// CurrentAmount, Remaining and ForecastMonths.
 //
-//   public class CashFlowForecastResponse
-//   {
-//       public List<CashFlowForecastRow> BudgetForecast { get; set; } = new();
-//       public List<CashFlowForecastRow> ContractForecast { get; set; } = new();
-//   }
-//   public class CashFlowForecastRow
-//   {
-//       public string JobNumber { get; set; }
-//       public string JobName { get; set; }
-//       public decimal TotalAmount { get; set; }
-//       public decimal CurrentAmount { get; set; }
-//       public decimal Remaining { get; set; }
-//       public Dictionary<string, decimal> ForecastMonths { get; set; } = new();
-//   }
-//
-// Confirmed against the real caller too (Components/Pages/ReportingDashboard/
-// CashFlowForecastBase.razor.cs): TotalAmount/CurrentAmount/Remaining are rendered as "Budget
-// Amount"/"Costs As Of"/"Remaining" in the Budget grid and "Total Contract Amount"/"Billed As
-// Of"/"Remaining" in the Contract grid (same three fields, reused for both), and ForecastMonths
-// is a dictionary keyed by a month label (e.g. "Jan 2026") used to build one dynamic grid column
-// per key - both grids read their column set from `.FirstOrDefault()?.ForecastMonths.Keys`.
+// The Cash Flow Forecast page shows the three amounts as Budget Amount / Costs As Of / Remaining in
+// the Budget grid and Total Contract Amount / Billed As Of / Remaining in the Contract grid.
+// ForecastMonths is keyed by a month label such as "Jan 2026", and each key becomes a grid column
+// (taken from the first row's keys).
 export interface CashFlowForecastRow {
   jobNumber: string;
   jobName: string;

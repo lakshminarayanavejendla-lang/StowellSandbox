@@ -5,15 +5,12 @@ import { environment } from '../../../environments/environment';
 import { PoAttachment } from '../models/project-management/po-attachment.model';
 
 /**
- * NEW service - Stowell PO Module. Backs the real file upload on FORM-PO Request / FORM-CO
- * Request, which was previously just a static "Drag and Drop / Browse" placeholder with no
- * upload wired up. Backend: PoAttachmentsController.cs - plain disk storage under
- * {ContentRoot}/Uploads/PoAttachments/{jobId}/, deliberately not reusing the existing
- * Syncfusion FileManager-backed BidsDocumentManagementController/FileManagerController (both are
- * full file browsers with a lot of half-finished SharePoint-via-Graph code, more than this needs).
+ * File uploads on the PO Request and CO Request forms. PoAttachmentsController.cs saves them to
+ * disk under {ContentRoot}/Uploads/PoAttachments/{jobId}/. It doesn't reuse the FileManager
+ * controllers, which are full file browsers with unfinished SharePoint code.
  *
- * Files are keyed by job ID only, not by a specific PO/CO draft - the real PO/CO number doesn't
- * exist until Submit succeeds. A known simplification for this first pass.
+ * Files are stored by job, not by PO or CO, because the PO or CO number only exists after Submit.
+ * That's a known shortcut for now.
  */
 @Injectable({ providedIn: 'root' })
 export class PoAttachmentService {
@@ -46,7 +43,7 @@ export class PoAttachmentService {
   }
 
   downloadUrl(jobId: string, storedName: string): string {
-    // files keep their real names now (spaces, brackets ...), so the name has to be URL-encoded
+    // File names keep spaces, brackets and so on, so encode the name for the URL.
     return `${this.base}api/PoAttachments/Download/${jobId}/${encodeURIComponent(storedName)}`;
   }
 }

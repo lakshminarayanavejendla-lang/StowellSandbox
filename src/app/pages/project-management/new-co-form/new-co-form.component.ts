@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, NgZone, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ComboBoxModule } from '@syncfusion/ej2-angular-dropdowns';
 import { ProjectCostCodeService } from '../../../core/services/project-cost-code.service';
 import { CostCodeRecord, recJobNumber } from '../../../core/models/project-management/cost-code.model';
@@ -18,25 +18,22 @@ import { VendorOption } from '../../../core/models/project-management/vendor.mod
 import { JobCostCodeService } from '../../../core/services/job-cost-code.service';
 import { JobCostCodeOption } from '../../../core/models/project-management/job-cost-code.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * NEW page - Stowell PO Module (not a Blazor port; built from the "Stowell PO Module" Moqups
- * design spec, page FORM-CO Request). Mirrors new-po-form.component.ts's FORM-PO Request build
- * almost exactly - see that file's header comment for the shared design rationale. The two
- * deltas the mockup shows over the PO Request form: a "Purchase Order" picker (links the change
- * order back to an existing PO for the selected job, sourced from JobPoService's
- * purchaseOrders list - the same data the "$ PO" Project Overview tab already renders) and
- * "CO Reason" replacing "PO Description".
+ * The CO Request form, built from the Moqups design (page FORM-CO Request), not ported from Blazor.
+ * It's nearly the same as new-po-form.component.ts (see its header). The two differences: a
+ * Purchase Order picker that links the CO to one of the job's POs (from JobPoService's
+ * purchaseOrders, the same list the "$ PO" tab shows), and "CO Reason" in place of "PO Description".
  *
- * NEW - `mode` (client-updated Moqups, page FORM-CO Request Approval): mirrors
- * new-po-form.component.ts's `mode` addition exactly, including the "mode !== 'approval'" guard
- * on isEditMode so 'edit-co-form/:coId' and the new 'co-request-approval/:coId' route (both
- * carrying a `:coId` param) don't both fire their loaders - see that file's header comment.
+ * `mode` works as in new-po-form, for the approval view (Moqups page FORM-CO Request Approval).
+ * isEditMode also checks `mode !== 'approval'`, so 'edit-co-form/:coId' and 'co-request-approval/:coId'
+ * don't both run their loaders.
  */
 @Component({
   selector: 'app-new-co-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ComboBoxModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, ComboBoxModule],
   templateUrl: './new-co-form.component.html',
   styleUrl: './new-co-form.component.scss',
 })
@@ -49,14 +46,14 @@ export class NewCoFormComponent implements OnInit {
   private jobCostCodeService = inject(JobCostCodeService);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
 
   loadedDraftId: number | null = null;
 
-  // NEW - edit-on-click for an already-submitted CO (see project-management.routes.ts's
-  // 'edit-co-form/:coId' route and co-request.service.ts's getCoById/updateCo). isEditMode true
-  // means this instance was opened via that route rather than 'new-co-form'.
+  // For editing a submitted CO (the 'edit-co-form/:coId' route, and getCoById and updateCo in
+  // co-request.service.ts). True when the page was opened that way, not through 'new-co-form'.
   isEditMode = false;
   editCoId: string | null = null;
 
@@ -96,13 +93,10 @@ export class NewCoFormComponent implements OnInit {
   uploading = false;
   dragging = false;
 
-  // FIX - "Total CO Amount" showing $0.00 for real historical COs even though the CO Queue grid
-  // (and GetCoById itself) has the real amount: this was a pure items.reduce() getter, but
-  // historical COs predate this app's per-line sbcgln tracking and load with items: [] - the
-  // getter always returned 0 for them regardless of the real loaded total. loadedTotalAmount
-  // holds that real total from GetCoById/getForApproval; once the admin actually adds/edits a
-  // line item (items.length > 0), the computed sum takes over as before - unchanged for the
-  // create-new-CO flow, which never has a loadedTotalAmount to begin with.
+  // Old COs showed a Total CO Amount of $0.00 even though the CO Queue had the real amount. This only
+  // added up the items, and old COs load with none (they're older than per-line sbcgln tracking).
+  // loadedTotalAmount keeps the real total from GetCoById or getForApproval. Once a line is added or
+  // changed, the sum of the items is used as before. A new CO never has a loadedTotalAmount.
   loadedTotalAmount: number | null = null;
 
   get totalCoAmount(): number {
@@ -117,12 +111,10 @@ export class NewCoFormComponent implements OnInit {
     this.editCoId = this.route.snapshot.paramMap.get('coId');
     this.isEditMode = !!this.editCoId && this.mode !== 'approval';
 
-    // FIX - edit form loading with most fields blank despite GetCoById returning full data
-    // (confirmed live: the API response had requester/coReason/etc. all populated, but the form
-    // never showed them). Same root cause as overview-tab.component.ts's "stuck on Loading" bug -
-    // this app's MSAL interceptor/zone.js interaction means these HTTP callbacks can run outside
-    // Angular's zone, so detectChanges() doesn't reliably commit to the DOM. Wrapping every
-    // subscribe body below in ngZone.run() forces it back into the zone first.
+    // The edit form loaded mostly blank even though GetCoById returned requester, coReason and the
+    // rest. The MSAL interceptor can run these callbacks outside Angular's zone, so detectChanges()
+    // doesn't always update the page. Each subscribe body below runs inside ngZone.run() to fix that
+    // (same as overview-tab).
     this.costCodeService.getAllUserJobs().subscribe((jobs) => {
       this.ngZone.run(() => {
         this.jobs = jobs;
@@ -145,7 +137,7 @@ export class NewCoFormComponent implements OnInit {
     });
   }
 
-  /** NEW - see this file's `mode` header comment. */
+  /** See `mode` in the header. */
   private loadForApproval(): void {
     if (!this.editCoId) {
       this.statusMessage = 'No CO id provided to approve.';
@@ -200,7 +192,7 @@ export class NewCoFormComponent implements OnInit {
     });
   }
 
-  /** NEW - see this file's isEditMode field comment. */
+  /** See the isEditMode field. */
   private loadForEdit(): void {
     if (!this.editCoId) return;
 
@@ -386,13 +378,17 @@ export class NewCoFormComponent implements OnInit {
     });
   }
 
-  /** NEW - see this file's isEditMode field comment. Replaces saveCo()/submitRequest() in edit mode. */
+  /** Saves in edit mode, in place of saveCo() and submitRequest() (see the isEditMode field). */
   saveEdits(): void {
     if (!this.editCoId) return;
 
     this.coRequestService.updateCo(this.editCoId, this.buildPayload()).subscribe((result) => {
       this.ngZone.run(() => {
-        this.statusMessage = result.saved ? `CO ${this.editCoId} updated.` : `Save failed: ${result.error ?? 'unknown error'}`;
+        this.statusMessage = result.saved
+          ? result.pendingApproval
+            ? `Change to CO ${this.editCoId} sent to Accounting for approval (request #${result.requestId}). The change order in Sage stays as it is until it is approved.`
+            : `CO ${this.editCoId} updated.`
+          : `Save failed: ${result.error ?? 'unknown error'}`;
         this.cdr.detectChanges();
       });
     });
@@ -407,7 +403,8 @@ export class NewCoFormComponent implements OnInit {
           return;
         }
 
-        this.statusMessage = `CO request submitted (${result.coId}).`;
+        // A submitted CO waits for Accounting approval, and the Sage CO number is given on approval (Mike Smith, 2026-09-26).
+        this.statusMessage = `CO request submitted for Accounting approval (request #${result.requestId}).`;
         if (this.loadedDraftId != null) {
           this.coRequestService.deleteDraft(this.loadedDraftId).subscribe();
           this.loadedDraftId = null;
@@ -417,7 +414,12 @@ export class NewCoFormComponent implements OnInit {
     });
   }
 
-  // --- Approval mode actions (mode === 'approval' only) ---
+  // --- Approval mode actions (only when mode === 'approval') ---
+
+  /** Once Accounting has decided, go back to the queue. */
+  private backToAccountingQueue(): void {
+    setTimeout(() => this.router.navigate(['/accounting/co-queue']), 1200);
+  }
 
   openRejectReason(): void {
     this.showRejectReason = true;
@@ -433,9 +435,10 @@ export class NewCoFormComponent implements OnInit {
 
     this.coRequestService.rejectRequest(this.editCoId, this.rejectionReason).subscribe((result) => {
       this.ngZone.run(() => {
-        this.statusMessage = result.succeeded ? 'CO request rejected.' : `Reject failed: ${result.error ?? 'unknown error'}`;
+        this.statusMessage = result.succeeded ? 'CO rejected and removed from the queue.' : `Reject failed: ${result.error ?? 'unknown error'}`;
         if (result.succeeded) this.showRejectReason = false;
         this.cdr.detectChanges();
+        if (result.succeeded) this.backToAccountingQueue();
       });
     });
   }
@@ -445,8 +448,9 @@ export class NewCoFormComponent implements OnInit {
 
     this.coRequestService.approveRequest(this.editCoId).subscribe((result) => {
       this.ngZone.run(() => {
-        this.statusMessage = result.succeeded ? 'CO request approved.' : `Approve failed: ${result.error ?? 'unknown error'}`;
+        this.statusMessage = result.succeeded ? 'CO approved and created in Sage.' : `Approve failed: ${result.error ?? 'unknown error'}`;
         this.cdr.detectChanges();
+        if (result.succeeded) this.backToAccountingQueue();
       });
     });
   }

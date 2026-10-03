@@ -1,8 +1,8 @@
-<div class="card-header">
-  <h3 class="m-0">Current Bids</h3>
-  <a class="btn btn-primary" routerLink="/bids/new-bid">New Bid</a>
-</div>
-<hr />
+<app-page-header title="Current Bids" [breadcrumbs]="[{ label: 'Bid Management' }, { label: 'Current Bids' }]">
+  <a actions class="btn btn-primary" routerLink="/bids/new-bid">New Bid</a>
+</app-page-header>
+
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
 
 <div class="toolbar">
   <div class="search-box">
@@ -31,9 +31,8 @@ class="black-grid"
       </ng-template>
     </e-column>
     <e-column field="BidName" headerText="Bid Name" width="200"></e-column>
-    <!-- NOTE: CurrentBids.razor's "Bid Manager" column shows the Bidder field
-         (Property="Bidder"), while BidQueue.razor's equivalent column shows BidManager -
-         an inconsistency in the source, ported as-is per page. -->
+    <!-- "Bid Manager" here shows the Bidder field, but the Bid Queue's column shows BidManager.
+         That difference comes from Blazor and is kept on each page. -->
     <e-column field="Bidder" headerText="Bid Manager" width="180"></e-column>
     <e-column field="Status" headerText="Status" width="120"></e-column>
   </e-columns>

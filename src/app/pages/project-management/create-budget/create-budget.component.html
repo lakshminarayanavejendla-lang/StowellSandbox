@@ -1,13 +1,9 @@
-<div class="heading-row">
-  <h3>Budget Configuration</h3>
-
-  @if (saveSuccess) {
-    <span class="save-success">
-      {{ saveSuccess }}
-    </span>
-  }
-</div>
-<hr />
+<app-page-header title="Budget Configuration" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'Budget Configuration' }]"></app-page-header>
+@if (saveSuccess) {
+  <div class="heading-row">
+    <span class="save-success">{{ saveSuccess }}</span>
+  </div>
+}
 
 <div class="row" style="margin-left: 0;">
   <div class="field">
@@ -42,16 +38,24 @@
   </div>
 </div>
 
+@if (isViewOnly) {
+  <div class="budget-locked-note" role="status">
+    The initial budget for this phase is set and can't be changed here. Budget changes are made through Change Orders.
+  </div>
+} @else if (phaseCreateMode) {
+  <div class="budget-locked-note info" role="status">
+    This phase has no initial budget yet. Enter its initial budget below.
+  </div>
+}
+
 <table class="budget-grid">
   <thead>
     <tr>
       <th>Cost Code Description</th>
-      <!-- FIX (2026-09-16, Mike Smith quick-fix request) - ModifyBudget mode used to show a
-           readonly "Total Budget" column alongside the real editable "Update Budget" column,
-           which doesn't match the Moqup design. For now: drop the readonly Total Budget column
-           entirely in ModifyBudget mode, and relabel the one remaining editable column "Initial
-           Budget" (still the same updateBudget control/save path - display-only change). Create
-           mode is untouched (its single "Total Budget" column is the only budget input it has). -->
+      <!-- In ModifyBudget mode there used to be a read-only "Total Budget" column next to the editable
+           "Update Budget" one, which didn't match the Moqup (Mike Smith, 2026-09-16). Now Modify mode
+           has only the editable column, labelled "Initial Budget". It's still the updateBudget field,
+           so only the display changed. Create mode keeps its single "Total Budget" column. -->
       @if (isCreate) {
         <th>Total Budget</th>
       } @else {
@@ -70,6 +74,7 @@
       formControlName="costCodeDescription"
       placeholder="Select Cost Code Description"
       autocomplete="off"
+      [readonly]="isViewOnly"
       (input)="onCostCodeDescriptionInput($event, row)"
       (focus)="onCostCodeDescriptionFocus($event, row)"
       (blur)="onCostCodeDescriptionBlur()"
@@ -101,12 +106,12 @@
             </div>
           </td>
         } @else {
+          <!-- The initial budget is already set, so it's display only; changes go through change orders (Mike Smith, 2026-09-26) -->
           <td>
             <div class="currency-input">
               <span class="currency-prefix">$</span>
-              <input type="text" inputmode="decimal"
-                [value]="formatCurrency(row.get('updateBudget')?.value)"
-                (input)="onBudgetInput($event, row, 'updateBudget')" />
+              <input type="text" readonly
+                [value]="formatCurrency(row.get('totalBudget')?.value)" />
             </div>
           </td>
         }
@@ -117,16 +122,18 @@
   </tbody>
 </table>
 
-<!-- FIX - "Cannot add rows in Budget": Add Row was gated to CreateBudget mode only, so a
-     ModifyBudget session with no existing cost code rows (fresh phase, nothing budgeted yet) had
-     no way to add one - a dead end. Available in both modes now; newly-added rows in ModifyBudget
-     mode still only submit if their Update Budget is filled in (see toRecords()/hasInvalidRows()),
-     so this doesn't change what ModifyBudget actually persists, just unblocks adding the row first. -->
+<!-- Add Row used to be Create mode only, so a ModifyBudget phase with no rows yet couldn't get any
+     ("Cannot add rows in Budget"). It works in both modes now. In Modify mode a new row is only saved
+     if its Update Budget is filled in (see toRecords() and hasInvalidRows()), so what gets saved is
+     the same. -->
+@if (!isViewOnly) {
 <button type="button" class="btn-primary" (click)="addRow()">Add Row</button>
+}
 
+@if (!isViewOnly) {
 <div class="upload-row">
   <input type="file" accept=".xls,.xlsx" (change)="onFileSelected($event)" />
-  <!-- FLAG: parsing not wired up yet - see component header comment. -->
+  <!-- The file isn't read yet; see the component header. -->
   <button type="button" class="btn-secondary" disabled title="Requires a client-side XLSX parsing library - see code comment">
     Upload
   </button>
@@ -159,6 +166,7 @@
   {{ isSaving ? 'Submitting...' : 'Submit' }}
 </button>
 </div>
+}
 
 
 

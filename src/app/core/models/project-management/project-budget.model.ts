@@ -1,8 +1,7 @@
-// INFERRED - StowellCoApp.DTO.ProjectBudgetQueueItem's class definition was never found in the
-// DTO/Models files handed to this phase; fields below are only what
-// ProjectBudgetConfiguration.razor's grid template binds (JobID, JobName, Address, Phase,
-// Source - the last one drives the Sage vs local "CreateBudget"/"ModifyBudget" link branch).
-// Confirm the full shape against the API before relying on any other field.
+// Guessed: the ProjectBudgetQueueItem class wasn't in the files we had. These are only the fields
+// the Project Budget Configuration grid shows: JobID, JobName, Address, Phase and Source. Source
+// decides whether the link opens CreateBudget or ModifyBudget (Sage or local). Check the full shape
+// before using anything else.
 export interface ProjectBudgetQueueItem {
   jobID: string;
   jobName: string;
@@ -11,7 +10,7 @@ export interface ProjectBudgetQueueItem {
   source?: string;
 }
 
-// Mirrors StowellCoApp.DTO.BudgetRecord (confirmed, DTO/CodeCodeSummaryRecord.cs).
+// Matches BudgetRecord in DTO/CodeCodeSummaryRecord.cs.
 export interface BudgetRecord {
   jobNumber: string;
   costCode?: string;
@@ -24,16 +23,14 @@ export interface BudgetRecord {
   actionType?: string;
 }
 
-// Mirrors StowellCoApp.DTO.ApiResponse (confirmed, DTO/CodeCodeSummaryRecord.cs).
+// Matches ApiResponse in DTO/CodeCodeSummaryRecord.cs.
 export interface ApiResponse {
   success: boolean;
   message?: string;
 }
 
-// INFERRED - CreateBudgetBase references StowellCoApp.Models.CostCodeList for the
-// RadzenAutoComplete cost-code-description picker; that Models/CostCodeList.cs file wasn't
-// among the source files staged for this phase. Description is the only field the template
-// actually reads (TextProperty="Description").
+// Guessed: Models/CostCodeList.cs wasn't in the files we had. The cost code description picker on
+// Create Budget only reads Description.
 export interface CostCodeList {
   id?: string;
   costCode?: string;

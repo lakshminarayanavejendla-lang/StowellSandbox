@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, NgZone, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ComboBoxModule } from '@syncfusion/ej2-angular-dropdowns';
 import { ProjectCostCodeService } from '../../../core/services/project-cost-code.service';
 import { CostCodeRecord, recJobNumber } from '../../../core/models/project-management/cost-code.model';
@@ -18,38 +18,30 @@ import { JobCostCodeOption } from '../../../core/models/project-management/job-c
 import { AuthService } from '../../../core/services/auth.service';
 import { JobPhaseService } from '../../../core/services/job-phase.service';
 import { JobPhaseOption } from '../../../core/models/project-management/job-phase.model';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * NEW page - Stowell PO Module (not a Blazor port; rebuilt from the "Stowell PO Module" Moqups
- * design spec, page FORM-PO Request, to serve the existing 'project-management/new-po-form'
- * route). The Blazor NewPOForm.razor this route used to serve was a static, unbound mock with a
- * different, unrelated field set (Building/Floor/Requested Change Reason) - the mockup this
- * feature is now built from has its own Requester/Vendor/PO Description fields plus an
- * "Items Requested" and "Back Charges" line-item entry panel, each feeding its own table and the
- * Total PO Amount.
+ * The PO Request form at 'project-management/new-po-form', built from the Moqups design (page
+ * FORM-PO Request), not ported from Blazor. The old NewPOForm.razor was a static mock with other
+ * fields (Building, Floor, Requested Change Reason). This one has Requester, Vendor and PO
+ * Description, plus Items Requested and Back Charges panels that each feed a table and the Total PO
+ * Amount.
  *
- * Job dropdown reuses ProjectCostCodeService.getAllUserJobs() - the same source every other
- * Project Management job picker in this app already uses.
+ * The Job dropdown uses ProjectCostCodeService.getAllUserJobs(), like every other job picker here.
  *
- * NEW - `mode` (client-updated Moqups, page FORM-PO Request Approval): this component now also
- * serves the read-only approval view, driven by route data exactly like
- * accounting/budget-approval.component.ts's 'new'/'modify' mode - that's the established
- * precedent in this codebase for "same fields, different action buttons" duplicate mockup pages,
- * so approval reuses this component's field layout and line-item logic instead of duplicating
- * ~250 lines into a second component. Default mode is 'request', matching every existing route
- * to this component today (neither 'new-po-form' nor 'edit-po-form' pass `data.mode`), so none of
- * the existing request/edit behavior changes.
+ * `mode` from the route data also lets this page show the read-only approval view (Moqups page
+ * FORM-PO Request Approval), the same way budget-approval.component.ts handles new and modify. That
+ * reuses the fields and line logic instead of copying about 250 lines. The default is 'request',
+ * and 'new-po-form' and 'edit-po-form' don't set a mode, so they work as before.
  *
- * FLAG - interaction with isEditMode: both 'edit-po-form/:poId' and the new
- * 'po-request-approval/:poId' route carry a `:poId` param, and isEditMode was originally derived
- * from that param's mere presence. Approval and edit are mutually exclusive flows (read-only
- * Approve/Reject vs full re-save), so isEditMode's check now also requires `mode !== 'approval'`
- * - see ngOnInit - to avoid both loadForEdit() and loadForApproval() firing for the same route.
+ * 'edit-po-form/:poId' and 'po-request-approval/:poId' both have a :poId. isEditMode used to mean
+ * "has a poId", so it now also needs `mode !== 'approval'` (see ngOnInit). Otherwise both
+ * loadForEdit() and loadForApproval() would run.
  */
 @Component({
   selector: 'app-new-po-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ComboBoxModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, ComboBoxModule],
   templateUrl: './new-po-form.component.html',
   styleUrl: './new-po-form.component.scss',
 })
@@ -62,14 +54,14 @@ export class NewPoFormComponent implements OnInit {
   private jobPhaseService = inject(JobPhaseService);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
 
   loadedDraftId: number | null = null;
 
-  // NEW - edit-on-click for an already-submitted PO (see project-management.routes.ts's
-  // 'edit-po-form/:poId' route and po-request.service.ts's getPoById/updatePo). isEditMode true
-  // means this instance was opened via that route rather than 'new-po-form'.
+  // For editing a submitted PO (the 'edit-po-form/:poId' route, and getPoById and updatePo in
+  // po-request.service.ts). True when the page was opened that way, not through 'new-po-form'.
   isEditMode = false;
   editPoId: string | null = null;
 
@@ -78,10 +70,9 @@ export class NewPoFormComponent implements OnInit {
   rejectionReason = '';
   showRejectReason = false;
 
-  // NEW - feeds the plain <h2> title (replacing the old inline @if blocks with a single
-  // getter); deliberately NOT <app-page-header> - this page's styling matches its live
-  // stowelldashboard.proserv360.tech Blazor counterpart (plain h2 + dashed rule, Bootstrap
-  // defaults) rather than the newer branded header used by Angular-only pages like PO Queue.
+  // The text for the plain <h2> title. It isn't <app-page-header>, because this page matches its
+  // Blazor version on the production site (plain h2 and a dashed line), not the branded header of
+  // Angular-only pages like the PO Queue.
   get pageTitle(): string {
     if (this.isEditMode) return `Purchase Order - PO ID: ${this.editPoId}`;
     if (this.mode === 'approval') return 'Purchase Order Request Approval';
@@ -96,10 +87,10 @@ export class NewPoFormComponent implements OnInit {
   costCodeFields = { text: 'display', value: 'costCode' };
   newItemCostCode: number | null = null;
 
-  // NEW (2026-09-23, Moqups FORM-PO Request comment: "User must select Project Phase"). The phase
-  // list is the selected job's phases (Sage's, plus any added in the app - see JobPhaseService).
-  // A saved draft / existing PO brings its phase along: it's parked in `pendingPhase` until the
-  // job's phase list has loaded, then selected. A single-phase job is selected automatically.
+  // "User must select Project Phase" (Moqups, 2026-09-23). The list is the job's phases, from Sage
+  // plus any added in the app (see JobPhaseService). A saved draft or PO keeps its phase in
+  // `pendingPhase` until the job's phases load, then it's selected. A job with one phase gets it
+  // selected automatically.
   availablePhases: JobPhaseOption[] = [];
   selectedPhase: number | null = null;
   private pendingPhase: number | null = null;
@@ -125,11 +116,10 @@ export class NewPoFormComponent implements OnInit {
   uploading = false;
   dragging = false;
 
-  // FIX - "Total PO Amount" showing $0.00 for real historical POs, same root cause and fix as
-  // new-co-form.component.ts's totalCoAmount (see that file's comment): this getter only ever
-  // summed items.itemCost, but historical POs predate this app's per-line pcorln tracking and
-  // load with items: [] - loadedTotalAmount preserves the real total from GetPoById/
-  // getForApproval until the admin actually adds/edits a line item.
+  // Old POs showed a Total PO Amount of $0.00, because this only added up items.itemCost and they
+  // load with no items (they're older than per-line pcorln tracking). loadedTotalAmount keeps the real
+  // total from GetPoById or getForApproval until a line is added or changed. Same fix as
+  // totalCoAmount in new-co-form.component.ts.
   loadedTotalAmount: number | null = null;
 
   get totalPoAmount(): number {
@@ -139,12 +129,10 @@ export class NewPoFormComponent implements OnInit {
     return this.items.reduce((sum, i) => sum + (Number(i.itemCost) || 0), 0);
   }
 
-  // FIX - edit form loading with most fields blank despite GetPoById returning full data
-  // (same root cause as overview-tab.component.ts's "stuck on Loading" bug and
-  // new-co-form.component.ts's identical fix): this app's MSAL interceptor/zone.js interaction
-  // means these HTTP callbacks can run outside Angular's zone, so detectChanges() doesn't
-  // reliably commit to the DOM. Wrapping every subscribe body below in ngZone.run() forces it
-  // back into the zone first.
+  // The edit form loaded mostly blank even though GetPoById returned everything. The MSAL
+  // interceptor can run these callbacks outside Angular's zone, so detectChanges() doesn't always
+  // update the page. Each subscribe body below runs inside ngZone.run() to fix that (same as
+  // overview-tab and new-co-form).
   ngOnInit(): void {
     this.mode = (this.route.snapshot.data['mode'] as PoFormMode) ?? 'request';
     this.editPoId = this.route.snapshot.paramMap.get('poId');
@@ -160,8 +148,8 @@ export class NewPoFormComponent implements OnInit {
           this.loadForEdit();
         } else {
           this.maybeLoadDraft();
-          // NEW - "+ New PO" link from Project Overview's PO tab passes ?jobId= so the form opens
-          // pre-scoped to that job instead of making the admin re-pick it from the full jobs list.
+          // The "+ New PO" link on the Project Overview PO tab passes ?jobId=, so the form opens on
+          // that job instead of making you pick it again.
           const jobIdParam = this.route.snapshot.queryParamMap.get('jobId');
           if (jobIdParam && !this.selectedJobId) {
             this.onJobChange(jobIdParam);
@@ -178,10 +166,9 @@ export class NewPoFormComponent implements OnInit {
     });
   }
 
-  // FIX - <input type="date"> requires a "YYYY-MM-DD" value or it silently renders blank. The
-  // API returns dates as "MM/DD/YYYY" (PO_GetPoById/CO equivalents use CONVERT(..., 101)), which
-  // is why Date Requested/Required OnSite never populated on edit/approval. Safe no-op for
-  // already-ISO strings (e.g. drafts), since JS parses "YYYY-MM-DD" natively too.
+  // A date input needs "YYYY-MM-DD" or it shows blank. The API sends "MM/DD/YYYY" (CONVERT(..., 101)
+  // in PO_GetPoById and the CO versions), so Date Requested and Required OnSite never filled in on
+  // edit or approval. Dates already in ISO form, such as drafts, are left as they are.
   private toDateInputValue(value: string | null | undefined): string {
     if (!value) return '';
     const parsed = new Date(value);
@@ -192,7 +179,7 @@ export class NewPoFormComponent implements OnInit {
     return `${yyyy}-${mm}-${dd}`;
   }
 
-  /** NEW - see this file's `mode` header comment. */
+  /** See `mode` in the header. */
   private loadForApproval(): void {
     if (!this.editPoId) {
       this.statusMessage = 'No PO id provided to approve.';
@@ -246,7 +233,7 @@ export class NewPoFormComponent implements OnInit {
     });
   }
 
-  /** NEW - see this file's isEditMode field comment. */
+  /** See the isEditMode field. */
   private loadForEdit(): void {
     if (!this.editPoId) return;
 
@@ -360,8 +347,8 @@ export class NewPoFormComponent implements OnInit {
       this.ngZone.run(() => {
         this.attachments = [...uploaded, ...this.attachments];
         this.uploading = false;
-        // The upload used to fail silently. Files go to the project's "11-Purchase Orders" folder in the document
-        // library - say so when none of them could be saved there.
+        // The upload used to fail without saying so. Files go to the project's "11-Purchase Orders"
+        // folder in the document library, so say so when none of them could be saved there.
         this.statusMessage = uploaded.length
           ? `${uploaded.length} document${uploaded.length > 1 ? 's' : ''} saved to the project's 11-Purchase Orders folder.`
           : "The document could not be saved to the project's 11-Purchase Orders folder. Please try again or contact support.";
@@ -387,21 +374,21 @@ export class NewPoFormComponent implements OnInit {
 
   addItem(): void {
     if (!this.newItem.item.trim()) return;
-    // NEW (2026-09-23, Mike Smith - "PO items always deduct from the specific cost code budget;
-    // user will not be inputting any negative numbers"): a negative cost would ADD money back to
-    // the cost code, so reject it here (the input also has min="0").
+    // A negative cost would add money back to the cost code, so it's refused here, and the input has
+    // min="0" (Mike Smith, 2026-09-23: "PO items always deduct from the specific cost code budget;
+    // user will not be inputting any negative numbers").
     if (Number(this.newItem.itemCost) < 0) {
       this.statusMessage = 'Save failed: item cost cannot be negative.';
       return;
     }
-    // A submitted PO only deducts from the budget through each line's cost code (pcorln.cstcde),
-    // so an item without one would silently deduct from nothing.
+    // A submitted PO only takes money off the budget through each line's cost code (pcorln.cstcde),
+    // so an item without one would deduct from nothing.
     if (this.newItemCostCode == null) {
       this.statusMessage = 'Save failed: select a cost code for this item.';
       return;
     }
     this.statusMessage = '';
-    // FIX - costCode was previously dropped here, so it never reached the submitted payload.
+    // Keep the costCode so it's sent with the submit.
     this.items.push({ ...this.newItem, costCode: this.newItemCostCode });
     this.newItem = { item: '', remainingBudget: 0, itemCost: 0, itemNote: '', costCode: null };
     this.newItemCostCode = null;
@@ -409,8 +396,8 @@ export class NewPoFormComponent implements OnInit {
 
   editItem(index: number): void {
     this.newItem = { ...this.items[index] };
-    // Prefer the cost code already stored on the item; fall back to matching the display text
-    // for items loaded from POs submitted before costCode was persisted.
+    // Use the cost code saved on the item. For items from POs submitted before costCode was saved,
+    // match the display text instead.
     const match = this.costCodes.find((c) => c.display === this.newItem.item);
     this.newItemCostCode = this.newItem.costCode ?? match?.costCode ?? null;
     this.items.splice(index, 1);
@@ -453,12 +440,20 @@ export class NewPoFormComponent implements OnInit {
     };
   }
 
-  /** Moqups FORM-PO Request: "User must select Project Phase". Required to submit / re-save a real PO
-   * (a draft may still be saved without one). Returns true when a phase is chosen, otherwise shows
-   * the reason. */
+  /** "User must select Project Phase" (Moqups FORM-PO Request). Needed to submit or re-save a real PO,
+   * but a draft can be saved without one. Returns true when a phase is picked, otherwise shows why. */
   private hasPhase(failPrefix: string): boolean {
     if (this.selectedPhase !== null) return true;
     this.statusMessage = `${failPrefix}: select a project phase.`;
+    this.cdr.detectChanges();
+    return false;
+  }
+
+  /** Sage's pchord.dscrpt must have at least one character, so a blank PO Description came back as a
+   * raw "INSERT conflicted with the CHECK constraint" error on Submit. This checks first and says what to fix. */
+  private hasDescription(failPrefix: string): boolean {
+    if (this.poDescription.trim()) return true;
+    this.statusMessage = `${failPrefix}: enter a PO description.`;
     this.cdr.detectChanges();
     return false;
   }
@@ -472,14 +467,19 @@ export class NewPoFormComponent implements OnInit {
     });
   }
 
-  /** NEW - see this file's isEditMode field comment. Replaces savePo()/submitRequest() in edit mode. */
+  /** Saves in edit mode, in place of savePo() and submitRequest() (see the isEditMode field). */
   saveEdits(): void {
     if (!this.editPoId) return;
     if (!this.hasPhase('Save failed')) return;
+    if (!this.hasDescription('Save failed')) return;
 
     this.poRequestService.updatePo(this.editPoId, this.buildPayload()).subscribe((result) => {
       this.ngZone.run(() => {
-        this.statusMessage = result.saved ? `PO ${this.editPoId} updated.` : `Save failed: ${result.error ?? 'unknown error'}`;
+        this.statusMessage = result.saved
+          ? result.pendingApproval
+            ? `Change to PO ${this.editPoId} sent to Accounting for approval (request #${result.requestId}). The PO in Sage stays as it is until it is approved.`
+            : `PO ${this.editPoId} updated.`
+          : `Save failed: ${result.error ?? 'unknown error'}`;
         this.cdr.detectChanges();
       });
     });
@@ -487,6 +487,7 @@ export class NewPoFormComponent implements OnInit {
 
   submitRequest(): void {
     if (!this.hasPhase('Submit failed')) return;
+    if (!this.hasDescription('Submit failed')) return;
 
     this.poRequestService.submitPoRequest(this.buildPayload()).subscribe((result) => {
       this.ngZone.run(() => {
@@ -496,7 +497,8 @@ export class NewPoFormComponent implements OnInit {
           return;
         }
 
-        this.statusMessage = `PO request submitted (${result.poId}).`;
+        // A submitted PO waits for Accounting approval, and the Sage PO number is given on approval (Mike Smith, 2026-09-26).
+        this.statusMessage = `PO request submitted for Accounting approval (request #${result.requestId}).`;
         if (this.loadedDraftId != null) {
           this.poRequestService.deleteDraft(this.loadedDraftId).subscribe();
           this.loadedDraftId = null;
@@ -506,7 +508,12 @@ export class NewPoFormComponent implements OnInit {
     });
   }
 
-  // --- Approval mode actions (mode === 'approval' only) ---
+  // --- Approval mode actions (only when mode === 'approval') ---
+
+  /** Once Accounting has decided, go back to the queue (the PO is no longer in it). */
+  private backToAccountingQueue(): void {
+    setTimeout(() => this.router.navigate(['/accounting/po-queue']), 1200);
+  }
 
   openRejectReason(): void {
     this.showRejectReason = true;
@@ -522,9 +529,10 @@ export class NewPoFormComponent implements OnInit {
 
     this.poRequestService.rejectRequest(this.editPoId, this.rejectionReason).subscribe((result) => {
       this.ngZone.run(() => {
-        this.statusMessage = result.succeeded ? 'PO request rejected.' : `Reject failed: ${result.error ?? 'unknown error'}`;
+        this.statusMessage = result.succeeded ? 'PO rejected and removed from the queue.' : `Reject failed: ${result.error ?? 'unknown error'}`;
         if (result.succeeded) this.showRejectReason = false;
         this.cdr.detectChanges();
+        if (result.succeeded) this.backToAccountingQueue();
       });
     });
   }
@@ -534,8 +542,9 @@ export class NewPoFormComponent implements OnInit {
 
     this.poRequestService.approveRequest(this.editPoId).subscribe((result) => {
       this.ngZone.run(() => {
-        this.statusMessage = result.succeeded ? 'PO request approved.' : `Approve failed: ${result.error ?? 'unknown error'}`;
+        this.statusMessage = result.succeeded ? 'PO approved and created in Sage.' : `Approve failed: ${result.error ?? 'unknown error'}`;
         this.cdr.detectChanges();
+        if (result.succeeded) this.backToAccountingQueue();
       });
     });
   }

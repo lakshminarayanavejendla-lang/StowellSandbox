@@ -1,42 +1,45 @@
-import { Component, OnInit, inject,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import {
   CategoryService,
   ChartModule,
   ColumnSeriesService,
+  DataLabelService,
   LegendService,
   TooltipService,
 } from '@syncfusion/ej2-angular-charts';
+import { CHART_AREA, CHART_COLORS, DATA_LABEL, LEGEND, ROUNDED_TOP, TOOLTIP, categoryAxis, moneyAxis, onAxisLabel, onDataLabel, onTooltip, useChartTheme } from '../../../../shared/charts/chart-style';
 import { JobService } from '../../../../core/services/job.service';
 import { ChartData, CashDataItem } from '../../../../core/models/chart-data.model';
 
-// Port of ColumnChart1.razor (grouped Cash Collected vs Cash Paid bar chart), now rendered with
-// Syncfusion's real `ejs-chart` (ChartComponent) instead of Chart.js/ng2-charts. Two `Column`
-// type e-series sharing the same category axis - Syncfusion clusters (dodges) multiple Column
-// series on a shared axis by default, matching the old grouped chart.js bar behavior; this
-// hasn't been runtime-verified, flagging in case 27.1.48 needs an explicit clustering option.
-// Dashboard.razor actually renders the plainer ColumnChart.razor variant (single "Cash Collected
-// vs Cash Paid" RadzenColumnSeries pair built straight from ChartData, no CashDataItem
-// transform) - this component reproduces that same visual result but through the CashDataItem
-// shape. Confirm which of the two duplicate Blazor components was the one actually meant to
-// ship; both were present in Components/ with no clear "dead code" marker.
+// Cash Collected vs Cash Paid, from ColumnChart1.razor: two column series side by side on one job
+// axis. Dashboard.razor actually used the simpler ColumnChart.razor, which looks the same. Both were
+// in the Blazor app; check which one was meant to ship.
 //
-// NOTE: ColumnSeriesService/CategoryService/LegendService/TooltipService must be registered in
-// this component's `providers` array - Syncfusion Angular Chart features (series types, axis
-// categories, legend, tooltip) are opt-in via Angular DI, not enabled just by template bindings.
+// Syncfusion chart features (series types, categories, legend, tooltip, labels) only work when
+// their services are in `providers`; the template alone isn't enough.
 @Component({
   selector: 'app-cash-collected-chart',
   standalone: true,
   imports: [ChartModule],
-  providers: [ColumnSeriesService, CategoryService, LegendService, TooltipService],
+  providers: [ColumnSeriesService, CategoryService, LegendService, TooltipService, DataLabelService],
   templateUrl: './cash-collected-chart.component.html',
 })
 export class CashCollectedChartComponent implements OnInit {
   private jobService = inject(JobService);
 
   chartData: CashDataItem[] = [];
-  primaryXAxis = { valueType: 'Category' as const };
-  primaryYAxis = { labelFormat: '{value}' };
-  legendSettings = { visible: true };
+  readonly chartTheme = useChartTheme();
+  readonly colors = CHART_COLORS;
+  readonly chartArea = CHART_AREA;
+  readonly legendSettings = LEGEND;
+  readonly tooltip = TOOLTIP;
+  readonly rounded = ROUNDED_TOP;
+  readonly marker = { dataLabel: DATA_LABEL('Outer') };
+  readonly primaryXAxis = categoryAxis();
+  readonly primaryYAxis = moneyAxis({ minimum: 0 });
+  readonly onAxisLabel = onAxisLabel;
+  readonly onTooltip = onTooltip;
+  readonly onDataLabel = onDataLabel;
 
   ngOnInit(): void {
     this.jobService.getCashCollectedDatasets().subscribe((datasets) => {

@@ -23,7 +23,7 @@
         <label>Bid Name</label>
         <input type="text" formControlName="bidName" [readonly]="isClosed" />
       </div>
-      <a class="doc-link" [routerLink]="['/bids/documents', bidId]"><i class="fas fa-folder"></i> Bid Document Library</a>
+      <a class="doc-link" href="#" (click)="$event.preventDefault(); openDocuments.emit()"><i class="fas fa-folder"></i> Bid Document Library</a>
     </div>
 
     <h2>Bid Overview</h2>
@@ -96,12 +96,9 @@
     </div>
     <div class="hr-line-dashed"></div>
 
-    <!-- FLAG: isClosed is fixed for the lifetime of this tab (derived from the `type` route
-         param set once via @Input), so conditionally including the Action e-column below with
-         @if isn't expected to hit any live add/remove-column re-render edge case - but I
-         couldn't confirm from the ej2-angular-grids 27.x docs whether ColumnsDirective's content
-         children are re-queried if that assumption ever stops holding. Flagging rather than
-         silently assuming full reactivity. -->
+    <!-- The Action column is added with @if. isClosed comes from the `type` route parameter and
+         doesn't change while the tab is open, so that's fine. It isn't confirmed whether the grid
+         would pick up the change if isClosed could change later. -->
     <ejs-grid [dataSource]="bidAmounts" width="auto">
       <e-columns>
         @if (!isClosed) {

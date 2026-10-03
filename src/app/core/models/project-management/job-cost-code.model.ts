@@ -1,13 +1,13 @@
-// NEW - Stowell PO Module. Replaces free-text "Item" on FORM-PO Request / FORM-CO Request with a
-// real dropdown scoped to the selected job's actual budget lines, carrying a computed Remaining
-// Budget so that field can auto-fill and stay read-only (per the mockup's own design note).
+// The cost code dropdown on the PO Request and CO Request forms, in place of a free-text Item. It
+// lists only the job's budget lines and carries the Remaining Budget, which fills in automatically
+// and is read-only, as the mockup says.
 export interface JobCostCodeOption {
   costCode: number;
   costCodeDescription: string;
   budget: number;
   toDate: number;
   remaining: number;
-  // Client-computed "{costCode} - {costCodeDescription}" for the ComboBox's display field,
-  // matching the mockup's "1000 - Cost Code Description" format.
+  // Built in the app as "{costCode} - {costCodeDescription}" for the dropdown, matching the
+  // mockup's "1000 - Cost Code Description".
   display?: string;
 }

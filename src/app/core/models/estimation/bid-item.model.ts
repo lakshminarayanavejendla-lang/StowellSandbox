@@ -1,6 +1,5 @@
-// Mirrors StowellCoApp.DTO.BidItem (confirmed, DTO/BidInfoDto.cs) - the row shape for
-// BidQueue's three grids (Open/Closed/Pending), populated from
-// GetOpenBids/GetClosedBids/GetPendingBids.
+// Matches BidItem in DTO/BidInfoDto.cs: one row in the Bid Queue's Open, Closed and Pending grids
+// (from GetOpenBids, GetClosedBids and GetPendingBids).
 export interface BidItem {
   ID: number;
   JobID: string;

@@ -47,11 +47,8 @@ getProfilePhoto(): Observable<Blob | null> {
       })
     );
 }
-  // FIX - Logout link was a plain <a href> pointing at postLogoutRedirectUri: that just navigates
-  // the browser there without ever clearing the MSAL session, so the app reloads still
-  // authenticated and looks like it "redirected to the same page" instead of logging out.
-  // logoutRedirect() clears the local MSAL cache, ends the Azure AD session, and only then
-  // redirects to postLogoutRedirectUri.
+  // A plain link to postLogoutRedirectUri didn't clear the MSAL session, so the app reloaded still
+  // signed in. logoutRedirect() clears the local cache, ends the Azure AD session, then redirects.
   logout(): void {
     this.msalService.logoutRedirect({
       postLogoutRedirectUri: environment.azureAd.postLogoutRedirectUri,

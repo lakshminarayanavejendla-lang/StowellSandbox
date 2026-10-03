@@ -20,7 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(MsalModule.forRoot(MSALInstanceFactory(), MSALGuardConfigFactory(), MSALInterceptorConfigFactory())),
     { provide: HTTP_INTERCEPTORS, useClass: MsalInterceptor, multi: true },
-    // API call/error log (dbo.ApiCallLog): send the signed-in user on every API call, and report browser-side errors.
+    // For the API call log (dbo.ApiCallLog): send the signed-in user with every API call and report errors from the browser.
     { provide: HTTP_INTERCEPTORS, useClass: UserHeaderInterceptor, multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],

@@ -1,8 +1,8 @@
-<div class="card-header">
-  <h3 class="m-0">Current Bids</h3>
-  <a class="btn btn-primary" routerLink="/bids/new-bid">New Bid</a>
-</div>
-<hr />
+<app-page-header title="Current Bids" [breadcrumbs]="[{ label: 'Bid Management' }, { label: 'Current Bids' }]">
+  <a actions class="btn btn-primary" routerLink="/bids/new-bid">New Bid</a>
+</app-page-header>
+
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
 
 <div class="toolbar">
   <div class="search-box">
@@ -62,9 +62,8 @@ class="black-grid"
   [pageSettings]="closedPageSettings"
 >
   <e-columns>
-    <!-- Type="Closed" here matches BidQueue.razor's link exactly - IsClosed downstream
-         checks Type === "Closed" (case-sensitive), vs. "current" (any non-"Closed" value)
-         used by the current-bids grid above. -->
+    <!-- Type must be exactly "Closed", as in BidQueue.razor. IsClosed checks Type === "Closed"
+         (case-sensitive); the current grid above uses "current". -->
     <e-column field="bidId" headerText="Bid ID" width="130">
       <ng-template #template let-data>
         <a [routerLink]="['/bids/bid-overview', data.bidId, 'Closed']" class="opportunity-link">{{ data.bidId }}</a>

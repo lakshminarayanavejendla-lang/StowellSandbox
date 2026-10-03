@@ -13,25 +13,16 @@ import {
 } from '../models/accounting/bid-info.model';
 
 /**
- * FLAGGED CROSS-MODULE DEPENDENCY - read this before extending or trusting this file.
+ * Read this before relying on it: Accounting's Add Form gets almost everything from the Estimation
+ * service in Blazor, not Accounting. That covers loading the bid, the contractor dropdown and
+ * address fill, the user's name, and the Bid Amounts, Bid Phases and Bid Employees grids. Only
+ * SubmitToSage is Accounting's own.
  *
- * AddFormBase.cs (the code-behind for Accounting's AddForm.razor) injects IEstimationService,
- * not IAccountingService, for almost everything except the final SubmitToSage call: loading
- * the original bid (GetBidDetails), the contractor-client dropdown + address autofill
- * (GetAllContractorClients/GetContractorClientById), the logged-in user's display name, and
- * full CRUD on the three AddForm sub-grids (Bid Amounts, Bid Phases, Bid Employees). All of
- * that is Estimation-module domain, being converted in parallel by another agent.
+ * Most routes here are guessed from IEstimationService's method names. Only GetBidDetails and
+ * GetEmployees are confirmed in GlobalEndpoints.cs.
  *
- * This service exists only so AddFormComponent compiles and is demonstrably wired to
- * *something* real-shaped, without editing any file the Estimation agent might also be
- * touching. Its endpoint paths (accounting-endpoints.ts's EstimationBidEndpoints) are mostly
- * INFERRED from IEstimationService's C# method names, not read from EstimationService.cs's
- * actual implementation (out of scope for this phase) - only GetBidDetails/GetEmployees are
- * confirmed via Common/GlobalEndpoints.cs.
- *
- * Once the Estimation module's own Angular service exists, AddFormComponent should almost
- * certainly be pointed at that instead of this file, and this file should be deleted rather
- * than kept as a second source of truth for the same bid data.
+ * Once the Estimation module's Angular service covers this, point AddFormComponent at it and
+ * delete this file, so there's only one source for bid data.
  */
 @Injectable({ providedIn: 'root' })
 export class AccountingBidInfoService {
@@ -50,12 +41,9 @@ export class AccountingBidInfoService {
       .pipe(catchError(() => of([])));
   }
 
-  // AddFormBase.cs's `_contractClientRecords` (the "Add Employee" dropdown data source) comes
-  // from IEstimationService.GetAllEmployees(), a *second*, differently-named method returning
-  // the same ContractorClient shape as GetAllContractorClients() above - almost certainly a
-  // copy/paste divergence in the C# source rather than an intentionally distinct data set.
-  // Flag for the Estimation agent / product owner to confirm before assuming these are
-  // actually different lists.
+  // The Add Employee dropdown uses GetAllEmployees(), which returns the same ContractorClient shape
+  // as GetAllContractorClients(). Probably a copy-paste in the C# code, not a different list.
+  // Confirm with the product owner.
   getAllEmployees(): Observable<ContractorClient[]> {
     return this.http
       .get<ContractorClient[]>(`${this.base}${EstimationBidEndpoints.GetAllEmployeesUrl}`)
@@ -105,7 +93,6 @@ export class AccountingBidInfoService {
   }
 
 deleteBidAmount(id: string): Observable<boolean> {
-  debugger;
   return this.http.post<boolean>(
     `${this.base}${EstimationBidEndpoints.DeleteBidAmountUrl}`,
     JSON.stringify(id),

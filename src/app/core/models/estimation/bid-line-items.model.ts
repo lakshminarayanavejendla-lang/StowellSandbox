@@ -1,12 +1,9 @@
-// Mirrors StowellCoApp.Models.BidAmount / BidPhase / BidEmployee (confirmed, Models/*.cs).
-// These are the three repeating "add a row via popup, list in a grid, delete a row" line-item
-// sections on AddBid/EditBidForm: Bids (bid amount history), Additional Phases, and Project
-// Resources (employee assignments).
+// Matches the BidAmount, BidPhase and BidEmployee models. These are the three row lists on Add Bid
+// and Edit Bid (add with a popup, show in a grid, delete): Bids (amount history), Additional Phases
+// and Project Resources (employees).
 
-// BidAmount.BidAmount1 - the C# property is literally named "BidAmount1" (EF Core's usual
-// dedup pattern when a column collides with its table/class name, e.g. a "BidAmount" column
-// on a "BidAmount" table). Kept the odd name rather than silently renaming it to `amount` so a
-// backend contract diff stays obvious; do rename if the API team confirms it's safe.
+// The C# property really is "BidAmount1". EF Core does this when a column has the same name as its
+// class. Kept as is so the API contract stays clear; rename it if the API team says it's safe.
 export interface BidAmount {
   id: number;
   jobId: string;

@@ -9,11 +9,9 @@
     @if (projectFolderLibraryUrl) {
       <a [href]="projectFolderLibraryUrl" target="_blank"><i class="bi bi-folder"></i> Project Folder Library</a>
     }
-    <!-- FIX (2026-09-16) - was '/Estimation/EditBidForm/' + jobID, a Blazor-era route never
-         ported (404 - reported by Mike Smith). BidFormComponent at estimation/edit-bid/:jobId is
-         the real, already-built Angular port of that exact page - see overview-tab.component.html
-         for the fuller comment (same fix, same underlying Bids_Update bug found and fixed via
-         that page). This tab itself is unchanged (still read-only). -->
+    <!-- Opens estimation/edit-bid/:jobId, the Edit Project page, in place of the Blazor route
+         /Estimation/EditBidForm/, which gave a 404 (reported by Mike Smith, 2026-09-16). See the same
+         link in overview-tab.component.html. This tab is still read-only. -->
     <a [routerLink]="['/estimation/edit-bid', bidModel.jobID]" class="btn-link">Update</a>
   </div>
 

@@ -1,58 +1,43 @@
-// Endpoint constants for the Accounting module (PO queue, budget approval, AddForm).
+// API routes for Accounting (PO queue, budget approval, Add Form).
 //
-// IMPORTANT: unlike core/global-endpoints.ts, most of these routes are NOT defined as
-// constants in the Blazor source's Common/GlobalEndpoints.cs. AccountingService.cs and
-// CostCodeService.cs call several of them as raw string literals inline (e.g.
-// "api/Accounting/GetRecords/{email}"), sometimes right next to a commented-out
-// GlobalEndpoints-style constant that was never actually wired up. Where a real
-// GlobalEndpoints.cs constant exists it's noted below; everything else is transcribed
-// verbatim from the literal strings in AccountingService.cs / CostCodeService.cs so this
-// Angular app keeps hitting the exact same StowellCoAPI routes the Blazor app used.
+// Most of these aren't in GlobalEndpoints.cs. AccountingService.cs and CostCodeService.cs use them
+// as plain strings, so they're copied exactly from there to hit the same routes the Blazor app did.
+// Routes that are in GlobalEndpoints.cs say so below.
 export const AccountingEndpoints = {
   // --- api/Accounting/* (StowellCoApp.Services.AccountingService) ---
-  // GET api/Accounting/GetRecords/{email} - Index.razor / IndexBase.cs queue grid.
+  // GET api/Accounting/GetRecords/{email}: the queue grid.
   GetRecordsUrl: 'api/Accounting/GetRecords',
-  // GET api/Accounting/GetCostCodes/{filter} - cost-code-description autocomplete on the
-  // budget approval grids (RadzenAutoComplete LoadData).
+  // GET api/Accounting/GetCostCodes/{filter}: cost code search on the budget approval grids.
   GetCostCodesUrl: 'api/Accounting/GetCostCodes',
-  // POST api/Accounting/GetApproveBudgetData - ApproveNewBudgetBase's initial/on-change load.
+  // POST: loads the Approve New Budget page.
   GetApproveBudgetDataUrl: 'api/Accounting/GetApproveBudgetData',
-  // POST api/Accounting/GetModifyBudgetData - ApproveModifyBudgetBase's initial/on-change load.
+  // POST: loads the Approve Modified Budget page.
   GetModifyBudgetDataUrl: 'api/Accounting/GetModifyBudgetData',
-  // POST api/Accounting/BudgetApproveRequest - "Approve" button on both budget pages.
+  // POST: the Approve button on both budget pages.
   BudgetApproveRequestUrl: 'api/Accounting/BudgetApproveRequest',
-  // POST api/Accounting/BudgetRejectRequest - "Reject" button on both budget pages.
+  // POST: the Reject button on both budget pages.
   BudgetRejectRequestUrl: 'api/Accounting/BudgetRejectRequest',
-  // POST api/Accounting/SubmitToSage - AddForm's "Create/Update Job" button, pushes the
-  // assembled BidInfoDto (+ nested location/contractor/project-info) into Sage.
+  // POST: Add Form's Create/Update Job button. Sends the BidInfoDto (with location, contractor and
+  // project info) to Sage.
   SubmitToSageUrl: 'api/Accounting/SubmitToSage',
 
-  // --- api/CostCode/* (StowellCoApp.Services.CostCodeService) actually used by Accounting ---
-  // Confirmed in Common/GlobalEndpoints.cs as GetAllUserJobsUrl.
+  // --- api/CostCode/* routes Accounting uses ---
+  // In GlobalEndpoints.cs as GetAllUserJobsUrl.
   GetAllUserJobsUrl: 'api/CostCode/GetAllUserJobs',
-  // GET api/CostCode/GetJobPhasesData/{jobId} - literal in CostCodeService.cs, no
-  // GlobalEndpoints constant exists for it (one was referenced in a comment,
-  // "GlobalEndpoints.GetJobPhasesData", but that member doesn't exist in the file).
+  // GET api/CostCode/GetJobPhasesData/{jobId}. Only a string in CostCodeService.cs; there's no
+  // GlobalEndpoints constant for it.
   GetJobPhasesDataUrl: 'api/CostCode/GetJobPhasesData',
-  // GET api/CostCode/GetAllPhases - used by AddForm's "Additional Phases" popup dropdown.
-  // Note the real controller wraps the payload as ApiListResponse<Phase> ({ data: [...] }),
-  // not a bare array - see PhaseListResponse in cost-code.model.ts.
+  // GET api/CostCode/GetAllPhases: the Additional Phases dropdown on Add Form. The response is
+  // { data: [...] }, not a plain array (see PhaseListResponse in cost-code.model.ts).
   GetAllPhasesUrl: 'api/CostCode/GetAllPhases',
 } as const;
 
-// --- Estimation-module endpoints AddForm.razor/AddFormBase.cs also call ---
-// AddForm is nominally an Accounting page (routed from the accounting queue for JobID with
-// StatusID "99"), but its code-behind leans almost entirely on IEstimationService for the
-// Bid Amounts / Bid Phases / Bid Employees sub-grids and for prefilling the form from the
-// original bid record. That service is Estimation's, being converted in parallel by another
-// agent - only two of these routes are confirmed via Common/GlobalEndpoints.cs
-// (GetBidDetails, GetEmployees); the rest are INFERRED from IEstimationService's C# method
-// names following the same "api/Estimation/{MethodName}" convention, since
-// EstimationService.cs's actual implementation wasn't read as part of this phase (out of
-// scope - Estimation module territory). CONFIRM these against the real EstimationService.cs
-// (or whatever the Estimation agent ships) before relying on them; consider having AddForm
-// consume the Estimation module's own Angular service directly once it exists, instead of
-// this parallel copy.
+// --- Estimation routes that Add Form also calls ---
+// Add Form is an Accounting page (opened from the queue for status 99), but most of its data comes
+// from IEstimationService: the bid amounts, phases and employees grids, and the bid it prefills from.
+// Only GetBidDetails and GetEmployees are in GlobalEndpoints.cs. The rest are guessed from the C#
+// method names as api/Estimation/{MethodName}. Confirm them against EstimationService.cs, and
+// consider using the Estimation module's own service instead of this copy.
 export const EstimationBidEndpoints = {
   GetBidDetailsUrl: 'api/Estimation/GetBidDetails', // confirmed via GlobalEndpoints.cs
   GetEmployeesUrl: 'api/Estimation/GetEmployees', // confirmed via GlobalEndpoints.cs (bid-role employee list)

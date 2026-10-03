@@ -1,13 +1,14 @@
 <div class="wrapper">
-  <h2>Change Order Budget Allocation</h2>
-  <hr class="dashed" />
+  <app-page-header [title]="isApproval ? 'Change Order Budget Allocation - Approval' : 'Change Order Budget Allocation'" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'CO Budget Allocation' }]"></app-page-header>
+
+  <!-- Approval mode: the request is read-only (inert, so nothing inside can be edited or clicked) -->
+  <div class="approval-lock" [attr.inert]="isApproval ? '' : null">
 
   <div class="header-grid">
     <div class="col">
       <div class="field">
         <label>CO Type</label>
-        <!-- (ngModelChange) instead of plain [(ngModel)] - picking a type also fetches/fills the
-             auto-generated CO Number preview (see onCoTypeChange()). -->
+        <!-- (ngModelChange) because picking a type also fills in the CO Number preview (see onCoTypeChange()). -->
         <div class="radio-group">
           <label><input type="radio" name="coType" value="Prime" [ngModel]="coType" (ngModelChange)="onCoTypeChange('Prime')" /> Prime</label>
           <label><input type="radio" name="coType" value="Internal" [ngModel]="coType" (ngModelChange)="onCoTypeChange('Internal')" /> Internal</label>
@@ -23,11 +24,9 @@
         </select>
       </div>
       <div class="field">
-        <!-- Always system-generated, never user-editable: Prime = "BC" + year + sequence,
-             Internal = "CO" + year + sequence (see onCoTypeChange()). Shown here as a live
-             preview as soon as CO Type is picked - the real number is still (re)computed under
-             lock at Submit time (see buildPayload()'s comment), this is never sent as an
-             override. -->
+        <!-- The system always sets this; nobody can edit it. Prime is "BC" + year + sequence, Internal is
+             "CO" + year + sequence (see onCoTypeChange()). It's a preview once CO Type is picked; the
+             server works out the real number under a lock on Submit and this is never sent. -->
         <label>CO Number</label>
         <input
           type="text"
@@ -37,20 +36,21 @@
         />
       </div>
       <div class="field">
-        <!-- NEW - real dropdown scoped to the selected job's Sage phases (see JobPhaseService),
-             not free text. -->
+        <!-- A dropdown of the job's Sage phases (see JobPhaseService), not free text. -->
         <label>Phase</label>
         <div class="phase-entry">
-          <!-- FIX (2026-09-23, Mike Smith - "Cannot submit - missing: Phase" with phase 0-None picked):
-               picking a phase here only filled this dropdown - it wasn't added to the phase list
-               (the chips below) until ADD was pressed, and Submit checks that list. Picking a phase
-               now adds it straight away; ADD stays for anyone who prefers it. -->
-          <select [ngModel]="newPhase" (ngModelChange)="onPhasePicked($any($event))">
-            <option [ngValue]="null">Select phase</option>
-            @for (p of availablePhasesForNewPhase; track p.phaseNumber) {
-              <option [ngValue]="p.phaseNumber">{{ p.phaseNumber }} - {{ p.phaseName }}</option>
-            }
-          </select>
+          <!-- Picking a phase only filled this dropdown and wasn't added to the list below until ADD was
+               pressed, but Submit checks that list (Mike Smith, 2026-09-23: "Cannot submit - missing:
+               Phase"). Now picking a phase adds it straight away; ADD still works. -->
+          <!-- The dropdown is rebuilt whenever phaseSelectKey changes, so it always starts on "Select phase". -->
+          @for (k of [phaseSelectKey]; track k) {
+            <select [ngModel]="newPhase" (ngModelChange)="onPhasePicked($any($event))">
+              <option [ngValue]="null">Select phase</option>
+              @for (p of availablePhasesForNewPhase; track p.phaseNumber) {
+                <option [ngValue]="p.phaseNumber">{{ p.phaseNumber }} - {{ p.phaseName }}</option>
+              }
+            </select>
+          }
           <button type="button" class="btn-sm" [disabled]="newPhase === null" (click)="addPhase()">ADD</button>
         </div>
       </div>
@@ -94,9 +94,9 @@
         <input type="text" [value]="budgetChangeTotal | currency" [class.neg]="budgetChangeTotal < 0" readonly />
       </div>
       <div class="field">
-        <!-- Prime: a percentage = (Approved Amount - Budget Change Total) / Approved Amount (see
-             recalcProfitOnSell() - per the Moqups comment), so read-only there; Internal has no
-             approved amount, so it stays a manual entry (also a percentage). -->
+        <!-- For Prime it's a percentage, (Approved Amount - Budget Change Total) / Approved Amount, from the
+             Moqups note, so it's read-only (see recalcProfitOnSell()). Internal has no approved amount,
+             so it's typed by hand, also as a percentage. -->
         <label>Profit on Sell (%)</label>
         @if (isPrime) {
           <input type="text" [value]="(profitOnSell | number: '1.2-2') + '%'" [class.neg]="profitOnSell < 0" readonly />
@@ -107,20 +107,15 @@
     </div>
   </div>
 
-  <!-- NEW - Moqups shows this section unconditionally (see FORM-CO Reallocation), but the fields
-       are only active for CO Type = Prime; Internal (or nothing selected) shows the section
-       greyed out/disabled rather than hidden entirely. Both fields are readonly, computed
-       (net Debit - Credit across every Budget Update line, see updatePieData()) rather than
-       manually typed - matches Overall Budget/Budget Change Total's existing computed-display
-       pattern on this same page. -->
+  <!-- Moqups always shows this section, but the fields only work for CO Type = Prime. For Internal, or
+       no type, the section is greyed out rather than hidden. -->
   <h3 class="section-header">Change Order Amount</h3>
   <hr class="dashed" />
   <div class="header-grid">
     <div class="field">
       <label>Requested Amount</label>
-      <!-- CHANGED (2026-09-20, Mike Smith - "need to be able to edit Requested amount and Approved
-           Amount") - typed inputs for a Prime CO instead of read-only computed displays. They still
-           start out as the Budget Update running total, until the user types their own value. -->
+      <!-- Typed inputs for a Prime CO (Mike Smith, 2026-09-20: "need to be able to edit Requested amount
+           and Approved Amount"). They start as the Budget Update total until the user types a value. -->
       <input type="text" appUsdInput [(ngModel)]="requestedAmount" (ngModelChange)="onAmountEdited()" [disabled]="!isPrime" />
     </div>
     <div class="field">
@@ -134,9 +129,9 @@
   </div>
   <hr class="dashed" />
 
-  <!-- NEW (2026-09-24, Mike Smith - "Submit failed ... 500"): the same two rules the server enforces when it posts to the job's
-       budget (a deduction needs a budget line under the chosen phase; nothing may go below zero), checked here first so the
-       user is told which cost code and phase to fix instead of getting a failed submit. -->
+  <!-- The two rules the server applies when it posts to the job's budget: taking budget off needs a
+       budget line in the chosen phase, and nothing may go below zero. They're checked here first so
+       the user knows which cost code and phase to fix (Mike Smith, 2026-09-24: "Submit failed ... 500"). -->
   @if (phaseIssues.length) {
     <div class="phase-warning" role="alert">
       <strong>This allocation cannot be submitted yet:</strong>
@@ -167,9 +162,10 @@
           <tr>
             <td>{{ line.costCode }} - {{ line.costCodeDescription }}</td>
             <td [class.neg]="remainingForCode(line.costCode) < 0">{{ remainingForCode(line.costCode) | currency }}</td>
-            <!-- Mike Smith, 2026-09-24 ("need debits to subtract and credits to add"): the Debit column edits the field that is
-                 DEDUCTED (`credit`, shown negative/red), the Credit column edits the field that is ADDED (`debit`). The stored
-                 fields keep their original meaning, so existing allocations and the server procedures are unchanged. -->
+            <!-- The Debit column edits the amount taken off (`credit`, shown negative in red) and the Credit
+                 column edits the amount added (`debit`) (Mike Smith, 2026-09-24: "need debits to subtract
+                 and credits to add"). The saved fields keep their meaning, so saved allocations and the
+                 server procedures don't change. -->
             <td><input type="text" appUsdInput usdDebit class="line-amount" [(ngModel)]="line.credit" (ngModelChange)="updatePieData()" /></td>
             <td><input type="text" appUsdInput class="line-amount" [(ngModel)]="line.debit" (ngModelChange)="updatePieData()" /></td>
             <td><button type="button" class="btn-sm" (click)="removeLine($index)">Remove</button></td>
@@ -183,9 +179,8 @@
 
     <div class="entry-panel">
       <div class="field">
-        <!-- Only lists cost codes not already auto-populated as a Budget Update row above (see
-             availableCostCodesForNewLine) - normally empty, since the grid already lists every
-             job cost code; kept as a fallback for any code that isn't in that list yet. -->
+        <!-- Only cost codes that don't already have a row above (see availableCostCodesForNewLine). It's
+             usually empty, since the grid lists every job cost code; it's there for any code that isn't. -->
         <label>Cost Code</label>
         <select [ngModel]="newLineCostCode" (ngModelChange)="onLineCostCodeSelected($any($event))">
           <option [ngValue]="null">Select cost code</option>
@@ -195,9 +190,9 @@
         </select>
       </div>
       <div class="field">
-        <!-- NEW (2026-09-16, per Mike Smith) - remaining budget used to be embedded inline in the
-             Cost Code dropdown text ("1012 - GC - Employeee Housing ($10000)"); moved to its own
-             field so it reads the same way the table's "Remaining Budget" column does. -->
+        <!-- Remaining budget used to be part of the dropdown text ("1012 - GC - Employeee Housing
+             ($10000)"). It has its own field now, like the table's Remaining Budget column (Mike Smith,
+             2026-09-16). -->
         <label>Remaining Budget</label>
         <input type="text" [value]="newLineCostCode ? (remainingForCode(newLineCostCode.toString()) | currency) : ''" [class.neg]="!!newLineCostCode && remainingForCode(newLineCostCode.toString()) < 0" readonly />
       </div>
@@ -224,14 +219,29 @@
     </div>
   }
 
+  </div>
+
   <div class="form-row actions">
-    <button type="button" class="btn-secondary" (click)="saveCo()">Save CO</button>
-    <button type="button" class="btn-primary" (click)="submit()">Submit</button>
-    @if (allocationId !== null) {
-      <button type="button" class="btn-secondary" (click)="deleteAllocation()">Delete</button>
+    @if (isApproval) {
+      <button type="button" class="btn-primary" (click)="approve()">Approve</button>
+      <button type="button" class="btn-secondary" (click)="openRejectReason()">Reject</button>
+      @if (showRejectReason) {
+        <div class="reject-reason">
+          <label>Reason for rejecting</label>
+          <textarea [(ngModel)]="rejectionReason" rows="2" placeholder="Enter the reason"></textarea>
+          <button type="button" class="btn-secondary" (click)="cancelReject()">Cancel</button>
+          <button type="button" class="btn-primary" [disabled]="!rejectionReason.trim()" (click)="confirmReject()">Confirm Rejection</button>
+        </div>
+      }
+    } @else {
+      <button type="button" class="btn-secondary" (click)="saveCo()">Save CO</button>
+      <button type="button" class="btn-primary" (click)="submit()">Submit</button>
+      @if (allocationId !== null) {
+        <button type="button" class="btn-secondary" (click)="deleteAllocation()">Delete</button>
+      }
     }
     @if (statusMessage) {
-      <span class="status-message" [class.error]="statusMessage.startsWith('Save failed') || statusMessage.startsWith('Submit failed') || statusMessage.startsWith('Cannot submit') || statusMessage.startsWith('Delete failed')">{{ statusMessage }}</span>
+      <span class="status-message" [class.error]="statusMessage.startsWith('Save failed') || statusMessage.startsWith('Submit failed') || statusMessage.startsWith('Cannot submit') || statusMessage.startsWith('Delete failed') || statusMessage.startsWith('Approve failed') || statusMessage.startsWith('Reject failed')">{{ statusMessage }}</span>
     }
   </div>
 </div>

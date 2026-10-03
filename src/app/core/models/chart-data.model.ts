@@ -1,6 +1,5 @@
-// Mirrors the (duplicated, locally-nested) ChartData/ChartDataset classes found in
-// ColumnChart1.razor and LineChart1.razor's @code blocks - a Chart.js-shaped
-// { labels, datasets[] } structure returned by the StowellCoAPI PmHome endpoints.
+// The ChartData and ChartDataset classes from ColumnChart1.razor and LineChart1.razor: a
+// Chart.js-style { labels, datasets[] } that the PmHome endpoints return.
 export interface ChartDataset {
   label: string;
   data: number[];
@@ -13,8 +12,8 @@ export interface ChartData {
   datasets: ChartDataset[];
 }
 
-// Derived shape used by the Cash Collected vs Cash Paid widget (see Dashboard.razor.cs'
-// TransformToCashData and ColumnChart1.razor's TransformToCashChartData).
+// The shape used by the Cash Collected vs Cash Paid chart (from TransformToCashData in
+// Dashboard.razor.cs and TransformToCashChartData in ColumnChart1.razor).
 export interface CashDataItem {
   category: string;
   cashCollected: number;

@@ -5,18 +5,17 @@ import { DatePipe } from '@angular/common';
 import { GridModule, PageService, SortService, FilterService } from '@syncfusion/ej2-angular-grids';
 import { ProjectCostCodeService } from '../../../core/services/project-cost-code.service';
 import { CostCodeRecord, BidItem } from '../../../core/models/project-management/cost-code.model';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
+import { KpiCardsComponent, KpiItem } from '../../../shared/ui/kpi-cards/kpi-cards.component';
 
-// Port of Components/Pages/ProjectManagement/ProjectQueue.razor + ProjectQueueBase.cs
-// (@page "/ProjectQueue"). Two RadzenDataGrids (Active Projects / CostCodeRecord, Pending
-// Projects / BidItem) are now real Syncfusion ejs-grid components (Community license
-// confirmed) instead of the earlier plain-table stand-in - see HANDOFF.md.
+// The Project Queue (/ProjectQueue in Blazor). Its two grids, Active Projects (CostCodeRecord) and
+// Pending Projects (BidItem), are Syncfusion ejs-grids.
 @Component({
   selector: 'app-project-queue',
   standalone: true,
-  imports: [RouterLink, FormsModule, GridModule, DatePipe],
-  // PageService/SortService/FilterService must be provided for [allowPaging]/[allowSorting]/
-  // [allowFiltering] to actually work - EJ2 Angular grids inject these features via DI rather
-  // than picking them up from the module import alone.
+  imports: [PageHeaderComponent, KpiCardsComponent, RouterLink, FormsModule, GridModule, DatePipe],
+  // Paging, sorting and filtering only work when PageService, SortService and FilterService are in
+  // providers; importing the module isn't enough.
   providers: [PageService, SortService, FilterService],
   templateUrl: './project-queue.component.html',
   styleUrl: './project-queue.component.scss',
@@ -26,6 +25,13 @@ export class ProjectQueueComponent implements OnInit {
  constructor(
   private cdr: ChangeDetectorRef,
   ) {}
+  get kpis(): KpiItem[] {
+    return [
+      { label: 'Active projects', value: this.costCodes.length },
+      { label: 'Pending projects', value: this.bids.length, tone: this.bids.length ? 'warn' : 'default' },
+    ];
+  }
+
   costCodes: CostCodeRecord[] = [];
   filteredCostCodes: CostCodeRecord[] = [];
   searchTerm = '';
@@ -33,8 +39,7 @@ export class ProjectQueueComponent implements OnInit {
   bids: BidItem[] = [];
   filteredBids: BidItem[] = [];
 
-  // Shared page-size config for both grids - Grid's own footer pager/page-size dropdown
-  // replaces the free-table version's manual "Show N entries" control.
+  // Page size for both grids, using the grid's own pager.
   pageSettings = { pageSize: 10, pageSizes: [10, 20, 50] };
 
   ngOnInit(): void {

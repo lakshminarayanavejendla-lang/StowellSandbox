@@ -5,8 +5,7 @@ import { environment } from '../../../environments/environment';
 import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { CostCodeSummaryRecord } from '../models/project-management/cost-summary.model';
 
-// Port of Services/IJobSummaryService.cs + JobSummaryService.cs - backs the Job Summary Report
-// page (/JobSummary/{ProjectId}).
+// Ported from JobSummaryService.cs, for the Job Summary Report (/JobSummary/{ProjectId}).
 @Injectable({ providedIn: 'root' })
 export class JobSummaryService {
   private http = inject(HttpClient);

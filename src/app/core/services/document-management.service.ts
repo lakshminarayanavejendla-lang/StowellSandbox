@@ -6,32 +6,15 @@ import { DocumentManagementEndpoints } from '../document-management-endpoints';
 import { DocumentFileEntry, DocumentManagementScope, ProjectFolderDetails } from '../models/document-management/document-file.model';
 
 /**
- * Port of the file-operations side of FileManagerComponent(Base).razor(.cs) and
- * RootFileManagerComponent(Base).razor(.cs) - the Blazor originals wired Syncfusion's paid
- * SfFileManager straight to api/DocumentManagement/* or api/RootDocumentManagement/* via
- * FileManagerAjaxSettings, whose exact request/response contract is defined by Syncfusion's
- * server SDK, not by anything we could inspect (no DocumentManagement controller exists in the
- * staged source at all - see document-management-endpoints.ts's header note).
+ * File operations for Document Management, ported from FileManagerComponent(Base) and
+ * RootFileManagerComponent(Base) in the Blazor app. Those used Syncfusion's SfFileManager against
+ * api/DocumentManagement/* and api/RootDocumentManagement/*. We don't have that controller's source,
+ * so its exact contract is unconfirmed.
  *
- * This service assumes a plain REST-ish contract loosely modeled on that AJAX protocol -
- * list via GET + folder/path query params, create-folder/rename via POST with an `action`
- * field, delete via DELETE + body, upload via multipart POST - replacing the paid grid per
- * HANDOFF.md's "free component library" decision (same approach as bid-file.service.ts).
- * CONFIRM the real controller's contract before wiring this up for real data.
- *
- * UPDATE (Syncfusion FileManager swap): `file-browser.component` now renders Syncfusion's real
- * `<ejs-filemanager>` instead of the free breadcrumb/table UI, pointed directly at
- * `getFileManagerAjaxSettings()` below. That means `listEntries`/`createFolder`/`renameEntry`/
- * `deleteEntry`/`uploadFile` are no longer called from file-browser.component (FileManager issues
- * its own read/create/rename/delete/upload requests straight to those URLs, per Syncfusion's own
- * AJAX contract - see file-browser.component.ts's header comment for exactly how that contract
- * differs from what these methods assume, e.g. the `{cwd, files, error}` response envelope
- * FileManager requires vs. the bare array `listEntries` returns here). Checked: nothing else in
- * the app calls these five methods either, so they're effectively dead code now - left in place
- * rather than deleted since they're a readable record of the earlier free-table contract, and
- * deleting them wasn't "strictly needed" for this task. `getFileUrl`/`getDownloadUrl`/
- * `getProjectFolderDetails` below are still live - file-browser.component still uses them for the
- * open-file viewer dispatch and the project-folder-name bridge.
+ * file-browser.component uses Syncfusion's <ejs-filemanager>, pointed at getFileManagerAjaxSettings().
+ * FileManager sends its own read/create/rename/delete/upload requests, so the five methods marked
+ * @deprecated below aren't called anywhere. They're kept as a record of the earlier table-based
+ * contract. getFileUrl, getDownloadUrl and getProjectFolderDetails are still in use.
  */
 @Injectable({ providedIn: 'root' })
 export class DocumentManagementService {
@@ -57,19 +40,12 @@ export class DocumentManagementService {
   }
 
   /**
-   * Builds the `ajaxSettings` object Syncfusion's `<ejs-filemanager [ajaxSettings]="...">` expects
-   * (CONFIRMED shape - `url`/`uploadUrl`/`downloadUrl`/`getImageUrl` string fields, per Syncfusion's
-   * Angular FileManager API docs). Everything downstream of these four URLs - the request bodies
-   * FileManager sends for read/create/rename/delete/search, and the `{cwd, files, error}` response
-   * envelope it expects back - is Syncfusion's own fixed AJAX contract, NOT this project's earlier
-   * inferred one (see this file's and file-browser.component.ts's header comments); nothing here
-   * can control or adapt that shape from the Angular side, only the backend controller can.
+   * The ajaxSettings object for <ejs-filemanager>: url, uploadUrl, downloadUrl and getImageUrl.
+   * FileManager decides the request bodies and expects a {cwd, files, error} response, so only the
+   * backend controller can change that shape.
    *
-   * `folder` (this module's existing project/root scoping concept) is appended as a `?folder=`
-   * query param on every URL, since FileManager's ajaxSettings model has no separate "extra
-   * params" field to carry it through otherwise - CONFIRM the eventual backend controller reads
-   * `folder` this way (as a query string on every action) rather than expecting it in the JSON
-   * body FileManager itself controls.
+   * ajaxSettings has no field for extra parameters, so `folder` goes on every URL as ?folder=.
+   * Check that the backend reads it from the query string.
    */
   getFileManagerAjaxSettings(
     scope: DocumentManagementScope,
@@ -88,14 +64,14 @@ export class DocumentManagementService {
     };
   }
 
-  /** @deprecated superseded by Syncfusion FileManager's own ajaxSettings-driven read - see getFileManagerAjaxSettings(). Kept only as a record of the earlier free-table contract. */
+  /** @deprecated FileManager reads folders itself (see getFileManagerAjaxSettings). */
   listEntries(scope: DocumentManagementScope, folder: string, path: string): Observable<DocumentFileEntry[]> {
     return this.http
       .get<DocumentFileEntry[]>(`${this.base}${this.operationsUrl(scope)}`, { params: { folder, path } })
       .pipe(catchError(() => of([])));
   }
 
-  /** @deprecated superseded by Syncfusion FileManager's own ajaxSettings-driven create - see getFileManagerAjaxSettings(). */
+  /** @deprecated FileManager creates folders itself (see getFileManagerAjaxSettings). */
   createFolder(scope: DocumentManagementScope, folder: string, path: string, name: string): Observable<boolean> {
     return this.http
       .post(`${this.base}${this.operationsUrl(scope)}`, { action: 'create', folder, path, name }, { observe: 'response' })
@@ -105,7 +81,7 @@ export class DocumentManagementService {
       );
   }
 
-  /** @deprecated superseded by Syncfusion FileManager's own ajaxSettings-driven rename - see getFileManagerAjaxSettings(). */
+  /** @deprecated FileManager renames itself (see getFileManagerAjaxSettings). */
   renameEntry(
     scope: DocumentManagementScope,
     folder: string,
@@ -125,7 +101,7 @@ export class DocumentManagementService {
       );
   }
 
-  /** @deprecated superseded by Syncfusion FileManager's own ajaxSettings-driven delete - see getFileManagerAjaxSettings(). */
+  /** @deprecated FileManager deletes itself (see getFileManagerAjaxSettings). */
   deleteEntry(scope: DocumentManagementScope, folder: string, path: string, name: string): Observable<boolean> {
     return this.http
       .request('DELETE', `${this.base}${this.operationsUrl(scope)}`, {
@@ -139,7 +115,7 @@ export class DocumentManagementService {
       );
   }
 
-  /** @deprecated superseded by Syncfusion FileManager's own ajaxSettings-driven upload (which posts to `uploadUrl` with its own multipart field names - see getFileManagerAjaxSettings()). */
+  /** @deprecated FileManager uploads to uploadUrl with its own field names (see getFileManagerAjaxSettings). */
   uploadFile(scope: DocumentManagementScope, folder: string, path: string, file: File): Observable<boolean> {
     const formData = new FormData();
     formData.append('file', file);
@@ -154,30 +130,24 @@ export class DocumentManagementService {
       );
   }
 
-  // Mirrors OnFileOpenHandler's GetFile URL construction. Reproduces the observed quirk (see
-  // DocumentManagementEndpoints.GetFileUrl's comment) where BOTH scopes hit the same
-  // api/DocumentManagement/GetFile route rather than Root using its own prefix.
+  // Same GetFile URL as the Blazor OnFileOpenHandler. Both scopes use api/DocumentManagement/GetFile,
+  // even Root, as the original did.
   getFileUrl(folder: string, filterPath: string, name: string): string {
     const params = new URLSearchParams({ folder, filterPath: filterPath ?? '', name });
     return `${this.base}${DocumentManagementEndpoints.GetFileUrl}?${params.toString()}`;
   }
 
-  // Plain-file download link (Details/toolbar "Download" action) - separate from getFileUrl
-  // because the Blazor source keeps FileDownloadUrl and GetFile as two distinct AJAX endpoints
-  // (download-as-attachment vs. open/preview), even though neither's real backend behavior was
-  // confirmable here.
+  // Link for the toolbar's Download action. The Blazor app has separate endpoints for downloading
+  // (FileDownloadUrl) and opening (GetFile), so this is kept apart from getFileUrl.
   getDownloadUrl(scope: DocumentManagementScope, folder: string, path: string, name: string): string {
     const params = new URLSearchParams({ folder, path, name });
     return `${this.base}${this.downloadUrl(scope)}?${params.toString()}`;
   }
 
   /**
-   * Bridge to Project Management's IProjectOverviewService.GetJobCodeDetails, mirroring
-   * FileManagerComponentBase.razor.cs. Ported here (rather than importing
-   * core/services/project-overview.service.ts directly) to avoid a hard dependency on a
-   * sibling module's file this phase was told not to edit - same cross-module-bridge pattern
-   * as core/services/accounting-bid-info.service.ts. Delete this method and call the real
-   * Project Management service directly once that's an acceptable dependency.
+   * Calls Project Management's GetJobCodeDetails, as FileManagerComponentBase did. It lives here
+   * instead of using project-overview.service.ts so this module doesn't depend on that one. Once
+   * that dependency is fine, delete this and call the Project Management service directly.
    */
   getProjectFolderDetails(projectId: string): Observable<ProjectFolderDetails | null> {
     return this.http

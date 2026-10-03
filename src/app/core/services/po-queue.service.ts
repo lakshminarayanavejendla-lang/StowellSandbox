@@ -6,14 +6,12 @@ import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { PoQueueData } from '../models/project-management/po-queue.model';
 
 /**
- * NEW service - Stowell PO Module (not a Blazor port; this module doesn't exist in the source
- * app). Built from the "Stowell PO Module" Moqups design spec (pages WF-Initial Job PO Workflow,
- * NAV-PO Queue Home).
+ * The PO Queue, built from the Moqups design (pages WF-Initial Job PO Workflow and NAV-PO Queue
+ * Home). The Blazor app had no PO module.
  *
- * Backend endpoint now implemented: PoQueueController.GetPoQueueData -> SAGESBQ's
- * PO_GetQueueData stored proc, cross-DB joining StowellSandbox.dbo.pchord (real Sage PO records)
- * with actrec (job name) and ProjectManagement (PM email). catchError kept as a defensive
- * fallback, not because the endpoint is missing.
+ * PoQueueController.GetPoQueueData runs PO_GetQueueData, which joins the Sage POs in
+ * StowellSandbox (pchord) with actrec for the job name and ProjectManagement for the PM's email.
+ * The catchError is just a safety net.
  */
 @Injectable({ providedIn: 'root' })
 export class PoQueueService {

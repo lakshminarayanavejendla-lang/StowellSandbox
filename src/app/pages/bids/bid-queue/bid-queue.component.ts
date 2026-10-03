@@ -3,20 +3,30 @@ import { RouterLink } from '@angular/router';
 import { GridModule, PageService, SortService, FilterService } from '@syncfusion/ej2-angular-grids';
 import { BidService } from '../../../core/services/bid.service';
 import { Bid } from '../../../core/models/bids/bid.model';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
+import { KpiCardsComponent, KpiItem } from '../../../shared/ui/kpi-cards/kpi-cards.component';
 
-// Port of BidQueue.razor/BidQueueOverviewTabBase.cs's data loading. Two independent
-// search+paging grids (Current Opportunities / Closed Opportunities), matching the source's
-// duplicated-but-separate current/closed filter logic. Radzen's grid is now a real Syncfusion
-// ejs-grid (search box stays custom/component-driven; paging is Grid's own built-in pager).
+// The Bid Queue's two grids, Current Opportunities and Closed Opportunities, each with its own
+// search and paging, as in BidQueue.razor. They're Syncfusion grids with our own search box.
 @Component({
   selector: 'app-bid-queue',
   standalone: true,
-  imports: [RouterLink, GridModule],
+  imports: [KpiCardsComponent, PageHeaderComponent, RouterLink, GridModule],
   providers: [PageService, SortService, FilterService],
   templateUrl: './bid-queue.component.html',
   styleUrl: './bid-queue.component.scss',
 })
 export class BidQueueComponent implements OnInit {
+  /** The summary cards under the page header. */
+  get kpis(): KpiItem[] {
+    const unassigned = this.currentBids.filter((b) => !b.bidManager?.trim()).length;
+    return [
+      { label: 'Current bids', value: this.currentBids.length },
+      { label: 'Closed bids', value: this.closedBids.length },
+      { label: 'Unassigned', value: unassigned, hint: unassigned ? 'current bids without a manager' : 'all assigned', tone: unassigned ? 'warn' : 'default' },
+    ];
+  }
+
   private bidService = inject(BidService);
 constructor(
   private cdr: ChangeDetectorRef,
@@ -29,8 +39,7 @@ constructor(
   currentSearchTerm = '';
   closedSearchTerm = '';
 
-  // Grid's own built-in pager/page-size dropdown replaces the previous manual
-  // pagedCurrentBids/pagedClosedBids slicing + First/Prev/Next/Last button row.
+  // The grid's own pager and page-size dropdown, in place of the old manual paging buttons.
   currentPageSettings = { pageSize: 10, pageSizes: [10, 20, 50] };
   closedPageSettings = { pageSize: 10, pageSizes: [10, 20, 50] };
 

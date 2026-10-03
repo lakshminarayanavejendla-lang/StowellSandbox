@@ -2,16 +2,17 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiLogDetail, ApiLogFilter, ApiLogPage, ApiLogRow, ApiLogService, ApiLogSummary } from '../../../core/services/api-log.service';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// NEW (2026-09-24) - Stowell Admin > "API Success & Errors". Every API call from every user (dbo.ApiCallLog), with successes and
-// errors, the user, time, status and how long it took; failures show their reason and, when a row is opened, the stack trace / error
-// response. Filters run in SQL (server-side paging), so it stays quick on a large log.
+// Stowell Admin > "API Success & Errors" (2026-09-24). Every API call from every user (dbo.ApiCallLog):
+// the user, time, status and duration. Failures show their reason, and opening a row shows the stack
+// trace or error response. Filtering and paging run in SQL, so it stays fast on a big log.
 type Preset = '1h' | '24h' | '7d' | '30d' | 'custom';
 
 @Component({
   selector: 'app-api-log',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule],
   templateUrl: './api-log.component.html',
   styleUrl: './api-log.component.scss',
 })
@@ -97,7 +98,7 @@ export class ApiLogComponent implements OnInit, OnDestroy {
     this.stopTimer();
     if (this.autoRefresh) {
       this.timer = setInterval(() => {
-        // "last hour / 24h / ..." windows slide forward with the clock while auto-refresh is on
+        // Windows like "last hour" or "24h" move forward with the clock while auto-refresh is on.
         if (this.preset !== 'custom') this.slideWindow();
         this.reload(true);
       }, 15_000);

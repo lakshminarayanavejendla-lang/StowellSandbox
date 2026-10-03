@@ -1,12 +1,100 @@
-<div class="widget-header">
-  <h4>Calendar</h4>
+<div class="cal-head">
+  <h2>{{ title() }}</h2>
+  <div class="nav">
+    <button type="button" class="today-btn" (click)="goToday()">Today</button>
+    <button type="button" class="nav-btn" aria-label="Previous month" (click)="shift(-1)"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+    <button type="button" class="nav-btn" aria-label="Next month" (click)="shift(1)"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+  </div>
 </div>
 
-<!-- Real Syncfusion Schedule replacing the old hand-built agenda list. Day/Week/Month views
-     mirror the original RadzenScheduler's RadzenDayView/RadzenWeekView/RadzenMonthView; the
-     "Agenda" view is included as a list-style view (closest match to the old widget's flat-list
-     toggle mode) and is switchable via the schedule's own built-in view-navigator header - the
-     old custom "List"/"Calendar" toggle button was dropped since Schedule already provides this
-     navigation itself. -->
-<ejs-schedule [eventSettings]="eventSettings" [views]="views" [currentView]="currentView" height="420px">
-</ejs-schedule>
+<div class="grid" role="grid" [attr.aria-label]="title()">
+  @for (d of weekdays; track $index) {
+    <div class="dow" role="columnheader">{{ d }}</div>
+  }
+  @for (c of cells(); track c.key) {
+    <button
+      type="button"
+      class="day"
+      [class.outside]="c.outside"
+      [class.today]="c.today"
+      [class.sel]="selected() === c.key"
+      [class.ev]="c.hasEvents"
+      [attr.aria-pressed]="selected() === c.key"
+      (click)="select(c)"
+    >
+      {{ c.day }}
+    </button>
+  }
+</div>
+
+<div class="agenda-head">
+  <h3>{{ selectedLabel() }}</h3>
+  <div class="agenda-tools">
+    <span class="count">{{ agenda().length }} {{ agenda().length === 1 ? 'event' : 'events' }}</span>
+    <button type="button" class="add-btn" (click)="openForm()"><i class="bi bi-plus-lg" aria-hidden="true"></i>Add event</button>
+  </div>
+</div>
+
+<div class="agenda">
+  @for (e of agenda(); track e.start.getTime() + e.title; let i = $index) {
+    <div class="ag">
+      <span class="bar" [class.alt]="i % 2 === 1"></span>
+      <span class="t">{{ e.time }}</span>
+      <div class="ag-text">
+        <strong>{{ e.title }}</strong>
+        @if (e.who) {
+          <small>{{ e.who }}</small>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p class="none">Nothing scheduled for this day.</p>
+  }
+</div>
+
+@if (formOpen()) {
+  <div class="dlg-scrim" (click)="closeForm()"></div>
+  <form class="dlg" role="dialog" aria-modal="true" aria-label="Add event" (submit)="$event.preventDefault(); save()">
+    <header>
+      <h3>Add event</h3>
+      <button type="button" class="x" aria-label="Close" (click)="closeForm()"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    </header>
+
+    <label class="fld">
+      <span>Title *</span>
+      <input type="text" [value]="form().title" (input)="setField('title', $any($event.target).value)" placeholder="Pre-construction meeting" autofocus />
+    </label>
+
+    <label class="fld">
+      <span>Date *</span>
+      <input type="date" [value]="form().date" (input)="setField('date', $any($event.target).value)" />
+    </label>
+
+    <label class="check">
+      <input type="checkbox" [checked]="form().allDay" (change)="setAllDay($any($event.target).checked)" />
+      <span>All day</span>
+    </label>
+
+    @if (!form().allDay) {
+      <div class="row">
+        <label class="fld">
+          <span>Starts</span>
+          <input type="time" [value]="form().start" (input)="setField('start', $any($event.target).value)" />
+        </label>
+        <label class="fld">
+          <span>Ends</span>
+          <input type="time" [value]="form().end" (input)="setField('end', $any($event.target).value)" />
+        </label>
+      </div>
+    }
+
+    @if (formError()) {
+      <p class="err" role="alert">{{ formError() }}</p>
+    }
+
+    <footer>
+      <button type="button" class="btn" (click)="closeForm()">Cancel</button>
+      <button type="submit" class="btn primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Add to calendar' }}</button>
+    </footer>
+  </form>
+}

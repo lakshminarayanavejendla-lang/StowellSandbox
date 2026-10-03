@@ -1,9 +1,14 @@
 .filters, .summary-row {
   display: flex;
-  gap: 20px;
+  gap: 16px 20px;
   flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 15px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: 16px;
+  box-shadow: var(--sh-shadow);
 }
 
 .field {
@@ -11,18 +16,20 @@
   flex-direction: column;
   gap: 4px;
 
-  label { font-weight: 600; color: #444; }
+  label { font-size: 0.8rem; font-weight: 700; color: var(--sh-ink-2); }
   select, input {
     height: 38px;
-    border: 1px solid #c7c7c7;
-    border-radius: 4px;
+    border: 1px solid var(--sh-line);
+    border-radius: 10px;
+    color: var(--sh-ink);
+    background: var(--sh-surface-2);
     padding: 6px 10px;
     min-width: 220px;
   }
 
   select[multiple] { height: auto; min-height: 90px; }
 
-  input[disabled] { background-color: #f7f7f7; }
+  input[disabled] { background-color: var(--sh-surface-2); }
 }
 
 .btn-primary, .btn-secondary {
@@ -31,11 +38,11 @@
   padding: 6px 14px;
   color: #fff;
   height: 38px;
-  white-space: nowrap; // FIX (2026-09-22) - see .actions' comment above.
+  white-space: nowrap; // keeps the label on one line (see .actions)
 }
 
-.btn-primary { background-color: #00355f; }
-.btn-secondary { background-color: #6c757d; }
+.btn-primary { background-color: var(--sh-blue); }
+.btn-secondary { background-color: var(--sh-ink-3); }
 .btn-secondary[disabled] { opacity: 0.5; cursor: not-allowed; }
 
 .toolbar {
@@ -46,19 +53,14 @@
   gap: 10px;
   margin-bottom: 10px;
 
-  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+  input { width: 300px; height: 36px; padding: 0 10px; border: 1px solid var(--sh-line); border-radius: 4px; }
 }
 
 .actions {
   display: flex;
   gap: 5px;
-  // FIX (2026-09-22, alignment sweep) - without this, at narrower widths the flex row forced
-  // all 5 export buttons onto one line, shrinking them below their own text's width; since the
-  // buttons had no white-space:nowrap (see the paired FIX on .btn-primary/.btn-secondary), the
-  // shrunk buttons wrapped their OWN TEXT onto a second line, which the buttons' fixed
-  // height then clipped ("Copy to" cutting off "clipboard", "Export" cutting off "CSV" etc).
-  // Wrapping the row instead lets a button that doesn't fit drop to the next line as a whole,
-  // intact unit.
+  // Let the export buttons wrap onto the next line. Squeezed onto one line they shrank, their text
+  // wrapped and the fixed height cut it off ("Copy to" lost "clipboard") (2026-09-22).
   flex-wrap: wrap;
 }
 
@@ -66,11 +68,11 @@
   width: 100%;
   border-collapse: collapse;
 
-  th { background-color: #00355f; color: #fff; text-align: left; padding: 10px; }
-  td { padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
-  .empty { text-align: center; color: #888; }
+  th { background-color: var(--sh-blue); color: #fff; text-align: left; padding: 10px; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--sh-line); }
+  .empty { text-align: center; color: var(--sh-ink-3); }
 }
 .e-grid .e-headercell, .e-grid .e-detailheadercell {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
     color: #fff;
 }

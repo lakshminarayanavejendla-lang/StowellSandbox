@@ -6,18 +6,16 @@ import { ProjectCostCodeService } from '../../../core/services/project-cost-code
 import { CostCodeRecord, recJobNumber } from '../../../core/models/project-management/cost-code.model';
 import { PrimeChangeList } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// Port of Components/Pages/ReportingDashboard/PrimeChangeList.razor + PrimeChangeListBase.cs
-// (@page "/PrimeChangeList"). Job dropdown (GetAllUserJobs) feeds
-// ICostCodeService.GetPrimeChangeList(jobNumber), already ported as
-// ProjectCostCodeService.getPrimeChangeList.
+// The Prime Change List (/PrimeChangeList in Blazor). Pick a job (GetAllUserJobs) to see its prime
+// change orders (getPrimeChangeList).
 //
-// FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
-// message - see report-export.util.ts's header comment.
+// PDF, Excel and Word export work (see report-export.util.ts).
 @Component({
   selector: 'app-prime-change-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [SortService, PdfExportService, ExcelExportService],
   templateUrl: './prime-change-list.component.html',
   styleUrl: './prime-change-list.component.scss',

@@ -1,0 +1,841 @@
+<!-- Monthly Financials: one tab per report -->
+<header class="mf-head">
+  <div class="mf-eyebrow"><a routerLink="/reporting-dashboard">Reports</a></div>
+  <h1>Monthly Financials</h1>
+</header>
+@if (sampleMode) {
+  <div class="sample-note" role="status">
+    <i class="bi bi-flask" aria-hidden="true"></i>
+    <span><strong>Sample data.</strong> These figures are made up so you can see how the reports will look. They are not from Sage, and they change with the period you pick.</span>
+  </div>
+}
+<nav class="mf-tabs" aria-label="Monthly Financials reports">
+  @for (t of mfTabs; track t.key) {
+    <a [routerLink]="['/reporting-dashboard/monthly-financials', t.key]" [class.on]="key() === t.key">{{ t.label }}</a>
+  }
+</nav>
+@if (key() === 'backlog') {
+  <nav class="mf-subtabs" aria-label="Backlog tabs">
+    @for (n of backlogNav; track n.label) {
+      <a
+        [routerLink]="n.tab ? ['/reporting-dashboard/monthly-financials/backlog', n.tab] : ['/reporting-dashboard/monthly-financials/backlog']"
+        [class.on]="tab() === n.tab"
+        >{{ n.label }}</a
+      >
+    }
+  </nav>
+}
+
+@if (isBacklogOverview()) {
+  <!-- Backlog Report: the overview of every division's backlog (the mockup's layout) -->
+  <section class="viz">
+    <app-mf-kpis [items]="blV().kpis" />
+    <div class="viz-grid ring">
+    <div class="viz-card">
+      <header><h2>Division progress</h2><span>Backlogs submitted for the period</span></header>
+      <app-mf-ring [value]="blV().completePct" label="complete" />
+    </div>
+    <div class="viz-card">
+      <header><h2>Projected revenue YTD</h2><span>By division</span></header>
+      <app-mf-bars [rows]="blV().bars" empty="No backlog figures yet." />
+    </div>
+    </div>
+  </section>
+  <section class="statement backlog">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Backlog Report Base</span>
+    </header>
+
+    <div class="title-row">
+      <h1>Stowell Backlog Overview</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+    </div>
+
+
+    @if (!sampleMode) {
+      <div class="banner"><i class="bi bi-info-circle" aria-hidden="true"></i>There's no backlog data yet; it isn't part of the Financials package. Figures appear here once it's added.</div>
+    }
+
+    <div class="totals">
+      <div class="t-field">
+        <span>Overall Projected Revenue Earned This Year</span>
+        <div class="boxes"><span class="box" [class.empty]="backlogTotals().revenueYtd === null">{{ backlogTotals().revenueYtd === null ? 'Placeholder' : amount(backlogTotals().revenueYtd) }}</span><span class="box pct empty">%</span></div>
+      </div>
+      <div class="t-field">
+        <span>Overall Projected Revenue Earned Future Year</span>
+        <div class="boxes"><span class="box" [class.empty]="backlogTotals().revenueFuture === null">{{ backlogTotals().revenueFuture === null ? 'Placeholder' : amount(backlogTotals().revenueFuture) }}</span><span class="box pct empty">%</span></div>
+      </div>
+      <div class="t-field">
+        <span>Overall Projected Profit Earned This Year</span>
+        <div class="boxes"><span class="box" [class.empty]="backlogTotals().profitYtd === null">{{ backlogTotals().profitYtd === null ? 'Placeholder' : amount(backlogTotals().profitYtd) }}</span><span class="box pct" [class.empty]="backlogTotals().profitYtdPct === null">{{ backlogTotals().profitYtdPct === null ? '%' : (backlogTotals().profitYtdPct!.toFixed(0) + '%') }}</span></div>
+      </div>
+      <div class="t-field">
+        <span>Overall Projected Profit Earned Future Year</span>
+        <div class="boxes"><span class="box" [class.empty]="backlogTotals().profitFuture === null">{{ backlogTotals().profitFuture === null ? 'Placeholder' : amount(backlogTotals().profitFuture) }}</span><span class="box pct" [class.empty]="backlogTotals().profitFuturePct === null">{{ backlogTotals().profitFuturePct === null ? '%' : (backlogTotals().profitFuturePct!.toFixed(0) + '%') }}</span></div>
+      </div>
+    </div>
+
+    <div class="table-wrap divisions">
+      <table>
+        <thead>
+          <tr>
+            <th>Division</th>
+            <th>Status</th>
+            <th>Completed Date</th>
+            <th class="num">Projected Revenue YTD</th>
+            <th class="num">Projected Profit YTD</th>
+            <th class="num">%</th>
+            <th class="num">Projected Revenue Future</th>
+            <th class="num">Projected Profit Future</th>
+            <th class="num">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of backlogRows(); track r.tab) {
+            <tr [class.done]="r.status === 'Completed'" [class.review]="r.status === 'Needs Review'">
+              <td><a [routerLink]="['/reporting-dashboard/monthly-financials/backlog', r.tab]">{{ r.name }}</a></td>
+              <td>{{ r.status }}</td>
+              <td>{{ r.completed ? (r.completed | date: 'M/d/yyyy') : '' }}</td>
+              <td class="num">{{ r.revenueYtd === null ? '' : amount(r.revenueYtd) }}</td>
+              <td class="num">{{ r.profitYtd === null ? '' : amount(r.profitYtd) }}</td>
+              <td class="num">{{ margin(r.profitYtd, r.revenueYtd) === null ? '' : margin(r.profitYtd, r.revenueYtd)!.toFixed(0) + '%' }}</td>
+              <td class="num">{{ r.revenueFuture === null ? '' : amount(r.revenueFuture) }}</td>
+              <td class="num">{{ r.profitFuture === null ? '' : amount(r.profitFuture) }}</td>
+              <td class="num">{{ margin(r.profitFuture, r.revenueFuture) === null ? '' : margin(r.profitFuture, r.revenueFuture)!.toFixed(0) + '%' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Click a division to open its backlog tab.</p>
+  </section>
+} @else if (isBacklogTab()) {
+  <!-- A Backlog tab: Master (every division) or one division, with its two job tables -->
+  <section class="statement backlog wide">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Backlog Report Base</span>
+    </header>
+
+    <div class="title-row">
+      <h1>Stowell Backlog {{ tabLabel() }} –</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      @if (isDivisionTab()) {
+        @if (submitted()) {
+          <button type="button" class="lock" (click)="unlockBacklog()" [disabled]="!isAccounting" [title]="isAccounting ? 'Reopen this backlog for the PM' : 'Only Accounting can unlock a submitted backlog'"><i class="bi bi-unlock" aria-hidden="true"></i>Unlock</button>
+        } @else {
+          <button type="button" class="submit-btn" (click)="submitBacklog()"><i class="bi bi-send" aria-hidden="true"></i>Submit</button>
+        }
+      }
+    </div>
+
+
+    @if (isDivisionTab() && submitted()) {
+      <div class="banner done">
+        <i class="bi bi-lock" aria-hidden="true"></i>
+        Submitted by {{ backlogState()!.by }} on {{ backlogState()!.at | date: 'MMM d, y, h:mm a' }}.
+        {{ isAccounting ? 'Unlock it to let the PM make changes.' : 'Only Accounting can unlock it for changes.' }}
+      </div>
+    } @else if (isDivisionTab() && backlogState()?.status === 'unlocked') {
+      <div class="banner open"><i class="bi bi-unlock" aria-hidden="true"></i>Unlocked by {{ backlogState()!.by }} on {{ backlogState()!.at | date: 'MMM d, h:mm a' }}. Make your changes and submit again.</div>
+    } @else if (isDivisionTab()) {
+      <div class="banner"><i class="bi bi-pencil" aria-hidden="true"></i>Fill in {{ tabLabel() }}'s backlog in the white columns, then Submit. The shaded columns are expected to come from Sage. Entries aren't saved yet: backlog data has no place to be stored.</div>
+    } @else if (!sampleMode) {
+      <div class="banner"><i class="bi bi-info-circle" aria-hidden="true"></i>There's no job backlog data yet. The shaded columns are the ones expected to come from Sage.</div>
+    }
+
+    @for (tb of backlogTables; track tb.title; let ti = $index) {
+      <div class="table-wrap job-table">
+        <table>
+          <thead>
+            <tr>
+              @for (col of tb.columns; track col.label) {
+                <th [class.num]="col.num">{{ col.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of tableRows(ti === 0 ? 0 : 1); track $index) {
+              <tr>
+                @for (col of tb.columns; track col.label; let ci = $index) {
+                  <td [class.shaded]="col.shaded" [class.num]="col.num" [class.editable]="editable() && !col.shaded">
+                    @if (editable() && !col.shaded) {
+                      <input type="text" [attr.aria-label]="col.label" [attr.inputmode]="col.num ? 'decimal' : null" [value]="r[ci]" />
+                    } @else {
+                      {{ r[ci] }}
+                    }
+                  </td>
+                }
+              </tr>
+            } @empty {
+              @for (r of blankRows; track r) {
+                <tr>
+                  @for (col of tb.columns; track col.label) {
+                    <td [class.shaded]="col.shaded" [class.num]="col.num" [class.editable]="editable() && !col.shaded">
+                      @if (editable() && !col.shaded) {
+                        <input type="text" [attr.aria-label]="col.label" [attr.inputmode]="col.num ? 'decimal' : null" />
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+} @else if (isOverUnder()) {
+  <!-- Over/Under Billings (the mockup's layout) -->
+  <section class="viz">
+    <app-mf-kpis [items]="ouViz().kpis" />
+    <div class="viz-card">
+      <header><h2>Biggest over and under billings</h2><span>The ten jobs with the largest difference</span></header>
+      <app-mf-bars [rows]="ouViz().bars" [diverging]="true" negLabel="Overbilled (liability)" posLabel="Underbilled (asset)" empty="No jobs with a billing difference for this period yet." />
+    </div>
+  </section>
+  <section class="statement wide over-under">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Monthly Financials Report</span>
+    </header>
+
+    <div class="title-row">
+      <h1>Over/Under Billings –</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      <button type="button" class="refresh-btn" (click)="refreshReport()" [disabled]="loading()" title="Re-pull the data from Sage100 for just this report">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Refresh Report
+      </button>
+      <button type="button" class="commit" (click)="commitOverUnder()" [disabled]="loading()" title="Commit this report (pushing to Sage100 isn't connected yet)">Commit</button>
+      @if (ouCommit(); as c) {
+        <span class="committed"><i class="bi bi-check2-circle" aria-hidden="true"></i>Committed by {{ c.by }}, {{ c.at | date: 'MMM d, h:mm a' }}</span>
+      }
+    </div>
+
+    @if (ouCommitMessage()) {
+      <div class="banner"><i class="bi bi-info-circle" aria-hidden="true"></i>{{ ouCommitMessage() }}</div>
+    }
+    @if (loading()) {
+      <div class="banner"><span class="spinner dark" aria-hidden="true"></span>Pulling Over/Under from Sage for {{ periodSvc.label() }}…</div>
+    } @else if (error()) {
+      <div class="banner bad">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ error() }}</span>
+        <button type="button" class="link" (click)="load()">Try again</button>
+      </div>
+    }
+
+    <div class="ou-summary">
+      <div class="ou-col">
+        <span class="ou-label">FL Total:</span>
+        <div class="ou-field" title="All negative numbers from the Over/Under column">
+          <span class="box" [class.empty]="!overUnderRows().length" [class.neg]="overUnderTotals().over < 0">{{ overUnderRows().length ? amount(overUnderTotals().over) : 'Placeholder' }}</span><b>OVER</b>
+        </div>
+        <div class="ou-field" title="All positive numbers from the Over/Under column">
+          <span class="box" [class.empty]="!overUnderRows().length">{{ overUnderRows().length ? amount(overUnderTotals().under) : 'Placeholder' }}</span><b>UNDER</b>
+        </div>
+        <div class="ou-field" title="Over plus Under; equals the total of the Over/Under column">
+          <span class="box" [class.empty]="!overUnderRows().length" [class.neg]="overUnderTotals().total < 0">{{ overUnderRows().length ? amount(overUnderTotals().total) : 'Placeholder' }}</span><b>TOTAL</b>
+        </div>
+      </div>
+      <div class="ou-col">
+        <div class="ou-field" title="GL 21000 Overbillings">
+          <b>Liabilities</b><span class="box" [class.empty]="overUnderTotals().liabilities === null">{{ overUnderTotals().liabilities === null ? 'Placeholder' : amount(overUnderTotals().liabilities) }}</span>
+        </div>
+        <div class="ou-field" title="GL 11900 Underbillings">
+          <b>Assets</b><span class="box" [class.empty]="overUnderTotals().assets === null">{{ overUnderTotals().assets === null ? 'Placeholder' : amount(overUnderTotals().assets) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap ou-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th class="num">Costs</th>
+            <th class="num c-budget">Budget</th>
+            <th class="num c-pct">%</th>
+            <th class="num">Contract</th>
+            <th class="num c-earned">Earned/Spent</th>
+            <th class="num c-billed">Billed</th>
+            <th class="num c-ou">Over/Under</th>
+            <th class="num c-adj">Adjustment to Net Contract Asset and Contract Liability</th>
+            <th class="num c-ret">Retainage from AR Aging</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of overUnderRows(); track r.job) {
+            <tr>
+              <td [title]="r.name">{{ r.job }}<small>{{ r.name }}</small></td>
+              <td class="num">{{ cell(r.cost, true) }}</td>
+              <td class="num c-budget">{{ cell(r.budget, true) }}</td>
+              <td class="num c-pct">{{ r.pct === null ? '' : r.pct.toFixed(0) + '%' }}</td>
+              <td class="num">{{ cell(r.contract, true) }}</td>
+              <td class="num c-earned">{{ cell(r.earned, true) }}</td>
+              <td class="num c-billed">{{ cell(r.billed, true) }}</td>
+              <td class="num c-ou" [class.neg]="isNegative(r.overUnder)">{{ cell(r.overUnder, true) }}</td>
+              <td class="num c-adj edit">
+                <input type="text" inputmode="decimal" [value]="adjustmentFor(r.job) === null ? '' : cell(adjustmentFor(r.job), true)" (change)="setAdjustment(r.job, $any($event.target).value)" [attr.aria-label]="'Adjustment for job ' + r.job" />
+              </td>
+              <td class="num c-ret">{{ cell(r.retainage, true) }}</td>
+            </tr>
+          } @empty {
+            @for (b of blankRows.slice(0, 3); track b) {
+              <tr><td></td><td></td><td class="c-budget"></td><td class="c-pct"></td><td></td><td class="c-earned"></td><td class="c-billed"></td><td class="c-ou"></td><td class="c-adj"></td><td class="c-ret"></td></tr>
+            }
+          }
+          <tr class="totals">
+            <td class="num">Totals:</td>
+            <td class="num">{{ overUnderRows().length ? cell(overUnderTotals().cost, true) : '' }}</td>
+            <td class="num c-budget">{{ overUnderRows().length ? cell(overUnderTotals().budget, true) : '' }}</td>
+            <td class="c-pct"></td>
+            <td class="num">{{ overUnderRows().length ? cell(overUnderTotals().contract, true) : '' }}</td>
+            <td class="num c-earned">{{ overUnderRows().length ? cell(overUnderTotals().earned, true) : '' }}</td>
+            <td class="num c-billed">{{ overUnderRows().length ? cell(overUnderTotals().billed, true) : '' }}</td>
+            <td class="num c-ou" [class.neg]="overUnderTotals().total < 0">{{ overUnderRows().length ? cell(overUnderTotals().total, true) : '' }}</td>
+            <td class="num c-adj">{{ adjustmentTotal() ? cell(adjustmentTotal(), true) : '' }}</td>
+            <td class="num c-ret">{{ overUnderRows().length && overUnderTotals().retainage ? cell(overUnderTotals().retainage, true) : '' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Adjustment to Net Contract Asset and Contract Liability is typed in per job (it isn't in the Financials package). Entries are kept in this browser for the period.</p>
+  </section>
+} @else if (isArAging()) {
+  <!-- Accounting Receivable Aging (the mockup's layout) -->
+  <section class="viz">
+    <app-mf-kpis [items]="arV().kpis" />
+    <div class="viz-grid">
+    <div class="viz-card">
+      <header><h2>How overdue is it?</h2><span>Total due by days past due</span></header>
+      <app-mf-stack [segments]="arV().stack" empty="No open receivables for this period yet." />
+    </div>
+    <div class="viz-card">
+      <header><h2>Most past due</h2><span>Jobs with the most overdue money</span></header>
+      <app-mf-bars [rows]="arV().bars" empty="Nothing is past due for this period." />
+    </div>
+    </div>
+  </section>
+  <section class="statement wide ar-aging">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Monthly Financials Report</span>
+    </header>
+
+    <div class="title-row">
+      <h1>Accounting Receivable Aging –</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      <button type="button" class="refresh-btn" (click)="refreshReport()" [disabled]="loading()" title="Re-pull the data from Sage100 for just this report">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Refresh Report
+      </button>
+      @if (arJobs().length) {
+        <span class="ar-tools">
+          <button type="button" class="link" (click)="setAllArJobs(true)">Open all</button>
+          <button type="button" class="link" (click)="setAllArJobs(false)">Close all</button>
+        </span>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="banner"><span class="spinner dark" aria-hidden="true"></span>Pulling AR Aging from Sage for {{ periodSvc.label() }}…</div>
+    } @else if (error()) {
+      <div class="banner bad">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ error() }}</span>
+        <button type="button" class="link" (click)="load()">Try again</button>
+      </div>
+    } @else if (!arJobs().length) {
+      <div class="banner"><i class="bi bi-info-circle" aria-hidden="true"></i>No open receivables for {{ periodSvc.label() }}.</div>
+    }
+
+    @for (j of arJobs(); track j.job) {
+      <div class="ar-job">
+        <button type="button" class="ar-head" (click)="toggleArJob(j.job)" [attr.aria-expanded]="!arCollapsed().has(j.job)">
+          <i class="bi" [class.bi-caret-down-fill]="!arCollapsed().has(j.job)" [class.bi-caret-right-fill]="arCollapsed().has(j.job)" aria-hidden="true"></i>
+          <span class="ar-no">{{ j.job }}</span> {{ j.name }}
+          <span class="ar-due">{{ j.invoices.length }} {{ j.invoices.length === 1 ? 'invoice' : 'invoices' }} · {{ arAmount(j.totals[j.totals.length - 1]) || '$0.00' }} due</span>
+        </button>
+        @if (!arCollapsed().has(j.job)) {
+          <div class="table-wrap ar-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice#</th>
+                  <th>Due Date</th>
+                  @for (c of arColumns; track c.key) { <th class="num">{{ c.label }}</th> }
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of j.invoices; track inv.invoice) {
+                  <tr>
+                    <td>{{ inv.invoice }}</td>
+                    <td>{{ inv.due ? (inv.due | date: 'MM/dd/yyyy') : '' }}</td>
+                    @for (a of inv.amounts; track $index) { <td class="num" [class.neg]="a < 0">{{ arAmount(a) }}</td> }
+                  </tr>
+                }
+                <tr class="totals">
+                  <td></td>
+                  <td class="num">Job Totals</td>
+                  @for (a of j.totals; track $index) { <td class="num" [class.neg]="a < 0">{{ arAmount(a) }}</td> }
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    @if (arJobs().length) {
+      <div class="table-wrap ar-table grand">
+        <table>
+          <tbody>
+            <tr class="totals">
+              <td>Grand Total</td>
+              <td class="num">{{ arJobs().length }} jobs</td>
+              @for (a of arGrandTotal(); track $index) { <td class="num" [class.neg]="a < 0">{{ arAmount(a) }}</td> }
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+} @else if (isOverview()) {
+  <!-- Overview (the mockup's first page): year-to-period totals, and where each month stands -->
+  <section class="viz-page ov">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Monthly Financials Report</span>
+    </header>
+    <div class="title-row">
+      <h1>Overview –</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      <button type="button" class="refresh-btn" (click)="refreshReport()" [disabled]="loading()" title="Re-pull the data from Sage100">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Refresh
+      </button>
+    </div>
+    @if (loading()) {
+      <div class="banner"><span class="spinner dark" aria-hidden="true"></span>Pulling the balance sheet from Sage for {{ periodSvc.label() }}…</div>
+    } @else if (error()) {
+      <div class="banner bad">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ error() }}</span>
+        <button type="button" class="link" (click)="load()">Try again</button>
+      </div>
+    }
+
+    <!-- Widgets from the YTD Statement of Income and YTD Balance Sheet totals, in the style of the Stowell Home dashboard -->
+    <section class="viz ov-widgets">
+      <app-mf-kpis [items]="ovKpis()" />
+      <app-mf-kpis [items]="balV().kpis" />
+      <div class="viz-grid">
+        <div class="viz-card">
+          <header><h2>From revenue to net income</h2><span>Year to date through {{ periodSvc.label() }}</span></header>
+          <app-mf-waterfall [steps]="ovSteps()" />
+        </div>
+        <div class="viz-card">
+          <header><h2>What the company owns</h2><span>Assets by type</span></header>
+          <app-mf-stack [segments]="balV().assets" empty="No figures for this period yet." />
+        </div>
+        <div class="viz-card">
+          <header><h2>How it is funded</h2><span>Liabilities and equity</span></header>
+          <app-mf-stack [segments]="balV().funding" empty="No figures for this period yet." />
+        </div>
+      </div>
+    </section>
+
+    <div class="ov-totals">
+      <div class="ov-card">
+        <h2>Assets Year to Period</h2>
+        <dl>
+          <dt>Total Current Assets</dt><dd>{{ money(balSum().currentAssets) }}</dd>
+          <dt>Property and Equipment</dt><dd>{{ money(balSum().propertyEquipment) }}</dd>
+          <dt>Other Assets</dt><dd>{{ money(balSum().otherAssets) }}</dd>
+          <dt class="total">Total Assets</dt><dd class="total">{{ money(balSum().totalAssets) }}</dd>
+        </dl>
+      </div>
+      <div class="ov-card">
+        <h2>Liabilities Year to Period</h2>
+        <dl>
+          <dt>Total Current Liabilities</dt><dd>{{ money(balSum().currentLiabilities) }}</dd>
+          <dt>Total Notes Payable</dt><dd>{{ money(balSum().notesPayable) }}</dd>
+          <dt>Stockholder Equity</dt><dd>{{ money(balSum().equity) }}</dd>
+          <dt class="total">Total Liabilities and Equity</dt><dd class="total">{{ money(balSum().liabilitiesAndEquity) }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    @if (checkResult(); as missing) {
+      <div class="check" [class.ok]="!missing.length">
+        @if (missing.length) {
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div>
+            <strong>Committed {{ periodSvc.label() }}, with missing reports</strong>
+            <p>Missing Backlog Reports: {{ missing.join(', ') }}.</p>
+          </div>
+        } @else {
+          <i class="bi bi-check2-circle" aria-hidden="true"></i>
+          <div><strong>Committed {{ periodSvc.label() }}.</strong> All reports are present.</div>
+        }
+      </div>
+    }
+
+    <div class="table-wrap ov-months">
+      <table>
+        <thead><tr><th>Month</th><th>Status</th><th class="act">Action</th></tr></thead>
+        <tbody>
+          @for (m of monthRows(); track m.month) {
+            <tr [class.cur]="m.current">
+              <td><button type="button" class="month-link" (click)="openMonth(m.month)" title="Pull {{ m.name }} so its report pages can be viewed">{{ m.name }}</button></td>
+              <td><span class="pill" [class]="m.status.toLowerCase()">{{ m.status }}</span></td>
+              <td class="act">
+                <button type="button" class="commit" (click)="commitMonth(m.month)" [disabled]="m.status !== 'Ready' || committing() || loading()" [title]="m.status === 'Ready' ? 'Commit ' + m.name + ' (pushing the journal entries to Sage100 isn\'t connected yet)' : 'Commit turns on once every division\'s backlog is submitted'">Commit</button>
+                <button type="button" class="lock" (click)="unlockMonth(m.month)" [disabled]="m.status !== 'Completed' || !isAccounting" [title]="isAccounting ? 'Unlock so it can be committed again. Delete the entries already in Sage100 first.' : 'Only Accounting can unlock a committed month'"><i class="bi bi-unlock" aria-hidden="true"></i>Unlock</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">A month is Ready, and Commit turns on, once every division's backlog is submitted. Click a month to pull its figures and view its reports. Unlocking a month does not remove its entries from Sage100; Accounting has to delete them there first, or the books will be wrong.</p>
+  </section>
+} @else if (isYtdBalance()) {
+  <!-- YTD Balance Sheet (the mockup's Period to Date Balance Sheet) -->
+  <section class="viz-page ov">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Monthly Financials Report</span>
+    </header>
+    <div class="title-row">
+      <h1>Period to Date Balance Sheet –</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      <button type="button" class="refresh-btn" (click)="refreshReport()" [disabled]="loading()" title="Re-pull the data from Sage100">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Refresh Report
+      </button>
+    </div>
+    <p class="hint">{{ periodSvc.yearStart() | date: 'MMMM d, y' }} – {{ periodSvc.periodEnd() | date: 'MMMM d, y' }}</p>
+    @if (loading()) {
+      <div class="banner"><span class="spinner dark" aria-hidden="true"></span>Pulling the balance sheet from Sage for {{ periodSvc.label() }}…</div>
+    } @else if (error()) {
+      <div class="banner bad">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ error() }}</span>
+        <button type="button" class="link" (click)="load()">Try again</button>
+      </div>
+    }
+    <div class="table-wrap ov-bs">
+      <table>
+        <tbody>
+          <tr class="sec"><th colspan="2">Assets</th></tr>
+          <tr><td>Current Assets</td><td class="num">{{ money(balSum().currentAssets) }}</td></tr>
+          <tr><td>Property and Equipment</td><td class="num">{{ money(balSum().propertyEquipment) }}</td></tr>
+          <tr><td>Other Assets</td><td class="num">{{ money(balSum().otherAssets) }}</td></tr>
+          <tr class="tot"><td>Total Assets</td><td class="num">{{ money(balSum().totalAssets) }}</td></tr>
+          <tr class="sec"><th colspan="2">Liabilities</th></tr>
+          <tr><td>Current Liabilities</td><td class="num">{{ money(balSum().currentLiabilities) }}</td></tr>
+          <tr><td>Notes Payable</td><td class="num">{{ money(balSum().notesPayable) }}</td></tr>
+          <tr class="tot"><td>Total Liabilities</td><td class="num">{{ money(balSum().totalLiabilities) }}</td></tr>
+          <tr class="sec"><th colspan="2">Stockholder's Equity</th></tr>
+          <tr class="tot"><td>Total Stockholder's Equity</td><td class="num">{{ money(balSum().equity) }}</td></tr>
+          <tr class="tot grand"><td>Total Liabilities and Equity</td><td class="num">{{ money(balSum().liabilitiesAndEquity) }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Summarised from the Monthly Balance Sheet, so the two always agree. Open Monthly Balance Sheet for every account.</p>
+  </section>
+} @else if (isBlankPage()) {
+  <section class="viz-page">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Monthly Financials Report</span>
+    </header>
+    <div class="title-row">
+      <h1>{{ title() }} –</h1>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      <button type="button" class="refresh-btn" (click)="refreshReport()" [disabled]="loading()" title="Re-pull the data from Sage100 for just this report">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Refresh Report
+      </button>
+    </div>
+    @if (loading()) {
+      <div class="banner"><span class="spinner dark" aria-hidden="true"></span>Pulling {{ title() }} from Sage for {{ periodSvc.label() }}…</div>
+    } @else if (error()) {
+      <div class="banner bad">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ error() }}</span>
+        <button type="button" class="link" (click)="load()">Try again</button>
+      </div>
+    }
+    @if (key() === 'income-statement-all') {
+      <section class="viz">
+        <app-mf-kpis [items]="incV().kpis" />
+        <div class="viz-grid">
+    <div class="viz-card">
+      <header><h2>Where each revenue dollar goes</h2><span>Year to date</span></header>
+      <app-mf-stack [segments]="incV().stack" empty="No figures for this period yet." />
+    </div>
+    <div class="viz-card">
+      <header><h2>Year to date by section</h2><span>Actual, with the budget underneath</span></header>
+      <app-mf-bars [rows]="incV().sectionBars" empty="No figures for this period yet." />
+    </div>
+        </div>
+    <div class="viz-card flush">
+      <header><h2>Account detail</h2><span>Actual against budget and the prior year</span></header>
+      @if (incV().groups.length) {
+        <div class="table-wrap grp-table">
+          <table>
+            <thead><tr><th>Account</th><th class="num">Period</th><th class="num">Year to date</th><th class="num">Prior year YTD</th><th class="num">Budget YTD</th><th class="num">vs budget</th></tr></thead>
+            <tbody>
+              @for (g of incV().groups; track g.title) {
+                <tr class="grp-head"><td colspan="6">{{ g.title }}</td></tr>
+                @for (r of g.rows; track $index) {
+                  <tr>
+                    <td>{{ r.name }}@if (r.account) {<small>{{ r.account }}</small>}</td>
+                    <td class="num">{{ money(r.values[0]) }}</td>
+                    <td class="num">{{ money(r.values[1]) }}</td>
+                    <td class="num mute">{{ money(r.values[2]) }}</td>
+                    <td class="num mute">{{ money(r.values[3]) }}</td>
+                    <td class="num var" [class]="varClass(g.title, r.values[1], r.values[3])">{{ r.values[3] ? money((r.values[1] ?? 0) - r.values[3]) : '' }}</td>
+                  </tr>
+                }
+                <tr class="grp-total">
+                  <td>Total {{ g.title }}</td>
+                    <td class="num">{{ money(g.totals[0]) }}</td>
+                    <td class="num">{{ money(g.totals[1]) }}</td>
+                    <td class="num mute">{{ money(g.totals[2]) }}</td>
+                    <td class="num mute">{{ money(g.totals[3]) }}</td>
+                    <td class="num var" [class]="varClass(g.title, g.totals[1], g.totals[3])">{{ g.totals[3] ? money((g.totals[1] ?? 0) - g.totals[3]) : '' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-note">{{ loading() ? 'Loading…' : 'No accounts for this period yet.' }}</p>
+      }
+    </div>
+      </section>
+    } @else {
+      <section class="viz">
+        <app-mf-kpis [items]="balV().kpis" />
+        <div class="viz-grid">
+    <div class="viz-card">
+      <header><h2>What the company owns</h2><span>Assets by type</span></header>
+      <app-mf-stack [segments]="balV().assets" empty="No figures for this period yet." />
+    </div>
+    <div class="viz-card">
+      <header><h2>How it is funded</h2><span>Liabilities and equity</span></header>
+      <app-mf-stack [segments]="balV().funding" empty="No figures for this period yet." />
+    </div>
+        </div>
+    <div class="viz-card flush">
+      <header><h2>Account detail</h2><span>Every account, by section</span></header>
+      @if (balV().groups.length) {
+        <div class="table-wrap grp-table">
+          <table>
+            <thead><tr><th>Account</th><th class="num">Amount</th></tr></thead>
+            <tbody>
+              @for (g of balV().groups; track g.title) {
+                <tr class="grp-head"><td colspan="2">{{ g.title }}</td></tr>
+                @for (r of g.rows; track $index) {
+                  <tr>
+                    <td>{{ r.name }}@if (r.account) {<small>{{ r.account }}</small>}</td>
+                    <td class="num">{{ money(r.values[0]) }}</td>
+                  </tr>
+                }
+                <tr class="grp-total">
+                  <td>Total {{ g.title }}</td>
+                    <td class="num">{{ money(g.totals[0]) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-note">{{ loading() ? 'Loading…' : 'No accounts for this period yet.' }}</p>
+      }
+    </div>
+      </section>
+    }
+  </section>
+} @else if (isStatement()) {
+  <section class="viz">
+    <app-mf-kpis [items]="stmtKpis()" />
+    <div class="viz-card">
+      <header><h2>From revenue to net income</h2><span>Year to date through {{ periodSvc.label() }}</span></header>
+      <app-mf-waterfall [steps]="stmtSteps()" />
+    </div>
+  </section>
+  <!-- Statement of Income and Retained Earnings (the mockup's layout) -->
+  <section class="statement">
+    <header class="brand">
+      <img src="assets/images/stowell-home-logo.png" alt="Stowell Company Inc." />
+      <span>Monthly Financials Report</span>
+    </header>
+
+    <h1>Statement of Income and Retained Earnings</h1>
+
+    <div class="period-row">
+      <span class="from">{{ periodSvc.yearStart() | date: 'MMMM d, y' }} –</span>
+      <select [value]="periodSvc.period()" (change)="onPeriod($any($event.target).value)" aria-label="Period end">
+        @for (c of periodSvc.choices(); track c.value) {
+          <option [value]="c.value" [selected]="c.value === periodSvc.period()">{{ c.label }}</option>
+        }
+      </select>
+      <button type="button" class="commit" (click)="commit()" [disabled]="committing() || loading()">
+        @if (committing()) { <span class="spinner dark" aria-hidden="true"></span>Checking… } @else { Commit }
+      </button>
+      @if (periodSvc.committed() && !checkResult()) {
+        <span class="committed"><i class="bi bi-check2-circle" aria-hidden="true"></i>Committed {{ periodSvc.commit()!.at | date: 'MMM d, h:mm a' }}</span>
+      }
+    </div>
+    <p class="hint">This date sets the period for every Monthly Financials report.</p>
+
+    @if (checkResult(); as missing) {
+      <div class="check" [class.ok]="!missing.length">
+        @if (missing.length) {
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <div>
+            <strong>Committed {{ periodSvc.label() }}, with missing reports</strong>
+            <p>Missing Backlog Reports: {{ missing.join(', ') }}.</p>
+          </div>
+        } @else {
+          <i class="bi bi-check2-circle" aria-hidden="true"></i>
+          <div><strong>Committed {{ periodSvc.label() }}.</strong> All reports are present.</div>
+        }
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="banner"><span class="spinner dark" aria-hidden="true"></span>Running the Financials package for {{ periodSvc.label() }}…</div>
+    } @else if (error()) {
+      <div class="banner bad">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <span>{{ error() }}</span>
+        <button type="button" class="link" (click)="load()">Try again</button>
+      </div>
+    } @else if (!hasFigures()) {
+      <div class="banner"><i class="bi bi-info-circle" aria-hidden="true"></i>No figures for {{ periodSvc.label() }} yet.</div>
+    }
+
+    <div class="lines-head" aria-hidden="true"><span class="prior">{{ likeForLike() ? 'Prior year' : '' }}</span><span class="chg">{{ likeForLike() ? 'Change' : '' }}</span><span class="cur">{{ periodSvc.year() }}</span></div>
+    <dl class="lines">
+      @for (l of statement(); track l.label) {
+        <div [class]="'line lvl-' + (l.level ?? 0)" [class.strong]="l.strong" [class.head]="!l.col">
+          <dt>{{ l.label }}</dt>
+          @if (l.col) {
+            <dd class="prior">{{ l.prior === null ? '' : money(l.prior) }}</dd>
+            <dd class="chg"><span [class.good]="(l.change ?? 0) >= 0" [class.bad]="(l.change ?? 0) < 0" [hidden]="l.change === null">{{ changeText(l.change) }}</span></dd>
+            <dd class="box" [class.empty]="l.value === null" [class.neg]="(l.value ?? 0) < 0">
+              {{ l.value === null ? (loading() ? '…' : 'Placeholder') : amount(l.value) }}
+            </dd>
+          }
+        </div>
+      }
+    </dl>
+    <div class="foot">
+      <button type="button" class="btn" (click)="download()" [disabled]="downloading() || !hasFigures()"><i class="bi bi-file-earmark-excel" aria-hidden="true"></i>{{ downloading() ? 'Preparing…' : 'Excel' }}</button>
+    </div>
+  </section>
+} @else {
+  <!-- Header -->
+  <section class="head">
+    <div>
+      <h1>{{ title() }}</h1>
+      <p class="sub">
+        Period ending {{ periodSvc.periodEnd() | date: 'MMMM d, y' }}
+        · <a routerLink="/reporting-dashboard/monthly-financials/statement-of-income">change on Statement of Income</a>
+      </p>
+    </div>
+    <div class="controls">
+      <button type="button" class="btn" (click)="load()" [disabled]="loading()"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Run</button>
+      <button type="button" class="btn primary" (click)="download()" [disabled]="downloading() || loading() || report()?.available === false">
+        @if (downloading()) {
+          <span class="spinner" aria-hidden="true"></span>Preparing…
+        } @else {
+          <i class="bi bi-file-earmark-excel" aria-hidden="true"></i>Excel
+        }
+      </button>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="state">
+      <span class="spinner dark" aria-hidden="true"></span>
+      <p>Running the Financials package for {{ periodSvc.label() }}… The first report for a month can take a minute.</p>
+    </div>
+  } @else if (error()) {
+    <div class="state bad">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ error() }}</p>
+      <button type="button" class="btn" (click)="load()">Try again</button>
+    </div>
+  } @else if (report()?.available === false) {
+    <div class="state">
+      <i class="bi bi-hourglass" aria-hidden="true"></i>
+      <p><strong>{{ title() }}</strong> isn't part of the Financials package yet, so there's no data to show.</p>
+      <small>It needs its query added to Reports/MonthlyFinancials.sql in the API.</small>
+    </div>
+  } @else {
+    @for (s of sections(); track s.name) {
+      <section class="card">
+        <header>
+          <h2>{{ s.name }}</h2>
+          <span>{{ s.rows.length }} {{ s.rows.length === 1 ? 'row' : 'rows' }}</span>
+        </header>
+        @if (s.rows.length) {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  @for (c of s.columns; track $index; let i = $index) {
+                    <th [class.num]="s.numeric[i]">{{ c }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of s.rows; track $index; let ri = $index) {
+                  <tr [class.total]="s.totals[ri]">
+                    @for (v of r; track $index; let i = $index) {
+                      <td [class.num]="s.numeric[i]" [class.neg]="isNegative(v)">{{ cell(v, s.numeric[i]) }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="empty">No rows for this period.</p>
+        }
+      </section>
+    } @empty {
+      <div class="state">
+        <i class="bi bi-inbox" aria-hidden="true"></i>
+        <p>No data for {{ periodSvc.label() }}.</p>
+      </div>
+    }
+  }
+}

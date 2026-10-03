@@ -1,5 +1,5 @@
-// Consistent with the rest of the app's form pages (create-budget/bid-details-tab): labeled
-// fields with proper spacing, 32-36px inputs, dark-blue table headers, dashed section rules.
+// Matches the other form pages (create-budget, bid-details-tab): labelled fields with even spacing,
+// 32 to 36px inputs and dashed section lines.
 .dropdown-row {
   display: flex;
   gap: 24px;
@@ -15,7 +15,7 @@
 
   label {
     font-weight: 600;
-    color: #777;
+    color: var(--sh-ink-3);
     font-size: 0.9rem;
   }
 
@@ -31,7 +31,7 @@
 
     &:focus {
       outline: none;
-      border-color: #00355f;
+      border-color: var(--sh-blue);
       box-shadow: 0 0 0 2px rgba(0, 53, 95, 0.15);
     }
   }
@@ -39,12 +39,12 @@
 
 h2 {
   font-weight: 700;
-  color: #00355f;
+  color: var(--sh-ink);
   margin-top: 20px;
 }
 
 .dashed {
-  border-top: 1px dashed #c7c7c7;
+  border-top: 1px dashed var(--sh-line);
   margin: 15px 0 20px 0;
 }
 
@@ -53,10 +53,10 @@ h2 {
   max-width: 720px;
   border-collapse: collapse;
   margin-bottom: 20px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid var(--sh-line);
 
   th {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
     color: #fff;
     text-align: left;
     padding: 10px 14px;
@@ -65,42 +65,42 @@ h2 {
 
   td {
     padding: 8px 14px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--sh-line);
 
     input {
       height: 34px;
       width: 100%;
       box-sizing: border-box;
       padding: 4px 10px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--sh-line);
       border-radius: 4px;
       font-size: 0.95rem;
 
       &:focus {
         outline: none;
-        border-color: #00355f;
+        border-color: var(--sh-blue);
         box-shadow: 0 0 0 2px rgba(0, 53, 95, 0.15);
       }
 
       &[disabled] {
-        background-color: #f7f7f7;
-        color: #555;
+        background-color: var(--sh-surface-2);
+        color: var(--sh-ink);
         cursor: not-allowed;
       }
     }
   }
 
   tbody tr:nth-child(even) {
-    background-color: #fafafa;
+    background-color: var(--sh-surface-2);
   }
 
   tbody tr:hover {
-    background-color: #f0f4f8;
+    background-color: var(--sh-surface-2);
   }
 
   .empty {
     text-align: center;
-    color: #888;
+    color: var(--sh-ink-3);
     padding: 16px;
   }
 }
@@ -124,11 +124,11 @@ h2 {
   }
 
   .btn-approve {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
   }
 
   .btn-reject {
-    background-color: #c0392b;
+    background-color: #c2410c;
   }
 }
 
@@ -146,8 +146,8 @@ h2 {
 }
 
 .spinner {
-  border: 8px solid #e0e0e0;
-  border-top: 8px solid #00355f;
+  border: 8px solid var(--sh-line);
+  border-top: 8px solid var(--sh-blue);
   border-radius: 50%;
   width: 70px;
   height: 70px;
@@ -166,9 +166,9 @@ h2 {
   transform: translate(-50%, -50%);
 
   padding: 15px 30px;
-  background: #d4edda;
+  background: var(--sh-surface-2);
   color: #155724;
-  border: 1px solid #c3e6cb;
+  border: 1px solid var(--sh-line);
   border-radius: 5px;
 
   z-index: 11000;
@@ -184,9 +184,9 @@ h2 {
   transform: translate(-50%, -50%);
 
   padding: 15px 30px;
-  background: #f8d7da;
+  background: var(--sh-surface-2);
   color: #721c24;
-  border: 1px solid #f5c6cb;
+  border: 1px solid var(--sh-line);
   border-radius: 5px;
 
   z-index: 11000;

@@ -1,6 +1,5 @@
-// Mirrors StowellCoApp.DTO.Phase / BudgetRecord / ApiResponse (DTO/CodeCodeSummaryRecord.cs)
-// and StowellCoApp.DTO.CostCodeRecord, used by the budget approval (new + modify) flow and
-// AddForm's "Additional Phases" popup.
+// Matches Phase, BudgetRecord, ApiResponse and CostCodeRecord from the DTO files. Used by budget
+// approval (new and modify) and the Add Form's Additional Phases popup.
 export interface Phase {
   recnum?: string;
   phaseNum: string;
@@ -9,7 +8,7 @@ export interface Phase {
   email?: string;
 }
 
-// One row of the ApproveNewBudget / ApproveModifyBudget cost-code budget grid.
+// One row of the cost code grid on the budget approval pages.
 export interface BudgetRecord {
   jobNumber: string;
   costCode?: string;
@@ -22,9 +21,9 @@ export interface BudgetRecord {
   actionType?: string;
 }
 
-// Job dropdown option for the budget approval pages (ICostCodeService.GetAllUserJobs()).
-// RecJobNumber/RecNumber are C# computed properties (`$"{RecNum} - {JobNumber}"`); replicated
-// here as plain fields rather than getters since this is a wire-shape mirror.
+// A Job dropdown option on the budget approval pages (from GetAllUserJobs()). RecJobNumber and
+// RecNumber are calculated in C# (`$"{RecNum} - {JobNumber}"`) but are plain fields here because
+// they come in the JSON.
 export interface CostCodeRecord {
   recNum: number;
   jobNumber: string;
@@ -41,9 +40,8 @@ export interface ApiResponse {
   message?: string;
 }
 
-// api/CostCode/GetAllPhases wraps its payload as { data: [...] } server-side
-// (ApiListResponse<Phase> in CostCodeService.cs), unlike the other CostCode/Accounting GETs
-// which return bare arrays - confirm this is still true of the real controller before assuming it.
+// api/CostCode/GetAllPhases comes wrapped as { data: [...] } (ApiListResponse<Phase>), unlike the
+// other CostCode and Accounting calls, which return a plain array. Check the real API.
 export interface PhaseListResponse {
   data: Phase[];
 }

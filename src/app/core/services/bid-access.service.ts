@@ -11,9 +11,8 @@ import {
 } from '../models/bids/bid-access.model';
 import { SimpleResponse } from '../models/bids/simple-response.model';
 
-// Port of IBidService/BidService.cs's Bid Access methods - the "Bid Access" (role/employee)
-// sub-grid on BidOverview's Details tab. Split out from bid.service.ts since it's a clearly
-// separate sub-resource.
+// The Bid Access part of BidService.cs: the role and employee grid on the bid's Details tab. Kept
+// apart from bid.service.ts.
 @Injectable({ providedIn: 'root' })
 export class BidAccessService {
   private http = inject(HttpClient);

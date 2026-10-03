@@ -1,0 +1,27 @@
+<app-page-header title="Change Order Queue" [breadcrumbs]="[{ label: 'Accounting', route: '/accounting' }, { label: 'CO Queue' }]"></app-page-header>
+
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
+
+<app-change-requests-panel [entities]="['CO', 'COALLOC']" title="Changes to change orders already in Sage"></app-change-requests-panel>
+
+<h3>Waiting for Approval</h3>
+<p class="queue-note">Click a request to review it. Approving creates the change order in Sage; rejecting removes it from this list.</p>
+
+<ejs-grid class="black-grid" [dataSource]="pending" [allowPaging]="true" [allowSorting]="true" [allowFiltering]="true" [pageSettings]="pageSettings">
+  <e-columns>
+    <e-column field="requestId" headerText="Request" width="100">
+      <ng-template #template let-data>
+        <a [routerLink]="approvalLink(data)" class="opportunity-link">#{{ data.requestId }}</a>
+      </ng-template>
+    </e-column>
+    <e-column field="jobName" headerText="Job Name" width="200"></e-column>
+    <e-column field="coReason" headerText="CO Reason" width="200"></e-column>
+    <e-column field="vendor" headerText="Vendor" width="160" hideAtMedia="(min-width: 1024px)"></e-column>
+    <e-column field="requester" headerText="Requester" width="140" hideAtMedia="(min-width: 768px)"></e-column>
+    <e-column field="totalAmount" headerText="Amount" width="120" format="C2" textAlign="Right"></e-column>
+    <e-column field="submittedDate" headerText="Submitted" width="120" hideAtMedia="(min-width: 768px)"></e-column>
+  </e-columns>
+</ejs-grid>
+@if (!pending.length) {
+  <p class="queue-note">Nothing is waiting for approval.</p>
+}

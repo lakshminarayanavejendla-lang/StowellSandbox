@@ -1,31 +1,52 @@
-<!--
-  FLAG: unwired in the original (see po-queue.component.ts) - both tables below are static
-  placeholders mirroring the source's empty markup, not backed by any service call.
--->
+<app-page-header title="Purchase Order Queue" [breadcrumbs]="[{ label: 'Accounting', route: '/accounting' }, { label: 'PO Queue' }]"></app-page-header>
+
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
+
+<app-change-requests-panel [entities]="['PO']" title="Changes to POs already in Sage"></app-change-requests-panel>
+
 <div class="po-card">
-  <h3>Purchase Order Queue</h3>
-  <p class="empty">No data source wired up in the original Blazor page.</p>
-  <ejs-grid [dataSource]="emptyPoQueue">
+  <h3>Waiting for Approval</h3>
+  <p class="queue-note">Click a request to review it. Approving creates the PO in Sage; rejecting removes it from this list.</p>
+  <ejs-grid class="black-grid" [dataSource]="pending" [allowPaging]="true" [allowSorting]="true" [allowFiltering]="true" [pageSettings]="pageSettings">
+    <e-columns>
+      <e-column field="requestId" headerText="Request" width="100">
+        <ng-template #template let-data>
+          <a [routerLink]="approvalLink(data)" class="opportunity-link">#{{ data.requestId }}</a>
+        </ng-template>
+      </e-column>
+      <e-column field="jobName" headerText="Job Name" width="200"></e-column>
+      <e-column field="vendor" headerText="Vendor" width="180"></e-column>
+      <e-column field="poDescription" headerText="Description" width="200" hideAtMedia="(min-width: 1024px)"></e-column>
+      <e-column field="requester" headerText="Requester" width="140" hideAtMedia="(min-width: 768px)"></e-column>
+      <e-column field="totalAmount" headerText="Amount" width="120" format="C2" textAlign="Right"></e-column>
+      <e-column field="submittedDate" headerText="Submitted" width="120" hideAtMedia="(min-width: 768px)"></e-column>
+    </e-columns>
+  </ejs-grid>
+  @if (!pending.length) {
+    <p class="queue-note">Nothing is waiting for approval.</p>
+  }
+</div>
+
+<div class="po-card">
+  <h3>Active Purchase Orders</h3>
+  <ejs-grid class="black-grid" [dataSource]="activePOs" [allowPaging]="true" [allowSorting]="true" [allowFiltering]="true" [pageSettings]="pageSettings">
     <e-columns>
       <e-column field="masterJobPoId" headerText="Master Job PO ID" width="160"></e-column>
       <e-column field="poStatus" headerText="PO Status" width="120"></e-column>
       <e-column field="jobName" headerText="Job Name" width="180"></e-column>
-      <e-column field="pm" headerText="PM" width="120"></e-column>
-      <e-column field="poType" headerText="PO Type" width="120"></e-column>
+      <e-column field="pm" hideAtMedia="(min-width: 768px)" headerText="PM" width="120"></e-column>
     </e-columns>
   </ejs-grid>
 </div>
 
 <div class="po-card">
   <h3>Completed Purchase Order Queue</h3>
-  <p class="empty">No data source wired up in the original Blazor page.</p>
-  <ejs-grid [dataSource]="emptyPoQueue">
+  <ejs-grid class="black-grid" [dataSource]="completedPOs" [allowPaging]="true" [allowSorting]="true" [allowFiltering]="true" [pageSettings]="pageSettings">
     <e-columns>
       <e-column field="masterJobPoId" headerText="Master Job PO ID" width="160"></e-column>
       <e-column field="poStatus" headerText="PO Status" width="120"></e-column>
       <e-column field="jobName" headerText="Job Name" width="180"></e-column>
-      <e-column field="pm" headerText="PM" width="120"></e-column>
-      <e-column field="poType" headerText="PO Type" width="120"></e-column>
+      <e-column field="pm" hideAtMedia="(min-width: 768px)" headerText="PM" width="120"></e-column>
     </e-columns>
   </ejs-grid>
 </div>

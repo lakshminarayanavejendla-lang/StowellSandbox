@@ -5,35 +5,24 @@ import { GridModule, GridComponent, PageService, SortService, PdfExportService, 
 import { ProjectCostCodeService } from '../../../core/services/project-cost-code.service';
 import { CurrentCostSummaryViewModel, CostCodeSummaryRecord } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of Components/Pages/ReportingDashboard/CashCodeSummaryReport.razor (source filename,
- * note the swapped letters vs "CostCodeSummaryReport") + CostCodeSummaryReportBase.cs
- * (@page "/CostCodeSummaryReport" - despite the file living in the ReportingDashboard folder,
- * its code-behind's C# namespace is `StowellCoApp.Components.Pages.ProjectManagement`, which
- * looks like a copy/paste leftover rather than a real module boundary; left as a data point,
- * not reproduced since Angular has no equivalent namespace concept).
+ * The Cost Code Summary report (/CostCodeSummaryReport in Blazor; the file is spelled
+ * CashCodeSummaryReport.razor).
  *
- * DUPLICATE-LOOKING BUT DISTINCT from Project Management's already-ported CostCodeSummaryComponent
- * (pages/project-management/cost-code-summary, route 'project-management/cost-code-summary/:projectId'):
- * both call the exact same ICostCodeService methods (GetJobCodesForReport, GetCostCodesForReport,
- * GetPhasesForReport, GetCurrentCostSummaryViewModel) and render the same grid - the only
- * difference is this one is a standalone route with no required job id (Model starts blank,
- * user must pick a job from the dropdown), while the Project Management one is always opened
- * with a job id already selected. Kept as two components (not one shared component fed by an
- * optional route param) to mirror the two distinct Blazor pages/routes 1:1; consider merging
- * later if that duplication becomes a maintenance problem.
+ * It looks like Project Management's CostCodeSummaryComponent: both use the same service methods
+ * and grid. The difference is that this one starts with no job, and the user picks one, while
+ * Project Management's always opens with a job. They're kept as two components to match the two
+ * Blazor pages; merge them if keeping both becomes a pain.
  *
- * FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
- * message - see report-export.util.ts's header comment.
+ * PDF, Excel and Word export work (see report-export.util.ts).
  */
 @Component({
   selector: 'app-cost-code-summary-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
-  // PageService/SortService: this report's plain table never paginated or sorted, so paging is
-  // left off (allowPaging unset) to preserve the original "everything in one flat list" behavior
-  // - only SortService is wired up as a low-risk, purely-additive Grid feature.
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
+  // The old table had no paging, so paging stays off to keep one flat list. Sorting was added.
   providers: [PageService, SortService, PdfExportService, ExcelExportService],
   templateUrl: './cost-code-summary-report.component.html',
   styleUrl: './cost-code-summary-report.component.scss',
@@ -42,8 +31,8 @@ export class CostCodeSummaryReportComponent implements OnInit {
   @ViewChild('costCodeSummaryGrid') costCodeSummaryGrid!: GridComponent;
 
   private costCodeService = inject(ProjectCostCodeService);
-  // FIX (2026-09-23, Mike Smith - "Phase not showing") - same as project-management/cost-code-summary:
-  // loaded data wasn't re-rendered, leaving the Job/Phase dropdowns empty. Render after each load.
+  // The loaded data wasn't re-rendered, so the Job and Phase dropdowns stayed empty. Render after
+  // each load, as in project-management/cost-code-summary (Mike Smith, 2026-09-23: "Phase not showing").
   private cdr = inject(ChangeDetectorRef);
 
   selectedProjectId = '';
@@ -78,8 +67,8 @@ export class CostCodeSummaryReportComponent implements OnInit {
     this.onSubmit();
   }
 
-  // NEW (2026-09-23, Mike Smith - "Phase not showing") - Phase column; see
-  // project-management/cost-code-summary for why it's the filter's phase, not a per-row value.
+  // The Phase column (Mike Smith, 2026-09-23). It shows the filter's phase, not a per-row value; see
+  // project-management/cost-code-summary.
   private appliedPhaseLabel = 'All phases';
 
   private currentPhaseLabel(): string {

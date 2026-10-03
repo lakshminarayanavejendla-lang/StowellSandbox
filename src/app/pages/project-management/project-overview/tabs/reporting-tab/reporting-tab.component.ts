@@ -16,16 +16,10 @@ interface CashSlice {
   value: number;
 }
 
-// Port of Components/Pages/ProjectManagement/ReportingTab.razor + ReportingTabBase.cs.
-// The RadzenProgressBarCircular is replicated with a plain percentage readout (a real circular
-// progress widget is a small enough native-CSS job that it doesn't need a grid/chart library -
-// left as a follow-up polish item rather than blocking this port). The RadzenChart pie
-// (Cash Collected / Cash Paid / Net Cash) was originally ported with ng2-charts/Chart.js
-// (matching Phase 1's free-stack decision); swapped here to Syncfusion's real
-// `AccumulationChartComponent` (Pie series) now that a Syncfusion license is confirmed available -
-// this one component was missed by the broader Phase 2/Dashboard grid-and-chart Syncfusion swap
-// (that pass covered `pages/dashboard/` charts and `pages/project-management/` GRIDS, but not this
-// tab's pie chart specifically), caught and fixed in this follow-up pass.
+// The Reporting tab, from ReportingTab.razor. Radzen's circular progress bar is shown as a plain
+// percentage for now; a CSS circle could be added later without any library. The Cash Collected /
+// Cash Paid / Net Cash pie is a Syncfusion AccumulationChart (Pie series). It started on Chart.js and
+// was missed when the other charts moved to Syncfusion.
 @Component({
   selector: 'app-reporting-tab',
   standalone: true,
@@ -51,7 +45,7 @@ export class ReportingTabComponent implements OnChanges {
   percentage = 0;
 
   pieData: CashSlice[] = [];
-  // Matches the previous Chart.js palette (Cash Collected/Cash Paid/Net Cash).
+  // The same colours as the old Chart.js pie (Cash Collected, Cash Paid, Net Cash).
   pieColors = ['#2196f3', '#4caf50', '#ff9800'];
   legendSettings = { visible: true, position: 'Bottom' as const };
   tooltipEnabled = true;

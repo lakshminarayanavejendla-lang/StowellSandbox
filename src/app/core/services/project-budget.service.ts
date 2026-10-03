@@ -6,25 +6,22 @@ import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { ProjectBudgetQueueItem, BudgetRecord } from '../models/project-management/project-budget.model';
 import { Phase } from '../models/project-management/cost-summary.model';
 
-// Port of Services/IProjectBudget.cs + ProjectBudget.cs - backs Project Budget Configuration
-// (the queue) and Create/Modify Budget.
+// Ported from ProjectBudget.cs, for the Project Budget Configuration queue and Create/Modify Budget.
 @Injectable({ providedIn: 'root' })
 export class ProjectBudgetService {
   private http = inject(HttpClient);
   private base = environment.apiBaseUrl;
 
   getProjectBudgetRecords(email: string): Observable<ProjectBudgetQueueItem[]> {
-    debugger;
     return this.http
       .get<ProjectBudgetQueueItem[]>(`${this.base}${ProjectManagementEndpoints.GetProjectBudgetRecordsUrl}/${encodeURIComponent(email)}`)
       .pipe(catchError(() => of([])));
   }
 
   /**
-   * NOTE: the C# service posts the selected Phase to this SAME URL as
-   * getProjectBudgetRecords() above (GET for the queue list, POST for a single phase's budget
-   * rows) - an odd dual-purpose endpoint, ported as-is rather than guessed into two different
-   * routes. Confirm with the backend whether that's intentional.
+   * This posts the phase to the same URL getProjectBudgetRecords() uses: GET returns the queue and
+   * POST returns one phase's budget rows. Odd, but kept as in C#. Check with the backend whether
+   * that's on purpose.
    */
   budgetData(phase: Phase): Observable<BudgetRecord[]> {
     return this.http
@@ -33,10 +30,9 @@ export class ProjectBudgetService {
   }
 
   /**
-   * The C# version stamps each record.Email from the authenticated user's claims before
-   * posting - same MSAL-vs-server-claims gap flagged elsewhere in this phase (see
-   * CostCodeService.getAllUserJobs). TODO: confirm how/whether the API still needs an email on
-   * each record once bearer-token auth carries the identity instead.
+   * The C# version sets each record's Email from the signed-in user before posting (like
+   * getAllUserJobs). TODO: check whether the API still needs an email on each record once the
+   * sign-in token carries the user.
    */
   saveCreateBatchCostCodes(records: BudgetRecord[]): Observable<BudgetRecord[]> {
     return this.http
@@ -56,9 +52,8 @@ export class ProjectBudgetService {
       .pipe(catchError(() => of([])));
   }
 
-  /** Port of ProjectBudget.cs' UploadAddExcelAsync(List&lt;BudgetRecord&gt;) overload (the one
-   * CreateBudgetBase.ProcessExcel actually calls after parsing the workbook client-side via
-   * NPOI - the app parses the .xlsx in C#, not the raw file, before this call). */
+  /** UploadAddExcelAsync(List&lt;BudgetRecord&gt;) from ProjectBudget.cs. The workbook is parsed into
+   * records first; the raw file isn't sent. */
   uploadParsedBudgetRows(records: BudgetRecord[]): Observable<BudgetRecord[]> {
     return this.http
       .post<BudgetRecord[]>(`${this.base}${ProjectManagementEndpoints.UploadAddExcelUrl}`, records)

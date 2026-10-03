@@ -18,12 +18,13 @@ import {
 } from '../../../core/models/project-management/cost-code.model';
 import { CostCodeSummaryRecord } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 @Component({
   selector: 'app-job-summary-report',
   standalone: true,
 
-  imports: [
+  imports: [PageHeaderComponent, 
     CommonModule,
     FormsModule,
     GridModule

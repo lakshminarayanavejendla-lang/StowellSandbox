@@ -6,12 +6,10 @@ import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { CoQueueData } from '../models/project-management/co-queue.model';
 
 /**
- * NEW service - Stowell PO Module (not a Blazor port; built from the "Stowell PO Module" Moqups
- * design spec, page NAV-CO Queue Home). Mirrors po-queue.service.ts.
+ * The CO Queue, built from the Moqups design (page NAV-CO Queue Home). Works like po-queue.service.ts.
  *
- * Backend endpoint now implemented: CoQueueController.GetCoQueueData -> SAGESBQ's
- * CO_GetQueueData stored proc, cross-DB joining StowellSandbox.dbo.prmchg (real Sage Change
- * Order records). catchError kept as a defensive fallback, not because the endpoint is missing.
+ * CoQueueController.GetCoQueueData runs CO_GetQueueData, which reads the Sage change orders in
+ * StowellSandbox (prmchg). The catchError is just a safety net.
  */
 @Injectable({ providedIn: 'root' })
 export class CoQueueService {

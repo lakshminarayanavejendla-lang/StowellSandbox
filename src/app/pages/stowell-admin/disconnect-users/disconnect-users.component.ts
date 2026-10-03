@@ -1,20 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { StowellAdminService } from '../../../core/services/stowell-admin.service';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// Port of DisconnectUsers.razor (@page "/StowellAdmin/DisconnectUsers") - inline @code block,
-// no matching *Base.cs. A single button that force-disconnects every currently logged-in user.
+// Disconnect Users (/StowellAdmin/DisconnectUsers in Blazor): one button that signs out everyone who
+// is logged in.
 //
-// SECURITY-RELEVANT: see stowell-admin.service.ts's header comment. This action is
-// unconditional (all users, no filter) and irreversible from the UI's perspective - the source
-// has no confirmation dialog before firing. A `confirm()` guard was added here since a
-// mis-click force-logging-out the whole company seems too risky to leave as a single bare
-// button click; flagging this as an intentional deviation from the Blazor source (which fires
-// immediately on click) rather than a faithful port. Remove the confirm() if product wants the
-// original one-click behavior back.
+// Security (see stowell-admin.service.ts): it affects all users and can't be undone from here. Blazor
+// did it on one click. This adds a confirm() first, because one mis-click would sign out the whole
+// company. Remove it if you want the original one-click behaviour.
 @Component({
   selector: 'app-disconnect-users',
   standalone: true,
-  imports: [],
+  imports: [PageHeaderComponent, ],
   templateUrl: './disconnect-users.component.html',
   styleUrl: './disconnect-users.component.scss',
 })

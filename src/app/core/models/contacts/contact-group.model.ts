@@ -1,7 +1,5 @@
-// Port of StowellCoApp.DTO.ContactGroups / ContactGroupMembers (DTO/ContactGroups.cs) - CONFIRMED,
-// read directly from source. These are the two shapes actually consumed by Contacts/Index.razor +
-// IndexBase.razor.cs (a security-group-scoped company directory: tabs of groups, each tab lists
-// that group's member contact cards).
+// Matches ContactGroups and ContactGroupMembers in DTO/ContactGroups.cs. The Contacts page is a
+// company directory with a tab per security group, each showing its members' contact cards.
 
 export interface ContactGroup {
   id: string;
@@ -22,7 +20,7 @@ export interface ContactGroupMember {
   phone: string;
   addressLine1: string;
   addressLine2: string;
-  // Nullable in the C# source (`string? photoBase64`) - a raw base64 JPEG string rendered via
-  // `data:image/jpeg;base64,...`, falls back to a static dummy-avatar image when absent.
+  // Optional (`string? photoBase64` in C#). A base64 JPEG shown as data:image/jpeg;base64,...,
+  // with a placeholder avatar when it's missing.
   photoBase64?: string | null;
 }

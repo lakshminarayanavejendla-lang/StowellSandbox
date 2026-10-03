@@ -6,23 +6,21 @@ import { GridModule, PageService, SortService, FilterService } from '@syncfusion
 import { ProjectCostCodeService } from '../../../core/services/project-cost-code.service';
 import { CostCodeRecord, StatusModel, recJobNumber } from '../../../core/models/project-management/cost-code.model';
 import { CashFlowRecord } from '../../../core/models/project-management/cost-summary.model';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
-// Port of Components/Pages/ProjectManagement/CashFlowReport.razor + CasFlowReport.cs
-// (@page "/CashFlowReport/{ProjectId:int}" - note the source filename typo, "CasFlowReport.cs").
+// The Cash Flow Report (/CashFlowReport/{ProjectId:int} in Blazor; its code file is spelled
+// CasFlowReport.cs).
 //
-// FLAG - route addition: not one of the five original stub routes; added as
-// 'project-management/cash-flow-report/:projectId' (opened via target="_blank" links from the
-// Reporting tab and Financials tab elsewhere in this module). Please splice into app.routes.ts.
+// Its route, 'project-management/cash-flow-report/:projectId', is new. The Reporting and Financials
+// tabs open it in a new tab.
 //
-// FLAG - exports: "Copy to clipboard" and "Export CSV" are ported natively (Clipboard API /
-// Blob download - zero new dependencies). "Export PDF" and "Export Excel" used iTextSharp/
-// ClosedXML server-side in Blazor; doing this client-side needs a new library (jsPDF/SheetJS)
-// that hasn't been confirmed for this project (see HANDOFF.md's free-libraries-only stance) -
-// left as disabled buttons pending that decision, rather than silently adding a dependency.
+// Copy to clipboard and Export CSV work without any library. Blazor made the PDF and Excel files on
+// the server with iTextSharp and ClosedXML. Doing that in the browser needs a library such as jsPDF
+// or SheetJS, which hasn't been approved, so those two buttons do nothing yet.
 @Component({
   selector: 'app-cash-flow-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [PageService, SortService, FilterService],
   templateUrl: './cash-flow-report.component.html',
   styleUrl: './cash-flow-report.component.scss',
@@ -30,9 +28,9 @@ import { CashFlowRecord } from '../../../core/models/project-management/cost-sum
 export class CashFlowReportComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private costCodeService = inject(ProjectCostCodeService);
-  // FIX (2026-09-23, Mike Smith - "Cash Flow Report need to focus on current project when selected
-  // from Report tab... I cannot find my project in here the way it is now"): loaded data wasn't
-  // re-rendered (dropdowns stayed empty) - render after each load, as the Current Cost Summary does.
+  // The loaded data wasn't re-rendered, so the dropdowns stayed empty. Render after each load, as the
+  // Current Cost Summary does (Mike Smith, 2026-09-23: "Cash Flow Report need to focus on current
+  // project when selected from Report tab... I cannot find my project in here the way it is now").
   private cdr = inject(ChangeDetectorRef);
 
   projectId = 0;

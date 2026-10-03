@@ -13,22 +13,22 @@
     /* Make labels cleaner */
     .col-form-label {
         font-weight: 600;
-        color: #777;
+        color: var(--sh-ink-3);
         padding-top: 6px;
         padding-bottom: 6px;
     }
 
     /* Read-only field styling */
     .form-control[readonly] {
-        background-color: #f7f7f7;
+        background-color: var(--sh-surface-2);
         opacity: 1;
-        border-color: #dcdcdc;
+        border-color: var(--sh-line);
         cursor: not-allowed;
     }
 
     /* Optional hover effect for editable form controls */
     .form-control:not([readonly]):hover {
-        border-color: #999;
+        border-color: var(--sh-ink-3);
     }
 
     /* Add spacing between inline form groups */
@@ -42,12 +42,12 @@
 
     h2 {
         font-weight: 700;
-        color: #2c3e50;
+        color: var(--sh-ink);
         margin-top: 20px;
     }
 
     .hr-line-dashed {
-        border-top: 1px dashed #c7c7c7;
+        border-top: 1px dashed var(--sh-line);
         margin: 15px 0 25px 0;
     }
 
@@ -56,25 +56,25 @@
         --------------------------------*/
 
     .table {
-        background-color: #fff;
+        background-color: var(--sh-surface);
         margin-top: 10px;
     }
 
         .table th {
-            background-color: #f2f2f2;
+            background-color: var(--sh-surface-2);
             font-weight: 600;
-            color: #333;
+            color: var(--sh-ink);
         }
 
         .table td,
         .table th {
-            border-color: #dcdcdc;
+            border-color: var(--sh-line);
             vertical-align: middle;
             padding: 8px 12px;
         }
 
     .table-bordered tbody tr:hover {
-        background-color: #f8f9fa;
+        background-color: var(--sh-surface-2);
     }
 
     /* ------------------------------

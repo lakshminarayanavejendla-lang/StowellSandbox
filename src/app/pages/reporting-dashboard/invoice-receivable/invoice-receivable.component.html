@@ -1,6 +1,4 @@
-<h3>Invoice Receivable</h3>
-<hr />
-
+<app-page-header title="Invoice Receivable"></app-page-header>
 <div class="filters">
   <div class="field">
     <label>Job Number</label>
@@ -26,7 +24,7 @@
   </div>
 </div>
 
-<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredJobs` data source. -->
+<!-- The report grid, using `filteredJobs`. -->
 @if (filteredJobs.length > 0) {
   <ejs-grid #invoiceReceivableGrid [dataSource]="filteredJobs" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
     <e-columns>

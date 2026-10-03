@@ -1,0 +1,45 @@
+<aside
+  class="sidebar"
+  [class.auto-hide]="state.autoHide()"
+  [class.open]="open()"
+  [class.collapsed]="state.collapsed()"
+  (click)="onClick($event)"
+  aria-label="Main navigation"
+>
+  <button
+    type="button"
+    class="pin-btn"
+    [class.on]="state.autoHide()"
+    [title]="state.autoHide() ? 'Auto-hide is on - click to keep the sidebar open' : 'Auto-hide the sidebar'"
+    [attr.aria-label]="state.autoHide() ? 'Turn auto-hide off' : 'Turn auto-hide on'"
+    [attr.aria-pressed]="state.autoHide()"
+    (click)="state.toggleAutoHide()"
+  >
+    <i class="bi bi-pin-angle" [class.bi-pin-angle-fill]="state.autoHide()" aria-hidden="true"></i>
+  </button>
+
+  <button
+    type="button"
+    class="collapse-btn"
+    [title]="state.collapsed() ? 'Show full menu' : 'Show icons only'"
+    [attr.aria-label]="state.collapsed() ? 'Expand the menu' : 'Collapse the menu to icons'"
+    [attr.aria-pressed]="state.collapsed()"
+    (click)="state.toggleCollapsed()"
+  >
+    <i class="bi" [class.bi-layout-sidebar-inset]="!state.collapsed()" [class.bi-layout-sidebar]="state.collapsed()" aria-hidden="true"></i>
+  </button>
+
+  <div class="logo">
+    <img alt="Stowell Company Inc." class="sidebar-logo-white" [src]="logoSrc()" />
+  </div>
+
+  <app-nav-menu [expandOnly]="state.autoHide() || open()" [collapsed]="state.collapsed()"></app-nav-menu>
+
+  <div class="user-profile" [title]="profileName() + ' - ' + profileRole()">
+    <img [src]="photoUrl()" [alt]="profileName()" class="profile-image" />
+    <div class="profile-text">
+      <div class="profile-name">{{ profileName() }}</div>
+      <div class="profile-role">{{ profileRole() }}</div>
+    </div>
+  </div>
+</aside>

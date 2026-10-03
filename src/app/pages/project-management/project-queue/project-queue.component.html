@@ -1,10 +1,7 @@
-<div class="card-header">
-  <h4 class="m-0">Active Projects</h4>
-  <a class="doclibrary" href="/DocManagement/Main" target="_blank">
-    <i class="bi bi-folder me-1"></i>
-    Project Document Library
-  </a>
-</div>
+<app-page-header title="Active Projects" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'Project Queue' }]">
+  <a actions class="doclibrary" href="/DocManagement/Main" target="_blank" rel="noopener"><i class="bi bi-folder me-1"></i> Project Document Library</a>
+</app-page-header>
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
 
 <div class="gridcard">
   <div class="toolbar">
@@ -25,16 +22,16 @@
     [pageSettings]="pageSettings"
   >
     <e-columns>
-      <e-column field="recNum" headerText="Rec Num" width="100">
+      <e-column field="recNum" hideAtMedia="(min-width: 1024px)" headerText="Rec Num" width="100">
         <ng-template #template let-data>
           <a [routerLink]="['/project-management/project-overview', data.recNum]" class="opportunity-link">{{ data.recNum }}</a>
         </ng-template>
       </e-column>
       <e-column field="jobNumber" headerText="Job Number" width="120"></e-column>
       <e-column field="address" headerText="Address" width="200"></e-column>
-      <e-column field="city" headerText="City" width="120"></e-column>
-      <e-column field="state" headerText="State" width="90"></e-column>
-      <e-column field="zipCode" headerText="ZipCode" width="100"></e-column>
+      <e-column field="city" hideAtMedia="(min-width: 1024px)" headerText="City" width="120"></e-column>
+      <e-column field="state" hideAtMedia="(min-width: 1024px)" headerText="State" width="90"></e-column>
+      <e-column field="zipCode" hideAtMedia="(min-width: 1024px)" headerText="ZipCode" width="100"></e-column>
     </e-columns>
   </ejs-grid>
 </div>
@@ -48,8 +45,8 @@
 </div>
 
 <div class="gridcard">
-  <!-- FLAG: BidItem's fields (JobID/BidDate/Address/Submitter) are inferred from this template
-       only - see core/models/project-management/cost-code.model.ts. -->
+  <!-- BidItem's fields (JobID, BidDate, Address, Submitter) are guessed from this template only
+       (see cost-code.model.ts). -->
   <ejs-grid
   class="black-grid"
     [dataSource]="filteredBids"
@@ -61,9 +58,8 @@
     <e-columns>
       <e-column field="jobID" headerText="Project Number" width="130">
         <ng-template #template let-data>
-          <!-- FIX (2026-09-16) - was '/Estimation/EditBidForm/' + jobID, the dead Blazor route
-               (404). BidFormComponent at estimation/edit-bid/:jobId is the real, already-built
-               port of that page - see overview-tab.component.html for the fuller comment. -->
+          <!-- Opens estimation/edit-bid/:jobId, the Edit Project page. The old Blazor route
+               /Estimation/EditBidForm/ gave a 404 (see overview-tab.component.html). -->
           <a [routerLink]="['/estimation/edit-bid', data.jobID]" class="opportunity-link">{{ data.jobID }}</a>
         </ng-template>
       </e-column>
@@ -71,7 +67,7 @@
         <ng-template #template let-data>{{ data.bidDate | date: 'MM/dd/yyyy' }}</ng-template>
       </e-column>
       <e-column field="address" headerText="Project" width="200"></e-column>
-      <e-column field="submitter" headerText="Submitter" width="140"></e-column>
+      <e-column field="submitter" hideAtMedia="(min-width: 768px)" headerText="Submitter" width="140"></e-column>
     </e-columns>
   </ejs-grid>
 </div>

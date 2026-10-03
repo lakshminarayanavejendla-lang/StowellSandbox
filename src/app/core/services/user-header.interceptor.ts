@@ -6,11 +6,12 @@ import { AuthService } from './auth.service';
 import { ClientLogService } from './client-log.service';
 
 /**
- * NEW (2026-09-24) - two jobs, both for the API call log (dbo.ApiCallLog):
- *  1. Adds an X-User-Email header (the signed-in user) to every call to the StowellCoAPI, so the API can record WHO made each call.
- *  2. If a call never gets a response at all (status 0: network down, timeout, blocked by the browser), reports it to the log - the
- *     server never saw it, so it can't record it itself. Calls that got an HTTP error response are already logged server-side.
- * The header is only added for our own API (never for Microsoft Graph or anything else).
+ * Two jobs for the API call log (dbo.ApiCallLog), added 2026-09-24:
+ *  1. Adds an X-User-Email header with the signed-in user to every StowellCoAPI call, so the API can
+ *     record who made it.
+ *  2. Reports calls that got no response at all (status 0: network down, timeout, blocked by the
+ *     browser), since the server never saw them. Calls with an HTTP error are already logged there.
+ * The header only goes to our own API, never to Microsoft Graph or anything else.
  */
 @Injectable()
 export class UserHeaderInterceptor implements HttpInterceptor {

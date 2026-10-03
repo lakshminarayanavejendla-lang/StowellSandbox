@@ -14,27 +14,27 @@
 
   label {
     font-weight: 600;
-    color: #777;
+    color: var(--sh-ink-3);
     white-space: nowrap;
   }
 
   input {
     width: 100%;
     box-sizing: border-box;
-    background-color: #f7f7f7;
-    border: 1px solid #dcdcdc;
+    background-color: var(--sh-surface-2);
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 10px;
   }
 
-  // Phase dropdown - same look as po-tab.component.scss (matches the inputs, white as it's editable).
+  // The phase dropdown looks like the PO tab's: styled like the inputs, white because it's editable.
   select {
     width: 100%;
     box-sizing: border-box;
     font: inherit;
-    color: #212529;
-    background-color: #fff;
-    border: 1px solid #dcdcdc;
+    color: var(--sh-ink);
+    background-color: var(--sh-surface);
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 10px;
   }
@@ -42,12 +42,12 @@
 
 h2 {
   font-weight: 700;
-  color: #00355f;
+  color: var(--sh-ink);
   margin-top: 30px;
 }
 
 .dashed {
-  border-top: 1px dashed #c7c7c7;
+  border-top: 1px dashed var(--sh-line);
   margin: 15px 0 25px 0;
 }
 
@@ -71,13 +71,13 @@ h2 {
 
   td {
     padding: 6px 14px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid var(--sh-line);
   }
 
   .label {
     font-weight: 600;
-    color: #555;
-    background-color: #f7f7f7;
+    color: var(--sh-ink);
+    background-color: var(--sh-surface-2);
   }
 
   .value {
@@ -95,7 +95,7 @@ h2 {
     align-items: center;
     gap: 6px;
     font-weight: 600;
-    color: #555;
+    color: var(--sh-ink);
   }
 }
 
@@ -122,7 +122,7 @@ h2 {
 .btn-primary {
   justify-self: start;
   background-color: #f0c800;
-  color: #333;
+  color: var(--sh-ink);
   border: none;
   border-radius: 4px;
   padding: 6px 16px;
@@ -135,22 +135,22 @@ h2 {
   padding: 4px 10px;
   border-radius: 3px;
   border: none;
-  background-color: #00355f;
+  background-color: var(--sh-blue);
   color: #fff;
   margin-right: 6px;
   font-size: 0.85rem;
 
   &.btn-danger {
-    background-color: #c0392b;
+    background-color: #c2410c;
   }
 }
 
-// Reuses the black-grid header styling convention used elsewhere in this app.
+// Uses the same grid header style as the rest of the app.
 .black-grid {
   .e-gridheader,
   .e-gridheader .e-columnheader,
   .e-gridheader .e-headercell {
-    background-color: #00355f !important;
+    background-color: var(--sh-blue) !important;
     color: #ffffff !important;
   }
 
@@ -161,15 +161,15 @@ h2 {
   }
 
   .opportunity-link {
-    color: #00355f;
+    color: var(--sh-ink);
     text-decoration: none;
     font-weight: 500;
   }
 
   .opportunity-link:hover {
-    color: #1c84c6;
+    color: var(--sh-blue);
     text-decoration: underline;
   }
 }
 
-.loading-row { color: #888; font-style: italic; padding: 10px 0; }
+.loading-row { color: var(--sh-ink-3); font-style: italic; padding: 10px 0; }

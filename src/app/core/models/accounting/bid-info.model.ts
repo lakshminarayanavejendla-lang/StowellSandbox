@@ -1,11 +1,7 @@
-// Mirrors DTO/BidInfoDto.cs and the StowellCoApp.Models.BidAmount/BidPhase/BidEmployee
-// classes AddForm.razor's sub-grids operate on. These are domain objects primarily owned by
-// the Estimation module (IEstimationService) - AddForm (an Accounting page, routed for
-// AccountingItem.statusID === "99", i.e. a bid not yet onboarded into a full budget) reads
-// and writes them directly. Duplicated here rather than imported from an Estimation module
-// path to avoid cross-agent file collisions during parallel conversion; reconcile with
-// whatever core/models the Estimation-module agent creates once both phases land - these two
-// sets of interfaces need to converge on one source of truth.
+// Matches DTO/BidInfoDto.cs and the BidAmount, BidPhase and BidEmployee models used by the Add
+// Form's grids. These belong to Estimation, but Accounting's Add Form (shown when statusID is "99",
+// a bid with no full budget yet) reads and writes them. This is a copy of the Estimation models;
+// merge the two into one later.
 export interface BidInfoDto {
   jobID: string;
   bidder?: string;
@@ -46,10 +42,10 @@ export interface ContractorInfoDto {
   zip?: string;
 }
 
-// Numeric-coded fields (InsuranceType 1=OCIP/2=CCIP, Bonded/TaxExcempt/InvoiceSubmittal/
-// CertifiedPayroll 0=unset/1=yes-or-first-option/2=no-or-second-option/3=third option for
-// InvoiceSubmittal) - see the <select> option values in AddForm.razor, they were never backed
-// by a named enum in the C# source.
+// These are number codes with no enum in the C# code (see the option values in AddForm.razor).
+// InsuranceType: 1 = OCIP, 2 = CCIP. Bonded, TaxExcempt, InvoiceSubmittal, CertifiedPayroll:
+// 0 = not set, 1 = yes or the first option, 2 = no or the second option, 3 = third option
+// (InvoiceSubmittal only).
 export interface ProjectInfoDto {
   jobID?: string;
   insuranceType?: number;
@@ -61,8 +57,8 @@ export interface ProjectInfoDto {
   retainagePerc?: number;
 }
 
-// StowellCoApp.DTO.ContractorClient (also defined inline in CodeCodeSummaryRecord.cs) - the
-// "General Contractor Information" client dropdown + its address fields.
+// ContractorClient (also defined in CodeCodeSummaryRecord.cs): the General Contractor dropdown and
+// its address fields.
 export interface ContractorClient {
   id?: number;
   name?: string;
@@ -105,18 +101,16 @@ export interface BidEmployee {
   employeeId?: number;
 }
 
-// AccountingService.cs declares this as a nested class alongside AccountingService itself
-// (not in DTO/Models) - the SubmitToSage response shape.
+// The SubmitToSage response. In C# it's a class inside AccountingService.cs, not in DTO or Models.
 export interface SubmitToSageResponse {
   success: boolean;
   message?: string;
   isExist: boolean;
 }
 
-// AddFormBase.cs's hardcoded `divisions` list (GUID-valued in the source - these look like
-// SharePoint/Graph group IDs rather than a Division table row, unconfirmed) and the
-// `departments`/`jobTypes` cascading dropdown data. Reproduced verbatim; flag anything that
-// looks like it should come from an API instead of being hardcoded in the component.
+// The divisions, departments and job types lists, copied as-is from AddFormBase.cs. The division
+// values are GUIDs that look like SharePoint or Graph group ids (not confirmed). These should
+// probably come from an API.
 export interface DivisionOption {
   value: string;
   text: string;

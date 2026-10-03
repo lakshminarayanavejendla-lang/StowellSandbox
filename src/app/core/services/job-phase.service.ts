@@ -6,17 +6,16 @@ import { ProjectManagementEndpoints } from '../project-management-endpoints';
 import { JobPhaseOption } from '../models/project-management/job-phase.model';
 
 /**
- * NEW service - Stowell PO/CO Module. Backs the Phase dropdown on FORM-CO Reallocation. Backend:
- * PoQueueController.GetJobPhases/{jobId} -> SAGESBQ's PO_GetJobPhases, scoped to the selected
- * job's real Sage phases (mirrors JobCostCodeService's pattern for cost codes).
+ * Fills the Phase dropdown on the CO Reallocation form with the selected job's Sage phases
+ * (PoQueueController.GetJobPhases/{jobId}, which runs PO_GetJobPhases). Works like
+ * JobCostCodeService does for cost codes.
  *
- * FIX (2026-09-20, Mike Smith - "It's not pulling in phases. Phases are getting duplicated"):
- *  - A brand-new project (e.g. one just converted from a bid) has no StowellSandbox.dbo.jobphs rows
- *    until its first budget upload, so the job-scoped call returned nothing and the dropdown sat
- *    empty. When that happens this now falls back to the full phase list (api/CostCode/GetAllPhases,
- *    SAGESBQ's VWPhasesList) so a phase can still be picked.
- *  - Duplicate jobphs rows (same job + phase number, written more than once by the budget "Update"
- *    sheet - see StowellCoAPI_DB_Changes_2026-09-20.sql) are collapsed to one entry per phase number.
+ * Two fixes for "It's not pulling in phases. Phases are getting duplicated" (Mike Smith, 2026-09-20):
+ *  - A new project, such as one just converted from a bid, has no jobphs rows until its first
+ *    budget upload. When the job has no phases, this falls back to the full phase list
+ *    (api/CostCode/GetAllPhases) so a phase can still be picked.
+ *  - The budget Update sheet can write the same job and phase more than once (see
+ *    StowellCoAPI_DB_Changes_2026-09-20.sql), so phases are reduced to one per number.
  */
 @Injectable({ providedIn: 'root' })
 export class JobPhaseService {
@@ -31,7 +30,7 @@ export class JobPhaseService {
     );
   }
 
-  /** Full phase list (not job-scoped) - the fallback for a job that has no phases of its own yet. */
+  /** Every phase, not just this job's. Used when the job has none of its own yet. */
   private getAllPhases(): Observable<JobPhaseOption[]> {
     type Row = { phaseNum?: string; phaseName?: string };
     return this.http.get<{ data?: Row[] } | Row[]>(`${this.base}${ProjectManagementEndpoints.GetAllPhasesUrl}`).pipe(

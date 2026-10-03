@@ -1,13 +1,31 @@
 <h4>Retain Amount Across Files</h4>
-<ejs-chart [primaryXAxis]="primaryXAxis" [primaryYAxis]="primaryYAxis" height="320px">
-  <e-series-collection>
-    <e-series
-      [dataSource]="chartData"
-      type="Line"
-      xName="category"
-      yName="value"
-      [name]="seriesName"
-      dashArray="5,5"
-    ></e-series>
-  </e-series-collection>
-</ejs-chart>
+@if (chartData.length) {
+  <ejs-chart
+    [theme]="chartTheme()"
+    background="transparent"
+    [chartArea]="chartArea"
+    [primaryXAxis]="primaryXAxis"
+    [primaryYAxis]="primaryYAxis"
+    [tooltip]="tooltip"
+    [crosshair]="crosshair"
+    (axisLabelRender)="onAxisLabel($event)"
+    (tooltipRender)="onTooltip($event)"
+    height="340px"
+  >
+    <e-series-collection>
+      <e-series
+        [dataSource]="chartData"
+        type="SplineArea"
+        xName="category"
+        yName="value"
+        [name]="seriesName"
+        [fill]="colors.blue"
+        opacity="0.22"
+        [border]="border"
+        [marker]="marker"
+      ></e-series>
+    </e-series-collection>
+  </ejs-chart>
+} @else {
+  <div class="chart-empty">No data to chart yet.</div>
+}

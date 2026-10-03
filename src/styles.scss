@@ -1,16 +1,159 @@
-html, body {
+@use 'app/shared/responsive/global-responsive';
+
+// ---- Theme colours for light and dark: one blue family and one orange accent (see core/layout/theme.service.ts) ----
+:root {
+  --sh-bg: #f2f5fa;
+  --sh-surface: #ffffff;
+  --sh-surface-2: #f7f9fd;
+  --sh-line: #e3e9f3;
+  --sh-ink: #0e2440;
+  --sh-ink-2: #4a5d78;
+  --sh-ink-3: #8492a8;
+  --sh-blue: #2563c9;
+  --sh-blue-2: #6f9be0;
+  --sh-blue-soft: #e8f0fc;
+  --sh-acc: #f26b2a;
+  --sh-nav: #0b2140;
+  --sh-shadow: 0 1px 2px rgba(14, 36, 64, 0.04), 0 8px 24px -12px rgba(14, 36, 64, 0.12);
+
+  // Sidebar: light in light mode, navy in dark mode
+  --sh-side-bg: #ffffff;
+  --sh-side-ink: #0e2440;
+  --sh-side-ink-2: #4a5d78;
+  --sh-side-group: #8492a8;
+  --sh-side-hover: rgba(14, 36, 64, 0.06);
+  --sh-side-active: #e8f0fc;
+  --sh-side-active-ink: #2563c9;
+  --sh-side-line: #e3e9f3;
+}
+
+:root[data-theme='dark'] {
+  --sh-bg: #08111f;
+  --sh-surface: #0f1c31;
+  --sh-surface-2: #132440;
+  --sh-line: #1c3050;
+  --sh-ink: #e8effb;
+  --sh-ink-2: #a3b4cd;
+  --sh-ink-3: #7086a6;
+  --sh-blue: #5b93f0;
+  --sh-blue-2: #3b67ad;
+  --sh-blue-soft: #162c4d;
+  --sh-acc: #ff7d3f;
+  --sh-nav: #060d19;
+  --sh-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+
+  --sh-side-bg: #0b2140;
+  --sh-side-ink: #ffffff;
+  --sh-side-ink-2: #c6d4ea;
+  --sh-side-group: #7f93b3;
+  --sh-side-hover: rgba(255, 255, 255, 0.07);
+  --sh-side-active: rgba(255, 255, 255, 0.1);
+  --sh-side-active-ink: #ffffff;
+  --sh-side-line: rgba(255, 255, 255, 0.1);
+}
+
+html,
+body {
   margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--sh-ink);
+  background: var(--sh-bg);
 }
 
 a {
-  color: #006bb7;
+  color: var(--sh-blue);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--sh-ink);
 }
 
 .btn-primary {
   color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+  background-color: var(--sh-blue);
+  border-color: var(--sh-blue);
+  border-radius: 10px;
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+input.form-control,
+select.form-control,
+textarea.form-control,
+.form-control {
+  color: var(--sh-ink);
+  background-color: var(--sh-surface);
+  border-color: var(--sh-line);
+  border-radius: 10px;
+}
+
+.modal-content,
+.card {
+  color: var(--sh-ink);
+  background-color: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: 16px;
+}
+
+// ---- Syncfusion widgets on every page: soft header, rounded frame, one blue ----
+.e-grid {
+  font-family: inherit;
+  border: 1px solid var(--sh-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--sh-surface);
+}
+
+.e-grid .e-gridheader,
+.e-grid .e-headercell {
+  background-color: var(--sh-surface-2);
+  color: var(--sh-ink-2);
+  border-color: var(--sh-line);
+  font-weight: 700;
+}
+
+.e-grid .e-row:hover .e-rowcell {
+  background-color: var(--sh-surface-2);
+}
+
+.e-grid .e-rowcell {
+  border-color: var(--sh-line);
+  color: var(--sh-ink);
+}
+
+.e-grid .e-pager {
+  background: var(--sh-surface);
+  border-color: var(--sh-line);
+}
+
+.e-btn,
+.e-input-group,
+.e-input-group.e-control-wrapper {
+  border-radius: 10px;
+}
+
+.e-schedule,
+.e-chart {
+  font-family: inherit;
+}
+
+// Syncfusion draws chart text in a fixed colour, so keep it readable in dark mode
+:root[data-theme='dark'] .e-chart text {
+  fill: var(--sh-ink-2) !important;
+}
+
+:root[data-theme='dark'] .e-chart rect[id$='_ChartBorder'],
+:root[data-theme='dark'] .e-chart rect[id$='_ChartAreaBorder'] {
+  fill: transparent !important;
 }
 
 * {
@@ -33,3 +176,372 @@ a {
 // .e-pager .e-numericitem{
 //   color: #ff4601;
 // }
+
+// Touch and density sizes. Components use these instead of fixed sizes: 40px rows on a laptop, and
+// 48px rows with targets of 44px or more on tablets and other touch devices.
+:root {
+  --ui-row-height: 40px;
+  --ui-control-height: 36px;
+  --ui-touch-target: 44px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --ui-row-height: 48px;
+    --ui-control-height: 44px;
+  }
+}
+
+// Grid headers on every page. Pages set their own dark navy header, often with !important, so the soft
+// header is set once here with :not(#sh), which outranks every page rule.
+html body .e-grid:not(#sh) .e-gridheader,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader .e-headercell,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader .e-headercell:hover,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader .e-headercell .e-headertext,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader .e-headercell .e-sortfilterdiv,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader .e-headercell .e-sortfilterdiv .e-icons,
+html body .e-grid:not(#sh) .e-gridheader .e-columnheader .e-headercell .e-filtermenudiv .e-icons {
+  background-color: var(--sh-surface-2) !important;
+  color: var(--sh-ink-2) !important;
+}
+
+// Plain HTML tables with a dark header on some pages get the same soft header
+table thead th {
+  background-color: var(--sh-surface-2) !important;
+  color: var(--sh-ink-2) !important;
+  border-color: var(--sh-line) !important;
+}
+
+// Slim scrollbars inside Syncfusion widgets (the default thick grey bars look heavy in cards)
+.e-grid .e-content,
+.e-schedule .e-content-wrap,
+.e-schedule .e-content-table {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sh-line) transparent;
+}
+
+// Form controls follow the theme on every page
+:root[data-theme='dark'] {
+  input:not([type='checkbox']):not([type='radio']):not([type='button']),
+  select,
+  textarea,
+  .e-input-group,
+  .e-input-group input.e-input,
+  .e-input-group.e-control-wrapper,
+  .e-float-input,
+  input.e-input {
+    color: var(--sh-ink);
+    background-color: var(--sh-surface-2);
+    border-color: var(--sh-line);
+  }
+
+  ::placeholder {
+    color: var(--sh-ink-3);
+  }
+
+  .e-grid .e-filterbarcell input,
+  .e-grid .e-filterbarcell .e-input-group {
+    background-color: var(--sh-surface-2);
+  }
+}
+
+// ---- Shared visual system (every page) -------------------------------------------------------------------------------------------
+// Status pills (GridStatusPillsService turns "... Status" grid columns into these)
+.st-pill {
+  display: inline-block;
+  padding: 0.12rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.st-ok {
+  color: #14915b;
+  background: rgba(20, 145, 91, 0.14);
+}
+
+.st-info {
+  color: var(--sh-blue);
+  background: var(--sh-blue-soft);
+}
+
+.st-warn {
+  color: #b7791f;
+  background: rgba(240, 182, 74, 0.22);
+}
+
+.st-bad {
+  color: #c2410c;
+  background: rgba(194, 65, 12, 0.13);
+}
+
+.st-mute {
+  color: var(--sh-ink-2);
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
+}
+
+// Section headings and dividers
+.section-header,
+.card-header {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--sh-ink);
+}
+
+.card-header {
+  background: var(--sh-surface-2);
+  border-bottom: 1px solid var(--sh-line);
+}
+
+hr,
+.hr-line-dashed {
+  border-color: var(--sh-line);
+  border-style: solid;
+  opacity: 1;
+}
+
+// Tabs (Bootstrap nav-tabs) as a soft segmented control
+.nav-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
+  border-radius: 14px;
+
+  .nav-link {
+    padding: 0.45rem 0.95rem;
+    font-weight: 700;
+    color: var(--sh-ink-2);
+    border: 0;
+    border-radius: 10px;
+
+    &:hover {
+      color: var(--sh-ink);
+    }
+
+    &.active {
+      color: var(--sh-blue);
+      background: var(--sh-surface);
+      box-shadow: 0 1px 3px rgba(14, 36, 64, 0.14);
+    }
+  }
+}
+
+// Buttons
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.07);
+}
+
+.btn-secondary {
+  color: var(--sh-ink);
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+
+  &:hover:not(:disabled) {
+    color: var(--sh-ink);
+    background: var(--sh-surface-2);
+    border-color: var(--sh-blue-2);
+  }
+}
+
+.btn-danger {
+  color: #fff;
+  background: #c2410c;
+  border-color: #c2410c;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--sh-blue);
+}
+
+// Bootstrap tables
+.table {
+  color: var(--sh-ink);
+
+  td,
+  th {
+    border-color: var(--sh-line);
+  }
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--sh-surface-2);
+}
+
+// Focus ring that matches the rest of the portal
+:where(input, select, textarea, button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--sh-blue);
+  outline-offset: 2px;
+}
+
+// Pages fade and rise in briefly, except for users who ask for reduced motion
+@keyframes sh-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+main.content-wrapper > * {
+  animation: sh-rise 0.28s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.content-wrapper > * {
+    animation: none;
+  }
+}
+
+// Older Bootstrap containers used on some pages (HR, forms): panels and resource cards
+.white-bg {
+  background: var(--sh-surface) !important;
+  border: 1px solid var(--sh-line);
+  border-radius: 16px;
+  box-shadow: var(--sh-shadow);
+  padding: 1.25rem;
+}
+
+.resource-card {
+  padding: 1.25rem 1rem;
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
+  border-radius: 14px;
+  transition: transform 0.14s, border-color 0.14s;
+
+  &:hover {
+    border-color: var(--sh-blue-2);
+    transform: translateY(-2px);
+  }
+}
+
+.wrapper-content h3 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+// Form pages: the form sits on a panel and its sections are headed groups
+.wrapper,
+form.add-form,
+form.new-bid-form,
+.new-opportunity-page > form {
+  background: var(--sh-surface);
+  border: 1px solid var(--sh-line);
+  border-radius: 16px;
+  box-shadow: var(--sh-shadow);
+  padding: 1.5rem;
+}
+
+.section-header {
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+  border-bottom: 1px solid var(--sh-line);
+}
+
+.grid-section,
+.section-header-row {
+  border-radius: 12px;
+}
+
+// Semantic buttons stay inside the palette
+.btn-success {
+  color: #fff;
+  background: #14915b;
+  border-color: #14915b;
+}
+
+.btn-warning {
+  color: #b7791f;
+  background: rgba(240, 182, 74, 0.22);
+  border-color: transparent;
+}
+
+.btn-info {
+  color: var(--sh-blue);
+  background: var(--sh-blue-soft);
+  border-color: transparent;
+}
+
+
+// ---- File managers (project Documents tab, bid Documents tab, Document Management) ----
+// Full folder and file names: Syncfusion cuts them to one line with "..." in a fixed 80px tile.
+// Here tiles are wider and names wrap, in the large icon view, the folder tree and the Details list.
+.e-filemanager {
+  .e-large-icons .e-list-item {
+    width: 132px;
+    height: auto;
+    min-height: 118px;
+    margin: 8px 6px;
+    padding: 6px 4px 8px;
+    overflow: visible;
+    border-radius: 12px;
+  }
+
+  .e-large-icons .e-list-text {
+    width: 100%;
+    padding: 4px 2px 0;
+    font-size: 12.5px;
+    line-height: 1.3;
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    overflow-wrap: anywhere;
+  }
+
+  .e-large-icons .e-list-icon {
+    width: 52px;
+    height: 52px;
+    margin: 6px auto 4px;
+  }
+
+  // folder tree: long names wrap instead of being cut off
+  .e-treeview .e-list-text {
+    height: auto;
+    min-height: 30px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .e-treeview .e-text-content {
+    display: flex;
+    align-items: flex-start;
+    height: auto;
+  }
+
+  .e-treeview .e-list-icon {
+    flex: none;
+    margin-top: 7px;
+  }
+
+  // Details view: the Name column wraps too
+  .e-grid .e-rowcell,
+  .e-grid .e-rowcell .e-fe-text {
+    white-space: normal;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+
+  // A modern two-tone folder in the app's blue, in place of Syncfusion's flat one
+  .e-fe-folder {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%236f9be0'/%3E%3Cstop offset='1' stop-color='%232563c9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M6 11a4 4 0 0 1 4-4h9.2a4 4 0 0 1 2.9 1.2l2.6 2.8H38a4 4 0 0 1 4 4v3H6z' fill='%231d4f9f'/%3E%3Crect x='4' y='15' width='40' height='26' rx='5' fill='url(%23f)'/%3E%3Crect x='4' y='15' width='40' height='3' rx='1.5' fill='%23ffffff' opacity='.28'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+
+  // a locked folder shows the same icon, greyed out
+  .e-fe-locked > .e-text-content .e-fe-folder,
+  .e-fe-locked > .e-fe-grid-icon .e-fe-folder {
+    filter: grayscale(0.6);
+  }
+}

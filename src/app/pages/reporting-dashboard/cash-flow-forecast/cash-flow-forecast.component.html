@@ -1,3 +1,4 @@
+<app-page-header title="Cash Flow Forecast" [breadcrumbs]="[{ label: 'Reports', route: '/reporting-dashboard' }, { label: 'Cash Flow Forecast' }]"></app-page-header>
 <h4 class="section-title">Cash Flow Budget</h4>
 
 <div class="toolbar">
@@ -11,8 +12,7 @@
   </div>
 </div>
 
-<!-- Syncfusion GridComponent replaces the plain <table> - see component header comment re: why
-     month columns use a template + monthValue() instead of a dot-path field string. -->
+<!-- The month columns use a template with monthValue(), not a dotted field (see the component header). -->
 @if (filteredBudgetForecast.length > 0) {
   <ejs-grid #budgetForecastGrid [dataSource]="filteredBudgetForecast" [allowSorting]="true" height="360" [allowPdfExport]="true" [allowExcelExport]="true">
     <e-columns>

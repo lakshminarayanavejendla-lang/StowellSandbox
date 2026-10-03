@@ -6,35 +6,39 @@ import { PoQueueRecord } from '../../../core/models/project-management/po-queue.
 import { PoRequestService } from '../../../core/services/po-request.service';
 import { PoDraftSummary } from '../../../core/models/project-management/po-draft.model';
 import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
+import { KpiCardsComponent, KpiItem } from '../../../shared/ui/kpi-cards/kpi-cards.component';
 
 /**
- * NEW page - Stowell PO Module (not a Blazor port; built from the "Stowell PO Module" Moqups
- * design spec, page NAV-PO Queue Home). Mirrors bid-queue.component.ts's established pattern for
- * this app (two independent ejs-grids, Syncfusion Page/Sort/Filter services, manual
- * ChangeDetectorRef.detectChanges() after the HTTP subscribe - see overview-tab.component.ts for
- * why that's needed in this app).
+ * The PO Queue, built from the Moqups design (page NAV-PO Queue Home), not ported from Blazor. It
+ * works like bid-queue.component.ts: two Syncfusion grids with paging, sorting and filtering, and
+ * detectChanges() after each request (see overview-tab.component.ts for why).
  *
- * The three checkboxes (Show Completed/Cancelled/On-Hold POs) are shown in the mockup with no
- * spec'd exact semantics - implemented as the most natural reading: Cancelled/On-Hold filter rows
- * OUT of the active queue below when unchecked, and Show Completed POs toggles the whole second
- * "Completed Purchase Order Queue" grid's visibility.
+ * The mockup's three checkboxes (Show Completed, Cancelled and On-Hold POs) have no written rules,
+ * so they do the obvious thing: unchecking Cancelled or On-Hold hides those rows from the active
+ * queue, and Show Completed POs shows or hides the Completed Purchase Order Queue grid.
  *
- * UPDATE: "Master Job PO ID" is now a link to /project-management/edit-po-form/:poId (see
- * NewPoFormComponent's isEditMode) using masterJobPoId itself as the id - the real Sage-backed
- * queue data (GetPoQueueData is confirmed live, see po-queue.service.ts) returns real PO record
- * identifiers here, not the speculative "(n of m)" composite the model comment describes. The
- * edit form's GetPoById/UpdatePo calls are themselves unconfirmed against the backend - see
- * po-request.service.ts's header comments on those two methods.
+ * "Master Job PO ID" links to /project-management/edit-po-form/:poId (see isEditMode in
+ * NewPoFormComponent). The queue data from Sage has real PO ids here, not the "(n of m)" value the
+ * model describes.
  */
 @Component({
   selector: 'app-po-queue',
   standalone: true,
-  imports: [GridModule, PageHeaderComponent, RouterLink],
+  imports: [KpiCardsComponent, GridModule, PageHeaderComponent, RouterLink],
   providers: [PageService, SortService, FilterService],
   templateUrl: './po-queue.component.html',
   styleUrl: './po-queue.component.scss',
 })
 export class PoQueueComponent implements OnInit {
+  /** The summary cards under the page header. */
+  get kpis(): KpiItem[] {
+    return [
+      { label: 'Active POs', value: this.allActivePOs.length, hint: 'in progress' },
+      { label: 'Completed POs', value: this.completedPOs.length, tone: 'good' },
+      { label: 'Draft POs', value: this.drafts.length, hint: this.drafts.length ? 'not yet submitted' : 'none waiting', tone: this.drafts.length ? 'warn' : 'default' },
+    ];
+  }
+
   private poQueueService = inject(PoQueueService);
   private poRequestService = inject(PoRequestService);
   private router = inject(Router);

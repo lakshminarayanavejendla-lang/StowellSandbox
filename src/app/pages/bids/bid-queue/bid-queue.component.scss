@@ -10,8 +10,8 @@
 }
 
 .btn-primary {
-  background-color: #00355f;
-  border-color: #00355f;
+  background-color: var(--sh-blue);
+  border-color: var(--sh-blue);
   color: #fff;
   padding: 6px 14px;
   border-radius: 4px;
@@ -37,7 +37,7 @@
     width: 260px;
     height: 36px;
     padding: 0 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
   }
 }
@@ -53,7 +53,7 @@
   border-collapse: collapse;
 
   th {
-    background-color: #00355f;
+    background-color: var(--sh-blue);
     color: #fff;
     text-align: left;
     padding: 8px 10px;
@@ -61,12 +61,12 @@
 
   td {
     padding: 8px 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--sh-line);
   }
 
   .empty {
     text-align: center;
-    color: #888;
+    color: var(--sh-ink-3);
   }
 }
 
@@ -83,28 +83,28 @@
 }
 .black-grid {
   .e-gridheader {
-    background: #00355f;
+    background: var(--sh-blue);
   }
 
   .e-gridheader .e-columnheader {
-    background: #00355f;
+    background: var(--sh-blue);
     color: #ffffff;
   }
 
   .e-gridheader .e-headercell {
-    background: #00355f;
+    background: var(--sh-blue);
     color: #ffffff;
     font-weight: 600;
   }
 
   .opportunity-link {
-    // color: #ff4601;
+    // color: var(--sh-acc);
     text-decoration: none;
     font-weight: 500;
   }
 
   .opportunity-link:hover {
-    // color: #ff6a33;
+    // color: var(--sh-acc);
     text-decoration: underline;
   }
 }
@@ -116,7 +116,7 @@
 .black-grid .e-gridheader,
 .black-grid .e-gridheader .e-columnheader,
 .black-grid .e-gridheader .e-headercell {
-  background-color: #00355f !important;
+  background-color: var(--sh-blue) !important;
   color: #ffffff !important;
 }
 
@@ -129,7 +129,7 @@
 /* Keep header text visible on hover */
 .black-grid .e-gridheader .e-headercell:hover,
 .black-grid .e-gridheader .e-headercell:hover .e-headertext {
-  background-color: #00355f !important;
+  background-color: var(--sh-blue) !important;
   color: #ffffff !important;
   opacity: 1 !important;
   visibility: visible !important;
@@ -149,12 +149,12 @@
 
 /* Bid ID link */
 .black-grid .opportunity-link {
-  // color: #ff4601 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: none;
 }
 
 .black-grid .opportunity-link:hover {
-  // color: #ff6a33 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: underline;
 }
 /* Sort/filter area */
@@ -169,16 +169,16 @@
 
 /* Prevent hover background from covering the text */
 .black-grid .e-gridheader .e-headercell:hover {
-  background-color: #00355f !important;
+  background-color: var(--sh-blue) !important;
 }
 /* Bid ID link */
 .black-grid .opportunity-link {
-  // color: #ff4601 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: none !important;
   font-weight: 500;
 }
 
 .black-grid .opportunity-link:hover {
-  // color: #ff6a33 !important;
+  // color: var(--sh-acc) !important;
   text-decoration: underline !important;
 }

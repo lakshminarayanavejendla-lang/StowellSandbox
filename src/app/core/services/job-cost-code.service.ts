@@ -5,9 +5,8 @@ import { environment } from '../../../environments/environment';
 import { JobCostCodeOption } from '../models/project-management/job-cost-code.model';
 
 /**
- * NEW service - Stowell PO Module. Backs the cost code picker on FORM-PO Request / FORM-CO
- * Request. Backend: PoQueueController.GetJobCostCodes/{jobId} -> SAGESBQ's PO_GetJobCostCodes,
- * scoped to the selected job's real budget lines (not the full ~4,000-row cost code catalog).
+ * The cost code picker on the PO Request and CO Request forms. PoQueueController.GetJobCostCodes/{jobId}
+ * runs PO_GetJobCostCodes, which returns only the job's own budget lines, not all ~4,000 cost codes.
  */
 @Injectable({ providedIn: 'root' })
 export class JobCostCodeService {

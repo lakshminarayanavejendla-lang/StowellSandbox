@@ -7,7 +7,7 @@
     <label>Job Name</label>
     <input type="text" [value]="model?.selectedJobName" readonly />
   </div>
-  <!-- NEW (2026-09-24, Mike Smith): all phases together (default) or one phase at a time. -->
+  <!-- All phases together (the default) or one at a time (Mike Smith, 2026-09-24). -->
   <div class="field">
     <label>Phase</label>
     <select [ngModel]="selectedPhaseId" (ngModelChange)="onPhaseChange($event)">

@@ -1,5 +1,5 @@
-<h3 class="m-0">Change Order Queue</h3>
-<hr />
+<app-page-header title="Change Order Queue" [breadcrumbs]="[{ label: 'Project Management' }, { label: 'CO Queue' }]"></app-page-header>
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
 
 @if (!loaded) {
   <p>Loading...</p>
@@ -73,7 +73,7 @@
       </e-column>
       <e-column field="poStatus" headerText="PO Status" width="140"></e-column>
       <e-column field="jobName" headerText="Job Name" width="200"></e-column>
-      <e-column field="pm" headerText="PM" width="140"></e-column>
+      <e-column field="pm" hideAtMedia="(min-width: 768px)" headerText="PM" width="140"></e-column>
     </e-columns>
   </ejs-grid>
 
@@ -97,7 +97,7 @@
       </e-column>
         <e-column field="poStatus" headerText="PO Status" width="140"></e-column>
         <e-column field="jobName" headerText="Job Name" width="200"></e-column>
-        <e-column field="pm" headerText="PM" width="140"></e-column>
+        <e-column field="pm" hideAtMedia="(min-width: 768px)" headerText="PM" width="140"></e-column>
       </e-columns>
     </ejs-grid>
   }

@@ -7,15 +7,10 @@ import { CostCodeRecord, Phase, PhaseListResponse } from '../models/accounting/b
 import { AuthService } from './auth.service';
 
 /**
- * Partial port of ICostCodeService/CostCodeService.cs - only the three methods the
- * Accounting module's pages actually call (GetAllUserJobs for the budget-approval job
- * dropdown, GetJobPhasesData for that dropdown's phase list, GetAllPhases for AddForm's
- * "Additional Phases" popup). The full C# interface has ~15 more methods
- * (GetCurrentCostSummaryViewModel, CashFlowAllDataByPeriod, GetContractSummaryData,
- * GetPrimeChangeList, GetInvoiceReceivable/GetARInvoice, the *ForReport family, etc.) that
- * belong to cost-code-summary/cash-flow reporting pages outside this module - likely
- * Project Management's or Reporting's territory; port those alongside whichever page
- * actually uses them rather than here, to avoid a speculative, untested surface.
+ * The three CostCodeService.cs methods Accounting uses: GetAllUserJobs and GetJobPhasesData for the
+ * budget approval job and phase dropdowns, and GetAllPhases for the Add Form's Additional Phases
+ * popup. The other ~15 methods are for reporting pages (see project-cost-code.service.ts); port
+ * them with the page that uses them.
  */
 @Injectable({ providedIn: 'root' })
 export class CostCodeService {
@@ -34,9 +29,8 @@ private authService = inject(AuthService);
       .pipe(catchError(() => of([])));
   }
 
-  // CostCodeService.cs unwraps an ApiListResponse<Phase> ({ data: [...] }) for this one call
-  // specifically - every other CostCode/Accounting GET in the source returns a bare array.
-  // Confirm this asymmetry is real (not a source-reading artifact) before trusting it in prod.
+  // This is the only call that comes wrapped as { data: [...] } (ApiListResponse<Phase>); the
+  // others return a plain array. Check that against the real API.
   getAllPhases(): Observable<Phase[]> {
     return this.http.get<PhaseListResponse>(`${this.base}${AccountingEndpoints.GetAllPhasesUrl}`).pipe(
       map((res) => res?.data ?? []),

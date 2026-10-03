@@ -1,8 +1,33 @@
 @if (isLoading) {
   <div class="spinner">Loading...</div>
 } @else {
-  <h3>Active Projects</h3>
-  <hr />
+  <app-page-header title="Accounting Queue"></app-page-header>
+
+<app-kpi-cards [items]="kpis"></app-kpi-cards>
+
+  <!-- Approval types (Mike Smith, 2026-09-26). Anything financial is approved here; bids and projects are not queue items. -->
+  <div class="type-filters" role="tablist" aria-label="Approval type">
+    <button type="button" role="tab" class="type-chip" [class.active]="selectedType === 'All'" (click)="selectType('All')">
+      All <span class="count">{{ items.length }}</span>
+    </button>
+    @for (t of types; track t.type) {
+      <button type="button" role="tab" class="type-chip" [class.active]="selectedType === t.type" (click)="selectType(t.type)">
+        {{ t.type }} <span class="count">{{ countFor(t.type) }}</span>
+      </button>
+    }
+    <!-- Legacy rows from the old "Active Projects" queue stay visible until bid/project file creation is decided. -->
+    @if (countFor('Project File Creation') > 0) {
+      <button type="button" role="tab" class="type-chip legacy" [class.active]="selectedType === 'Project File Creation'" (click)="selectType('Project File Creation')">
+        Project File Creation <span class="count">{{ countFor('Project File Creation') }}</span>
+      </button>
+    }
+    @if (countFor('Budget Update') > 0) {
+      <button type="button" role="tab" class="type-chip legacy" [class.active]="selectedType === 'Budget Update'" (click)="selectType('Budget Update')">
+        Budget Update <span class="count">{{ countFor('Budget Update') }}</span>
+      </button>
+    }
+  </div>
+
   <div class="toolbar">
     <div class="search-box">
       <i class="bi bi-search"></i>
@@ -15,6 +40,12 @@
     </div>
   </div>
 
+  @if (selectedTypeNotReady) {
+    <p class="type-note">
+      Nothing is waiting here yet. {{ selectedType }} approvals will appear in this queue once that approval step is set up.
+    </p>
+  }
+
   <ejs-grid
   class="black-grid"
     [dataSource]="filteredItems"
@@ -24,15 +55,16 @@
     [pageSettings]="pageSettings"
   >
     <e-columns>
+      <e-column field="approvalType" headerText="Type" width="190"></e-column>
       <e-column field="jobID" headerText="Job ID" width="110">
         <ng-template #template let-data>
           <a [routerLink]="queueLink(data)" class="opportunity-link">{{ data.jobID }}</a>
         </ng-template>
       </e-column>
       <e-column field="jobName" headerText="Job Name" width="180"></e-column>
-      <e-column field="address" headerText="Address" width="200"></e-column>
-      <e-column field="submitter" headerText="Submitter" width="140"></e-column>
-      <e-column field="jobType" headerText="Type" width="110"></e-column>
+      <e-column field="address" hideAtMedia="(min-width: 1024px)" headerText="Address" width="200"></e-column>
+      <e-column field="submitter" hideAtMedia="(min-width: 768px)" headerText="Submitter" width="140"></e-column>
+      <e-column field="jobType" hideAtMedia="(min-width: 1024px)" headerText="Job Type" width="110"></e-column>
     </e-columns>
   </ejs-grid>
 }

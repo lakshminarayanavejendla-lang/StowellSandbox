@@ -1,7 +1,4 @@
-<h3>Add Form</h3>
-
-<hr />
-
+<app-page-header title="Add Form"></app-page-header>
 @if (isLoading) {
   <div class="busy-indicator">
       <div class="spinner"></div>
@@ -10,9 +7,7 @@
 
 <form [formGroup]="form" class="add-form">
 
-  <!-- ================================================= -->
-  <!-- BASIC INFORMATION -->
-  <!-- ================================================= -->
+  <!-- Basic information -->
 
   <section class="row-3">
 
@@ -63,9 +58,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- PROJECT -->
-  <!-- ================================================= -->
+  <!-- Project -->
 
   <section class="row-3">
 
@@ -118,9 +111,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- JOB DETAILS -->
-  <!-- ================================================= -->
+  <!-- Job details -->
 
   <section class="row-3">
 
@@ -165,9 +156,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- BIDS -->
-  <!-- ================================================= -->
+  <!-- Bids -->
 
   <section class="grid-section">
 
@@ -259,9 +248,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- CONTRACT -->
-  <!-- ================================================= -->
+  <!-- Contract -->
 
   <section class="row-3">
 
@@ -303,9 +290,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- ESTIMATED DATES -->
-  <!-- ================================================= -->
+  <!-- Estimated dates -->
 
   <section class="row-2">
 
@@ -336,9 +321,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- ADDITIONAL PHASES -->
-  <!-- ================================================= -->
+  <!-- Additional phases -->
 
 <section class="grid-section">
 
@@ -427,9 +410,7 @@
 </section>
 
 
-  <!-- ================================================= -->
-  <!-- LOCATION + CONTRACTOR -->
-  <!-- ================================================= -->
+  <!-- Location and contractor -->
 
   <section class="row-2">
 
@@ -616,9 +597,7 @@
   </section>
 
 
-  <!-- ================================================= -->
-  <!-- PROJECT INFORMATION -->
-  <!-- ================================================= -->
+  <!-- Project information -->
 
   <h2>Project Information</h2>
 
@@ -779,9 +758,7 @@
   </section>
 
 
-<!-- ================================================= -->
-<!-- PROJECT RESOURCES -->
-<!-- ================================================= -->
+<!-- Project resources -->
 
 <h2>Project Resources</h2>
 
@@ -878,9 +855,7 @@
 </section>
 
 
-  <!-- ================================================= -->
-  <!-- MESSAGES -->
-  <!-- ================================================= -->
+  <!-- Messages -->
 
   @if (successMessage) {
   <div class="success-message">
@@ -895,9 +870,7 @@
 }
 
 
-  <!-- ================================================= -->
-  <!-- ACTIONS -->
-  <!-- ================================================= -->
+  <!-- Actions -->
 
   <div class="actions">
 
@@ -926,17 +899,11 @@
 </form>
 
 
-<!-- ================================================= -->
-<!-- ADD BID POPUP -->
-<!-- ================================================= -->
+<!-- Add bid popup -->
 
 <!--
-  IMPORTANT:
-  Do NOT use @if here.
-
-  The popup remains in the DOM and only its display
-  property changes. This avoids the rendering problem
-  that was occurring immediately after showBidPopup=true.
+  Don't use @if here. The popup stays in the page and only its display changes, which avoids the
+  rendering problem that happened right after showBidPopup was set to true.
 -->
 
 <div
@@ -947,7 +914,7 @@
     class="bid-popup"
     (click)="$event.stopPropagation()">
 
-    <!-- HEADER -->
+    <!-- Header -->
 
     <div class="bid-popup-header">
 
@@ -965,7 +932,7 @@
     </div>
 
 
-    <!-- BODY -->
+    <!-- Body -->
 
     <div class="bid-popup-body">
 
@@ -1005,7 +972,7 @@
     </div>
 
 
-    <!-- FOOTER -->
+    <!-- Footer -->
 
     <div class="bid-popup-footer">
 
@@ -1033,9 +1000,7 @@
   </div>
 
 </div>
-<!-- ================================================= -->
-<!-- ADD PHASE POPUP -->
-<!-- ================================================= -->
+<!-- Add phase popup -->
 
 <div
   class="bid-popup-overlay"
@@ -1045,7 +1010,7 @@
     class="bid-popup"
     (click)="$event.stopPropagation()">
 
-    <!-- HEADER -->
+    <!-- Header -->
 
     <div class="bid-popup-header">
 
@@ -1063,7 +1028,7 @@
     </div>
 
 
-    <!-- BODY -->
+    <!-- Body -->
 
     <div class="bid-popup-body">
 
@@ -1097,7 +1062,7 @@
     </div>
 
 
-    <!-- FOOTER -->
+    <!-- Footer -->
 
     <div class="bid-popup-footer">
 
@@ -1125,9 +1090,7 @@
 
 </div>
 
-<!-- ================================================= -->
-<!-- ADD EMPLOYEE POPUP -->
-<!-- ================================================= -->
+<!-- Add employee popup -->
 
 <div
   class="bid-popup-overlay"
@@ -1137,7 +1100,7 @@
     class="bid-popup"
     (click)="$event.stopPropagation()">
 
-    <!-- HEADER -->
+    <!-- Header -->
 
     <div class="bid-popup-header">
 
@@ -1155,11 +1118,11 @@
     </div>
 
 
-    <!-- BODY -->
+    <!-- Body -->
 
     <div class="bid-popup-body">
 
-      <!-- ROLE -->
+      <!-- Role -->
 
       <div class="field">
 
@@ -1189,7 +1152,7 @@
       </div>
 
 
-      <!-- EMPLOYEE -->
+      <!-- Employee -->
 
       <div class="field">
 
@@ -1221,7 +1184,7 @@
     </div>
 
 
-    <!-- FOOTER -->
+    <!-- Footer -->
 
     <div class="bid-popup-footer">
 

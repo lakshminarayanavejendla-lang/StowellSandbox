@@ -1,38 +1,34 @@
-// Colors/typography matched against the live stowelldashboard.proserv360.tech reference (actual
-// computed styles pulled from that site 2026-09-13, same pass as new-po-form/new-co-form's
-// matching comment): Segoe UI font, h2/h3 text #28363C, regular-weight #212529 labels (NOT the
-// bold #555 this previously had), primary button/table header #0479CC with white text, text
-// inputs #ced4da border / 4px radius (NOT 8px this previously had).
+// Fonts, sizes and spacing were first matched to the production dashboard (2026-09-13, the same pass
+// as new-po-form and new-co-form). Colours now come from the theme tokens in styles.scss.
 .wrapper {
-  background: #fff;
+  background: var(--sh-surface);
   padding: 20px;
   border-radius: 4px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #212529;
+  color: var(--sh-ink);
 }
 
 h2 {
-  color: #28363c;
+  color: var(--sh-ink);
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 4px;
 }
 
 .dashed {
-  border-top: 1px dashed #e7eaec;
+  border-top: 1px dashed var(--sh-line);
   margin: 15px 0 25px 0;
 }
 
-// NEW - solid blue banner (matches the Budget Update table header's #0479cc), not plain dark
-// text - per direction/screenshot, section headers on this page should read as a banner bar.
-// flex: 1 makes it span full width when it's the sole child of the flex .section-header-row
-// below (a plain block h3 already spans full width on its own, so this has no effect there).
+// Section headings on this page are a solid banner bar, not plain text, as asked for. flex: 1 makes
+// the banner full width when it's the only child of .section-header-row below; a plain block h3 is
+// full width anyway.
 .section-header {
   flex: 1;
   margin: 25px 0 0;
   padding: 8px 12px;
-  background-color: #0479cc;
-  color: #fff;
+  background-color: var(--sh-blue-soft);
+  color: var(--sh-blue);
   font-size: 18px;
   font-weight: 700;
 }
@@ -49,39 +45,34 @@ h2 {
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
-  // FIX (2026-09-22, alignment sweep) - grid items default to min-width: auto (their content's
-  // own min-content size), which overrides the header-grid column's minmax(0, 1fr) track: at
-  // narrower widths the value cell's content (the CO Type radio group; the Phase row's
-  // select+ADD button) was wider than its column and visually overflowed into the next
-  // header-grid column ("Internal" running into "CO Reason", the phase dropdown into "Budget
-  // Change Total") - CSS Grid doesn't clip that overflow, so the two columns' text overlapped
-  // instead of the field simply getting narrower/wrapping. min-width: 0 lets this field shrink
-  // to its track's actual width like the surrounding grids already assume it will.
+  // Grid items default to min-width: auto, so at narrow widths the CO Type radios and the Phase
+  // dropdown with its ADD button spilled into the next column and the text overlapped ("Internal"
+  // over "CO Reason") (2026-09-22). min-width: 0 lets the field shrink to its column instead.
   min-width: 0;
 
   label {
     font-weight: 400;
-    color: #212529;
+    color: var(--sh-ink);
   }
 
   input,
   select,
   textarea {
-    border: 1px solid #ced4da;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 6px 12px;
     font-size: 14px;
   }
 
   input[readonly] {
-    background: #f7f7f7;
-    color: #212529;
+    background: var(--sh-surface-2);
+    color: var(--sh-ink);
   }
 
-  // NEW - Change Order Amount fields when CO Type isn't Prime.
+  // The Change Order Amount fields when CO Type isn't Prime.
   input:disabled {
-    background: #e9ecef;
-    color: #6c757d;
+    background: var(--sh-surface-2);
+    color: var(--sh-ink-3);
     cursor: not-allowed;
   }
 }
@@ -89,15 +80,15 @@ h2 {
 .radio-group {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap; // FIX (2026-09-22) - see .field's min-width:0 comment; wraps onto a second
-  // line inside its own cell at narrow widths instead of overflowing into the next column.
+  flex-wrap: wrap; // on narrow screens, wrap within the cell instead of spilling into the next
+  // column (see the min-width: 0 note on .field, 2026-09-22)
 
   label {
     display: flex;
     align-items: center;
     gap: 6px;
     font-weight: 400;
-    color: #212529;
+    color: var(--sh-ink);
   }
 }
 
@@ -111,7 +102,7 @@ h2 {
 .phase-entry {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap; // FIX (2026-09-22) - same reasoning as .radio-group above.
+  flex-wrap: wrap; // same as .radio-group above
 
   input,
   select {
@@ -137,21 +128,17 @@ h2 {
   margin-bottom: 20px;
 }
 
-// FIX (2026-09-22, alignment sweep) - was `display: flex; flex-wrap: wrap`. Its 5 children
-// (the Cost Code/Remaining Budget/Debit/Credit `.field`s + the Add Line button) have no fixed
-// width, so at ordinary content-panel widths flex-wrap breaks the row wherever it runs out of
-// space - here, after Debit - dropping Credit and Add Line to a second line that starts back at
-// the left edge, not lined up under anything above it. CSS Grid's `repeat(auto-fit, ...)` fixes
-// this because every row shares the SAME column tracks: wherever a row breaks, the next row's
-// items still land in the same columns as the row above, instead of flex's independent per-line
-// packing.
+// This used to be flex with wrap. Its five children (Cost Code, Remaining Budget, Debit and Credit,
+// plus Add Line) have no fixed width, so the row broke after Debit and the rest started again at the
+// left, not lined up with anything (2026-09-22). With a grid of repeat(auto-fit, ...), every row
+// shares the same columns, so wrapped items still line up.
 .entry-panel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   align-items: end;
   gap: 16px;
-  background: #f7f7f7;
-  border: 1px solid #dcdcdc;
+  background: var(--sh-surface-2);
+  border: 1px solid var(--sh-line);
   border-radius: 4px;
   padding: 14px;
 
@@ -176,7 +163,7 @@ h2 {
   margin: 15px 0;
 
   th {
-    background-color: #0479cc;
+    background-color: var(--sh-blue);
     color: #fff;
     font-weight: 700;
     padding: 12px 10px;
@@ -185,13 +172,13 @@ h2 {
 
   td {
     padding: 8px 10px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--sh-line);
   }
 
-  // NEW - inline Debit/Credit editing on each auto-populated Budget Update row.
+  // Debit and Credit can be edited on each Budget Update row.
   .line-amount {
     width: 100px;
-    border: 1px solid #ced4da;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     padding: 4px 8px;
     font-size: 14px;
@@ -200,7 +187,7 @@ h2 {
 
 .empty-row {
   text-align: center;
-  color: #888;
+  color: var(--sh-ink-3);
   font-style: italic;
 }
 
@@ -212,16 +199,16 @@ h2 {
 }
 
 .btn-primary {
-  background-color: #0479cc;
+  background-color: var(--sh-blue);
   color: #fff;
-  border: 1px solid #0479cc;
+  border: 1px solid var(--sh-blue);
   border-radius: 3.2px;
   padding: 6px 16px;
   cursor: pointer;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--sh-ink-3);
   color: #fff;
   border: 1px solid #6c757d;
   border-radius: 4px;
@@ -230,7 +217,7 @@ h2 {
 }
 
 .btn-add {
-  background-color: #0479cc;
+  background-color: var(--sh-blue);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -245,22 +232,22 @@ h2 {
 
 .btn-sm {
   background: none;
-  color: #0479cc;
-  border: 1px solid #0479cc;
+  color: var(--sh-blue);
+  border: 1px solid var(--sh-blue);
   border-radius: 3px;
   padding: 2px 8px;
   font-size: 12px;
   cursor: pointer;
 }
 
-// Pre-submit phase check (see phaseIssues in the component).
+// The phase check before Submit (see phaseIssues in the component).
 .phase-warning {
   margin: 8px 0 12px;
   padding: 10px 14px;
   border: 1px solid #e0a39c;
-  border-left: 5px solid #c0392b;
+  border-left: 5px solid #c2410c;
   border-radius: 4px;
-  background: #fdf1ef;
+  background: var(--sh-surface-2);
   color: #611a15;
 
   ul {
@@ -272,7 +259,7 @@ h2 {
     padding: 6px 14px;
     border: none;
     border-radius: 4px;
-    background: #00355f;
+    background: var(--sh-blue);
     color: #fff;
     font-weight: 600;
     cursor: pointer;
@@ -285,12 +272,12 @@ h2 {
   font-size: 0.85rem;
 }
 
-// Minus amounts are red, 0 or more stay normal (Mike Smith, 2026-09-23) - see also
+// Negative amounts are red and 0 or more are normal (Mike Smith, 2026-09-23). See also
 // shared/usd-input/usd-input.directive.ts for the editable dollar fields.
 .neg,
 .wrapper input.neg,
 .wrapper td.neg {
-  color: #c0392b !important;
+  color: #c2410c !important;
 }
 
 .status-message {

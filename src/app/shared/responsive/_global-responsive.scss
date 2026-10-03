@@ -1,0 +1,275 @@
+@use 'breakpoints' as bp;
+
+// Responsive rules for every page (imported from src/styles.scss).
+//
+// Pages already share a few layout classes (.form-row, .header-grid, .two-col ... and the label/value ".field" grid), so the
+// reflow rules live here once instead of in each component stylesheet. Component styles are view-encapsulated and therefore more
+// specific, so these overrides use !important, and only inside the media queries below (the desktop layout is untouched).
+//
+//   >= 1280   as designed (1440x900 is the design/QA target)
+//   1024-1279 three-column form rows drop to two
+//   768-1023  tablet: forms 2 columns, grids scroll sideways instead of squeezing
+//   < 768     single column, label above value, dialogs full width
+
+// --- never wider than the screen ------------------------------------------------------------------------------------
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+// --- multi-column form / header grids -------------------------------------------------------------------------------
+$three-col: '.form-row, .form-group.row, .row-3, .three-column, .header-fields';
+$two-col: '.header-grid, .two-col, .two-column, .row-2';
+
+@include bp.below(bp.$bp-desktop) {
+  #{$three-col} {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@include bp.below(bp.$bp-tablet) {
+  #{$three-col},
+  #{$two-col} {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  // label + value pairs stack (label above the field)
+  .field {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .file-upload {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  // Syncfusion dropdowns/inputs fill their field instead of keeping a desktop-width inner box
+  .field ejs-combobox,
+  .field ejs-dropdownlist,
+  .field .e-control-wrapper,
+  .field .e-input-group {
+    width: 100% !important;
+  }
+}
+
+// --- data grids: scroll sideways rather than squeeze columns ---------------------------------------------------------
+ejs-grid {
+  display: block;
+  max-width: 100%;
+}
+
+@include bp.below(bp.$bp-compact) {
+  ejs-grid,
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  // low-priority columns hide themselves via hideAtMedia on the main queues; this floor keeps the rest from squeezing
+  ejs-grid.e-grid {
+    min-width: 480px;
+  }
+
+  // plain HTML tables (not Syncfusion's own e-* tables) scroll inside their own box instead of stretching the page
+  table:not([class^='e-']):not([class*=' e-']) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+// --- phone: grid rows become cards -----------------------------------------------------------------------------------------
+// Under 768px each row of a data grid (the app's `.black-grid` grids) reads as a card of "Label  value" lines; the header and filter row
+// are hidden (paging stays). Labels come from GridCardLabelsService (data-label). Columns hidden via hideAtMedia stay hidden (e-hide).
+@include bp.below(bp.$bp-tablet) {
+  ejs-grid.black-grid {
+    min-width: 0;
+    border: 0;
+
+    .e-gridheader,
+    .e-toolbar {
+      display: none;
+    }
+
+    .e-gridcontent .e-content {
+      height: auto !important;
+    }
+
+    .e-content table,
+    .e-content tbody,
+    .e-content colgroup {
+      display: block;
+      width: 100% !important;
+    }
+
+    .e-content colgroup {
+      display: none;
+    }
+
+    tr.e-row {
+      display: block;
+      margin: 0 0 10px;
+      padding: 6px 12px;
+      border: 1px solid #d5dde6;
+      border-radius: 6px;
+      background: var(--sh-surface);
+    }
+
+    td.e-rowcell {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100% !important;
+      height: auto !important;
+      padding: 5px 0 !important;
+      border: 0 !important;
+      text-align: right;
+      overflow-wrap: anywhere;
+
+      &::before {
+        content: attr(data-label);
+        flex: 0 0 38%;
+        font-weight: 600;
+        color: #555;
+        text-align: left;
+      }
+
+      // columns the tablet layout hides (hideAtMedia) are part of the card: a phone card shows the full row
+      &.e-hide {
+        display: flex !important;
+      }
+    }
+  }
+}
+
+// --- dialogs / popups / cards ---------------------------------------------------------------------------------------
+.e-dialog,
+.modal,
+.modal-content,
+.popup {
+  max-width: 96vw;
+}
+
+@include bp.below(bp.$bp-tablet) {
+  .e-dialog {
+    width: 96vw !important;
+    left: 2vw !important;
+  }
+}
+
+// --- density modes (data-density on <html>, set by DensityService) -------------------------------------------------------------
+// standard = the app as designed (nothing overridden). Touch devices default to comfortable; the user can switch from the top bar.
+//   comfortable: 44px controls, 48px grid rows, >= 8px between row actions (tablets / touch)
+//   compact:      32px grid rows, tighter buttons (power users / finance)
+// (Syncfusion inputs and buttons, the e-* classes, size themselves. Forcing a height on their inner parts misaligns them.)
+[data-density='comfortable'] {
+  button:not([class*='e-']),
+  .btn,
+  select,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([class*='e-']) {
+    min-height: var(--ui-touch-target, 44px);
+  }
+
+  .e-grid .e-rowcell {
+    height: 48px;
+  }
+
+  // touch: no cramped row actions
+  td button + button,
+  td a + a,
+  td button + a,
+  td a + button,
+  .btn + .btn,
+  .btn-sm + .btn-sm {
+    margin-left: 8px;
+  }
+}
+
+[data-density='compact'] {
+  .e-grid .e-rowcell {
+    height: 32px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .e-grid .e-headercell {
+    height: 34px;
+  }
+
+  .btn,
+  .btn-sm {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}
+
+// primary navigation targets are at least 48px on touch devices
+.touch-layout .nav-menu a,
+.touch-layout .nav-menu .menu-toggle {
+  min-height: 48px;
+}
+
+// on touch there is no hover: actions that only appear on hover must always be visible
+.touch-layout .show-on-hover {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+// dialogs grow to full screen on tablets/phones (Warren: "for tablets, dialogs should progressively become larger or even full-screen")
+@include bp.below(bp.$bp-compact) {
+  .custom-modal,
+  .modal-content {
+    width: min(96vw, 720px) !important;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+}
+
+@include bp.below(bp.$bp-tablet) {
+  .custom-modal,
+  .modal-content {
+    width: 100vw !important;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}
+
+// --- accessibility basics --------------------------------------------------------------------------------------------------
+// visible keyboard focus everywhere; respect the OS "reduce motion" setting
+:focus-visible {
+  outline: 2px solid #1b6ec2;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Contrast: greys that were under WCAG AA 4.5:1 on white in the axe audit, darkened just enough to pass
+.empty-row,
+td.empty,
+.note,
+.drop-zone > span,
+.entry-panel.disabled .field > label,
+.entry-panel.disabled label {
+  color: #626466 !important;
+  opacity: 1 !important;
+}
+
+.e-schedule .e-toolbar .e-tbar-btn-text {
+  color: #0a58ca !important;
+}

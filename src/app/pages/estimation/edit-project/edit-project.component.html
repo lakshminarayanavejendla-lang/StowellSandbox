@@ -1,0 +1,362 @@
+<a class="back-link" [routerLink]="['/estimation/bid-queue']">&larr; Back to Bid Queue</a>
+<app-page-header title="Edit Project" [breadcrumbs]="[{ label: 'Estimation', route: '/estimation/bid-queue' }, { label: 'Edit Project' }]"></app-page-header>
+
+@if (isLoading) {
+  <div class="busy-overlay"></div>
+}
+
+<form class="bid-form" [formGroup]="form" (ngSubmit)="submitBid()">
+  <div class="row">
+    <div class="field">
+      <label>Bidder</label>
+      <input type="text" formControlName="bidder" />
+    </div>
+    <div class="field">
+      <label>Job Phase *</label>
+      <select formControlName="jobPhase">
+        <option [ngValue]="null">Select Job Phase</option>
+        @for (p of jobPhases; track p) {
+          <option [value]="p">{{ p }}</option>
+        }
+      </select>
+      @if (form.get('jobPhase')?.invalid && form.get('jobPhase')?.touched) {
+        <span class="error">Job Phase is required</span>
+      }
+    </div>
+    <div class="field">
+      <label>Bid Status</label>
+      <select formControlName="bidStatus">
+        <option [ngValue]="null">Select status</option>
+        @for (s of bidStatuses; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Project Number</label>
+      <input type="text" formControlName="jobId" />
+    </div>
+    <div class="field">
+      <label>Division</label>
+      <select formControlName="division">
+        <option [ngValue]="null">Select Division</option>
+        @for (d of divisions; track d.value) {
+          <option [value]="d.value">{{ d.text }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label>Department</label>
+      <select formControlName="department" (change)="onDepartmentChange($any($event.target).value)">
+        <option [ngValue]="null">Select department</option>
+        @for (d of departments; track d) {
+          <option [value]="d">{{ d }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Job Type</label>
+      <select formControlName="jobType">
+        <option [ngValue]="null">Select job type</option>
+        @for (jt of jobTypes; track jt) {
+          <option [value]="jt">{{ jt }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label>Job Name</label>
+      <input type="text" formControlName="jobName" placeholder="Enter job name" />
+    </div>
+    <div class="field">
+      <label>Short Name</label>
+      <input type="text" formControlName="jobShortName" placeholder="Enter short name" />
+    </div>
+  </div>
+
+
+
+  <div class="row">
+    <div class="field">
+      <label>Contract Number</label>
+      <input type="text" formControlName="contractNumber" placeholder="Enter contract number" />
+    </div>
+    <div class="field">
+      <label>Contract Date</label>
+      <input type="date" formControlName="contractDate" />
+    </div>
+    <div class="field">
+      <label>Contract Amount</label>
+      <input type="number" step="0.01" min="0" formControlName="contractAmount" placeholder="Enter contract amount" />
+      @if (contractAmountLocked) {
+        <small class="field-note">The contract amount can't be changed here once the project is submitted. Ask accounting to update it in Sage100.</small>
+      }
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Est Start Date</label>
+      <input type="date" formControlName="estStartDate" />
+    </div>
+    <div class="field">
+      <label>Est Completion Date</label>
+      <input type="date" formControlName="estCompletionDate" />
+    </div>
+  </div>
+
+  <section>
+    <div class="section-header">
+      <h4>Additional Phases</h4>
+      <button type="button" class="btn btn-primary btn-sm" (click)="openAddPhasePopup()">Add Phases</button>
+    </div>
+    <table class="line-item-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Phase</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of phases.controls; track row.value.id) {
+          <tr>
+            <td><button type="button" class="btn-icon-danger" (click)="deletePhase(row)">Delete</button></td>
+            <td>{{ row.value.phase }}</td>
+            <td>{{ row.value.description }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="3" class="empty">No additional phases.</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <div class="two-col">
+    <div class="col">
+      <h4>Project Location</h4>
+      <div class="field">
+        <label>Jobsite</label>
+        <input type="text" formControlName="jobSite" placeholder="Enter jobsite" />
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <input type="text" formControlName="jobSiteAddress" placeholder="Enter address" />
+      </div>
+      <div class="field">
+        <label>Address 2</label>
+        <input type="text" formControlName="jobSiteAddress2" placeholder="Enter address 2" />
+      </div>
+      <div class="field">
+        <label>City</label>
+        <input type="text" formControlName="jobSiteCity" placeholder="Enter city" />
+      </div>
+      <div class="field">
+        <label>State</label>
+        <input type="text" formControlName="jobSiteState" placeholder="Enter state" />
+      </div>
+      <div class="field">
+        <label>Sales Tax District</label>
+        <input type="text" formControlName="jobSiteSalesTaxDistrict" placeholder="Enter sales tax district" />
+      </div>
+    </div>
+    <div class="col">
+      <h4>General Contractor Information</h4>
+      <div class="field">
+        <label>Client</label>
+        <select formControlName="clientId" (change)="onClientChange($any($event.target).value ? +$any($event.target).value : null)">
+          <option [ngValue]="null">Select Client</option>
+          @for (c of contractClientDroplist; track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label>Address</label>
+        <input type="text" formControlName="clientAddress1" placeholder="Address line 1" />
+      </div>
+      <div class="field">
+        <label>Address 2</label>
+        <input type="text" formControlName="clientAddress2" placeholder="Address line 2" />
+      </div>
+      <div class="field">
+        <label>City</label>
+        <input type="text" formControlName="clientCity" placeholder="Enter city" />
+      </div>
+      <div class="field-inline">
+        <div class="field">
+          <label>State</label>
+          <input type="text" formControlName="clientState" placeholder="Enter state" />
+        </div>
+        <div class="field">
+          <label>Zip</label>
+          <input type="text" maxlength="5" formControlName="clientZip" placeholder="Enter zip" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Project Information</h4>
+  <div class="two-col">
+    <div class="col">
+      <div class="field">
+        <label>Insurance Type</label>
+        <select formControlName="insuranceType">
+          <option value="0">Select insurance type</option>
+          <option value="1">OCIP</option>
+          <option value="2">CCIP</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Bonded</label>
+        <select formControlName="bonded">
+          <option value="0">Select</option>
+          <option value="1">Yes</option>
+          <option value="2">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tax Exempt</label>
+        <select formControlName="taxExempt">
+          <option value="0">Select</option>
+          <option value="1">Yes</option>
+          <option value="2">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Invoice Submittal</label>
+        <select formControlName="invoiceSubmittal">
+          <option value="0">Select</option>
+          <option value="1">Email</option>
+          <option value="2">Portal</option>
+          <option value="3">Mail</option>
+        </select>
+      </div>
+    </div>
+    <div class="col">
+      <div class="field">
+        <label>Certified Payroll</label>
+        <select formControlName="certifiedPayroll">
+          <option value="0">Select</option>
+          <option value="1">Yes</option>
+          <option value="2">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Net Terms Date</label>
+        <input type="date" formControlName="netTermsDate" />
+      </div>
+      <div class="field">
+        <label>Retainage %</label>
+        <input type="number" min="0" max="100" step="0.01" formControlName="retainagePercent" placeholder="Enter retainage percentage" />
+      </div>
+    </div>
+  </div>
+
+  <h4>Project Resources</h4>
+  <section>
+    <div class="section-header">
+      <button type="button" class="btn btn-primary btn-sm" (click)="openAddEmployeePopup()">Add Employee</button>
+    </div>
+    <table class="line-item-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Role</th>
+          <th>Employee</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of employees.controls; track row.value.id) {
+          <tr>
+            <td><button type="button" class="btn-icon-danger" (click)="deleteEmployee(row)">Delete</button></td>
+            <td>{{ row.value.role }}</td>
+            <td>{{ row.value.employee }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="3" class="empty">No employees assigned.</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <div class="submit-row">
+    <button type="submit" class="btn btn-primary" [disabled]="isLoading">Save Project</button>
+  </div>
+</form>
+
+@if (showPhasePopup) {
+  <div class="modal-overlay" (click)="closePhasePopup()">
+    <div class="custom-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">Additional Phases</span>
+        <button type="button" class="close" (click)="closePhasePopup()">&times;</button>
+      </div>
+      <div class="modal-body" [formGroup]="addPhaseForm">
+        <table class="table-bordered">
+          <thead><tr><th>Phase</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>
+                <select formControlName="phaseNum">
+                  <option [ngValue]="null">Select phase</option>
+                  @for (p of phasesCatalog; track p.phaseNum) {
+                    <option [value]="p.phaseNum">{{ p.phaseName }}</option>
+                  }
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="closePhasePopup()">Close</button>
+        <button type="button" class="btn btn-primary btn-sm" (click)="savePhase()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showEmployeePopup) {
+  <div class="modal-overlay" (click)="closeEmployeePopup()">
+    <div class="custom-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">Add Employee</span>
+        <button type="button" class="close" (click)="closeEmployeePopup()">&times;</button>
+      </div>
+      <div class="modal-body" [formGroup]="addEmployeeForm">
+        <table class="table-bordered">
+          <thead><tr><th>Role</th><th>Employee</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>
+                <select formControlName="empRole">
+                  @for (r of empRoles; track r) {
+                    <option [value]="r">{{ r }}</option>
+                  }
+                </select>
+              </td>
+              <td>
+                <select formControlName="employeeId">
+                  <option [ngValue]="null">None</option>
+                  @for (c of contractClientRecords; track c.id) {
+                    <option [value]="c.id">{{ c.name }}</option>
+                  }
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="closeEmployeePopup()">Close</button>
+        <button type="button" class="btn btn-primary btn-sm" (click)="saveEmployee()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+}

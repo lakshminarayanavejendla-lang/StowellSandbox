@@ -1,6 +1,4 @@
-<h3>Cash Flow To Date - Multiple</h3>
-<hr />
-
+<app-page-header title="Cash Flow To Date - Multiple"></app-page-header>
 <div class="filters">
   <div class="field">
     <label>Status</label>
@@ -47,7 +45,7 @@
   </div>
 </div>
 
-<!-- Syncfusion GridComponent replaces the plain <table>, same `filteredRecords` data source. -->
+<!-- The report grid, using `filteredRecords`. -->
 @if (filteredRecords.length > 0) {
   <ejs-grid #cashFlowToDateGrid [dataSource]="filteredRecords" [allowSorting]="true" height="420" [allowPdfExport]="true" [allowExcelExport]="true">
     <e-columns>

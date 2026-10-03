@@ -9,31 +9,24 @@ import { Phase } from '../../../core/models/estimation/phase.model';
 import { DivisionOption } from '../../../core/models/estimation/estimation-common.model';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 /**
- * Shared port of AddBid.razor/AddBidBase.cs AND EditBidForm.razor/EditBidFormBase.cs.
+ * One component for both Add Bid (AddBid.razor) and Edit Bid (EditBidForm.razor).
  *
- * CONSOLIDATION CALL (flagging per the task's request to document this either way): a
- * line-by-line diff of the two .razor files and their code-behind classes showed they are
- * effectively the SAME form - identical field list, identical popups, identical validation
- * (only Job Phase is Required), identical dropdown data sources and identical
- * insert/delete-row handlers for the three line-item sections. The only real differences are:
- *   1. EditBidForm takes a route `{JobId:int}`, loads the existing bid via GetBidDetails and
- *      reverse-populates every field; AddBid instead calls GetNewBidNumber for a fresh Job ID.
- *   2. EditBidForm's Save button posts to UpdateBid instead of SubmitBid.
- *   3. EditBidForm alone renders a second "Send For Approval" button, enabled only when
- *      Bid Status = "Won" - but it calls the exact same submit handler as "Save Bid", so it is
- *      not a functionally distinct action, just a second, conditionally-visible label/CTA.
- * Given ~95%+ field/logic overlap and that the risk of the two silently drifting apart (e.g. a
- * future bug fix applied to one copy but not the other) seemed worse than the risk of one
- * shared component needing an `isEditMode` branch in a few places, this was built as ONE
- * component parameterized by an optional `jobId` route param, rather than two components or a
- * shared child component. If product requirements diverge further between Add and Edit later,
- * split them then - the two code paths are already clearly isolated below (see `isEditMode`).
+ * The two Blazor forms are the same: same fields, popups, validation (only Job Phase is required),
+ * dropdown data and row handlers. The differences:
+ *   1. Edit takes a {JobId:int} route, loads the bid with GetBidDetails and fills in every field.
+ *     Add gets a new Job ID from GetNewBidNumber.
+ *   2. Edit's Save posts to UpdateBid; Add's posts to SubmitBid.
+ *   3. Edit also shows a "Send For Approval" button when Bid Status is "Won", but it runs the same
+ *     handler as Save Bid.
+ * Two copies would drift apart over time, so this is one component with an optional `jobId` route
+ * parameter. The edit-only code is behind `isEditMode`. Split it if Add and Edit start to differ more.
  */
 @Component({
   selector: 'app-bid-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, DatePipe, CurrencyPipe],
+  imports: [PageHeaderComponent, ReactiveFormsModule, RouterLink, DatePipe, CurrencyPipe],
   templateUrl: './bid-form.component.html',
   styleUrl: './bid-form.component.scss',
 })
@@ -47,10 +40,9 @@ export class BidFormComponent implements OnInit {
   isLoading = false;
   jobId = '';
 
-  // TODO: resolve the signed-in user's email from the MSAL account instead of a hardcoded
-  // placeholder once auth is fully wired - same open item as JobService/CurrentJobsComponent.
-  // The Blazor source resolved this via GetLoggedUserEmail() (server-side ClaimsPrincipal),
-  // which has no HTTP call behind it at all (see EstimationService notes).
+  // TODO: use the signed-in user's email from the MSAL account instead of this placeholder once
+  // sign-in is fully wired (same as JobService). Blazor's GetLoggedUserEmail() read it on the server
+  // and made no HTTP call (see EstimationService).
   private userEmail = this.authservice.getLoggedInUserEmail();
 
   readonly jobPhases = ['RFI', 'Estimate', 'Bid', 'Project'];
@@ -61,7 +53,7 @@ export class BidFormComponent implements OnInit {
     Drywall: ['Apartment', 'Condo', 'Medical', 'Residential'],
     Concrete: ['Block', 'Tilt Up', 'Foundation'],
   };
-  // Hardcoded GUID-keyed division picklist, verbatim from AddBidBase.cs/EditBidFormBase.cs.
+  // The fixed division list, keyed by GUID, copied from AddBidBase.cs and EditBidFormBase.cs.
   readonly divisions: DivisionOption[] = [
     { value: 'BlockConcreteGroupId', text: 'BlockConcrete' },
     { value: 'a539add2-52ab-4545-acb6-5d23c703403f', text: 'Jacksonville' },
@@ -103,10 +95,8 @@ export class BidFormComponent implements OnInit {
     clientCity: [''],
     clientState: [''],
     clientZip: [''],
-    // Codes ("0"/"1"/"2"/"3") match the C# select-option values verbatim - "0" behaves as an
-    // unselected placeholder in the source but IS a real value (Convert.ToInt32("0") = 0), not
-    // null. Ported as-is rather than "fixed" to a proper null-placeholder; flag if that
-    // 0-vs-unselected ambiguity needs resolving with the API team.
+    // The codes "0" to "3" match the C# option values. "0" acts as "not chosen" but is a real value
+    // (0), not null. Kept that way; check with the API team if that needs changing.
     insuranceType: ['0'],
     bonded: ['0'],
     taxExempt: ['0'],
@@ -116,17 +106,14 @@ export class BidFormComponent implements OnInit {
     retainagePercent: [null],
   });
 
-  // Repeating line-item sections. Each row is inserted/deleted via its own immediate API call
-  // (InsertBid/InsertPhase/InsertEmployee, DeleteBidAmount/DeletePhase/DeleteEmployee) rather
-  // than being submitted as part of the main form - matching SaveBidsClick/SavePhaseClick/
-  // SaveEmployeeClick in the source, which post-and-refetch each grid independently of
-  // SubmitBidAsync. FormArrays back the grids so add/remove goes through Angular's reactive
-  // forms API rather than manual array splicing.
+  // The three row lists. Each row is added or deleted with its own API call (InsertBid, InsertPhase,
+  // InsertEmployee, DeleteBidAmount, DeletePhase, DeleteEmployee), not with the main form, just like
+  // the Blazor page, which saved and reloaded each grid separately. FormArrays hold the rows.
   bidAmounts = this.fb.array<FormGroup>([]);
   phases = this.fb.array<FormGroup>([]);
   employees = this.fb.array<FormGroup>([]);
 
-  // Popup entry forms (the modal "add a row" mini-forms).
+  // The popup forms for adding a row.
   addBidForm = this.fb.group({
     bidDate: [null],
     bidAmount: [null],
@@ -177,6 +164,11 @@ export class BidFormComponent implements OnInit {
     this.form.get('jobId')?.setValue(this.jobId);
     this.refreshLineItems();
 
+    // The PM enters the Contract Amount when the project is first submitted. On this edit screen it
+    // can't be changed; accounting changes it in Sage 100 (Mike Smith, 2026-09-25). It's disabled, not
+    // removed, because submitBid() uses getRawValue(), so the saved amount is sent back unchanged.
+    this.form.get('contractAmount')?.disable();
+
     this.estimationService.getBidDetails(jobIdNum).subscribe((bid) => {
       if (!bid) {
         return;
@@ -216,9 +208,8 @@ export class BidFormComponent implements OnInit {
         netTermsDate: bid.projectInfo?.netTermsDate ?? null,
         retainagePercent: bid.projectInfo?.retainagePerc ?? null,
       });
-      // patchValue above already set `department`; onDepartmentChange rebuilds the dependent
-      // jobTypes list AND resets `jobType` to null as a side effect (mirrors
-      // AddBidBase.OnDepartmentChange), so the real saved jobType has to be reapplied after.
+      // patchValue already set `department`, but onDepartmentChange rebuilds the job type list and
+      // clears `jobType` (like AddBidBase.OnDepartmentChange), so set the saved jobType again after.
       this.onDepartmentChange(this.form.get('department')?.value);
       this.form.get('jobType')?.setValue(bid.jobType ?? null);
     });
@@ -386,7 +377,7 @@ export class BidFormComponent implements OnInit {
     });
   }
 
-  // --- Main submit (Save Bid / Send For Approval - both call this, matching the source) ---
+  // --- Main submit (Save Bid and Send For Approval both call this, as in Blazor) ---
   submitBid(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -454,11 +445,8 @@ export class BidFormComponent implements OnInit {
                 ? 'Project details updated successfully'
                 : 'Project details saved successfully'
             );
-            // FIX (2026-09-16, Mike Smith - "When I save the Project from the 'Update' screen it
-            // navigates back to Bid Queue, need to go back to project") - this page is reached
-            // from the Project Overview's Details/Overview tabs "Update" link for an existing
-            // project (isEditMode), so saving should return there, not to the Bid Queue (which
-            // only makes sense for the non-edit "New Bid" flow).
+            // Editing is opened from the Project Overview's "Update" link, so after saving go back to
+            // the project, not the Bid Queue (Mike Smith, 2026-09-16). The Bid Queue is only for New Bid.
             this.router.navigate(
               this.isEditMode
                 ? ['/project-management/project-overview', this.jobId]

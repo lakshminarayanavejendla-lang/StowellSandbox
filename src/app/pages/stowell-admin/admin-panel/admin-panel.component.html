@@ -30,18 +30,11 @@
 }
 
 <!--
-  FIX - assignments panel opening at the bottom of the page instead of under the clicked row:
-  the outer list previously used <ejs-grid>, which structurally can't place arbitrary content
-  directly after ONE specific row without Syncfusion's own detailTemplate/DetailRowService (the
-  original port deliberately avoided that - single-expand-at-a-time wasn't confidently
-  reproducible with that feature's API sight-unseen, per the older version of this comment).
-  Reverted the OUTER list to a plain <table> (the inner per-project assignments Grid below is
-  UNCHANGED, still Syncfusion) - a real, direct fix, not a workaround: a plain <tr> can be
-  followed immediately by another <tr> holding the expanded panel, which is exactly what
-  "expand under the row you clicked" needs, using plain and completely reliable Angular (click)
-  bindings throughout. This also happens to restore the .projects-table/.project-row/
-  .assignments-row CSS already sitting unused in this component's stylesheet since that earlier
-  Grid swap - not new styling, just no longer dead code.
+  The project list is a plain <table>, not <ejs-grid>. With the grid, the assignments panel opened at
+  the bottom of the page, because a grid can't put content right after one row without its detail
+  template feature. With a table, the panel is just the next <tr> under the row you clicked. The
+  assignments inside are still a Syncfusion grid. This also puts the .projects-table, .project-row
+  and .assignments-row styles back in use.
 -->
 <table class="projects-table">
   <thead>
@@ -82,11 +75,9 @@
               }
 
               @if (group.assignments.length > 0) {
-                <!-- FIX - delete not working: (click) bound inside this column's own
-                     ng-template wasn't reliably wired. Uses (recordClick) on this <ejs-grid>
-                     instead, gated to the "Actions" column (the only template-only column here,
-                     so headerText is the way to identify it - same "no field on template-only
-                     columns" situation flagged below). -->
+                <!-- A (click) inside the Actions column's template didn't always fire, so delete uses
+                     the grid's (recordClick) and only acts in the Actions column. That column has
+                     no field, so it's found by its headerText. -->
                 <ejs-grid [dataSource]="group.assignments" [allowSorting]="true" height="auto" (recordClick)="onAssignmentRecordClick(group, $event)">
                   <e-columns>
                     <e-column field="userRoleName" headerText="Role" width="150"></e-column>

@@ -12,10 +12,9 @@ import {
 import { environment } from '../../../environments/environment';
 
 /**
- * Phase 1 default: MSAL Angular (client-side / public-client Azure AD auth), replacing the
- * Blazor server's Microsoft.Identity.Web confidential-client OIDC flow. This is a placeholder
- * choice flagged for confirmation - see the handoff notes for the alternative (a BFF / auth
- * proxy pattern that keeps token handling server-side, closer to what the Blazor app did).
+ * Sign-in uses MSAL Angular (Azure AD in the browser) in place of the Blazor server's
+ * Microsoft.Identity.Web flow. This still needs confirming. The other option, in the handoff notes,
+ * is a server-side auth proxy that keeps tokens off the browser, like Blazor did.
  */
 export function MSALInstanceFactory(): IPublicClientApplication {
   return new PublicClientApplication({

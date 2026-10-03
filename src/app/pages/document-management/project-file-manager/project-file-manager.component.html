@@ -1,5 +1,4 @@
-<h3>Document Management @if (jobName) { <span class="job-name">- {{ jobName }}</span> }</h3>
-<hr />
+<app-page-header [title]="'Document Management' + (jobName ? ' - ' + jobName : '')" [breadcrumbs]="[{ label: 'Document Management' }]"></app-page-header>
 
 @if (notFound) {
   <div class="not-found">Could not resolve a document folder for project "{{ projectId }}".</div>

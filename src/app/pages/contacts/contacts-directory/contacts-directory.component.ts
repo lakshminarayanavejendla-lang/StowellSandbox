@@ -1,22 +1,17 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ContactService } from '../../../core/services/contact.service';
 import { ContactGroup, ContactGroupMember } from '../../../core/models/contacts/contact-group.model';
-import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of Contacts/Index.razor + IndexBase.razor.cs (@page "/Contacts") - restored to the
- * original group-tabs directory (previously narrowed to a flat all-users list, see git history).
+ * The Contacts page (/Contacts in Blazor): a directory with a chip for each group.
  *
- * Groups are fetched up front (cheap - just id/displayName), but a group's MEMBERS are only
- * fetched when its tab is selected, one group at a time. This avoids the original Blazor page's
- * performance problem (eagerly loading every group's members - each member needs two sequential
- * Graph calls for profile + photo - across all ~280 groups at once); lazy, per-group loading
- * keeps that same per-member cost but pays it for one group at a time instead of all of them.
+ * The group list (just ids and names) loads first, and a group's members load only when it is opened
+ * (Blazor loaded all ~280 groups' members at once). The service keeps what it has loaded, so going back
+ * to a group is instant.
  *
- * CONFIRMED against IndexBase.razor.cs: GetAllGroups() returns every Azure AD group in the
- * tenant (~280), and the source filters that down to this exact hardcoded whitelist of 11
- * "contact directory" groups (Accounting, BlockConcrete, Executive, HR, PM-*, Security Team,
- * Stowell Team) before rendering tabs. Reproduced verbatim rather than guessed at.
+ * As in IndexBase.razor.cs, GetAllGroups() returns every Azure AD group, and the page keeps only 11
+ * directory groups (Accounting, BlockConcrete, Executive, HR, PM-*, Security Team, Stowell Team).
+ * The list is copied exactly.
  */
 const CONTACT_GROUP_IDS = [
   '00c89364-0f28-402e-a905-3080af09b97b',
@@ -32,10 +27,19 @@ const CONTACT_GROUP_IDS = [
   '21e5091d-cb71-4bdb-8d63-f98d8bce3017',
 ];
 
+/** Soft background and text colours for the initials avatar, picked from the name so a person keeps theirs. */
+const AVATAR_TONES = [
+  ['#e8f0fc', '#2563c9'],
+  ['#e3f6ec', '#14804a'],
+  ['#fdeee2', '#c2570c'],
+  ['#f0e8fb', '#6d3fc0'],
+  ['#e1f4f7', '#12788a'],
+  ['#fbe6ee', '#b8325f'],
+];
+
 @Component({
   selector: 'app-contacts-directory',
   standalone: true,
-  imports: [PageHeaderComponent],
   templateUrl: './contacts-directory.component.html',
   styleUrl: './contacts-directory.component.scss',
 })
@@ -47,12 +51,27 @@ export class ContactsDirectoryComponent implements OnInit {
   groupsLoaded = false;
 
   selectedGroup: ContactGroup | null = null;
-  groupMembers: ContactGroupMember[] = [];
   membersLoaded = false;
+  /** A number of placeholder cards to show while members load. */
+  readonly skeletons = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  readonly members = signal<ContactGroupMember[]>([]);
+  readonly query = signal('');
+  /** Photo URLs by user id, filled in as they arrive after the list has shown. */
+  readonly photos = signal<Record<string, string>>({});
+  /** The email that was just copied, to show a tick for a moment. */
+  readonly copied = signal<string | null>(null);
+
+  /** The members matching the search (name, title, email, phone or city). */
+  readonly shown = computed(() => {
+    const q = this.query().trim().toLowerCase();
+    if (!q) return this.members();
+    return this.members().filter((m) => [m.displayName, m.jobTitle, m.mail, m.phone, m.city, m.state].some((v) => (v ?? '').toLowerCase().includes(q)));
+  });
 
   ngOnInit(): void {
     this.contactService.getAllGroups().subscribe((groups) => {
-      this.groups = groups.filter((g) => CONTACT_GROUP_IDS.includes(g.id));
+      this.groups = groups.filter((g) => CONTACT_GROUP_IDS.includes(g.id)).sort((a, b) => a.displayName.localeCompare(b.displayName));
       this.groupsLoaded = true;
       if (this.groups.length > 0) {
         this.selectGroup(this.groups[0]);
@@ -65,21 +84,61 @@ export class ContactsDirectoryComponent implements OnInit {
     if (this.selectedGroup?.id === group.id) return;
     this.selectedGroup = group;
     this.membersLoaded = false;
-    this.groupMembers = [];
+    this.members.set([]);
+    this.query.set('');
     this.contactService.getGroupUsers(group.id).subscribe((members) => {
-      this.groupMembers = members;
+      // a slower reply for an earlier tab must not replace the one now open
+      if (this.selectedGroup?.id !== group.id) return;
+      this.members.set(members);
       this.membersLoaded = true;
+      this.loadPhotos(members);
       this.cdr.detectChanges();
     });
   }
 
-  avatarSrc(member: ContactGroupMember): string {
-    return member.photoBase64
-      ? `data:image/jpeg;base64,${member.photoBase64}`
-      : '/assets/img/demo/avatars/icon-dummy-user.png';
+  photo(member: ContactGroupMember): string | null {
+    return this.photos()[member.id] ?? null;
   }
 
-  hasCityStateZip(member: ContactGroupMember): boolean {
-    return !!(member.city || member.state || member.postalCode);
+  /** The list shows first; each photo fills in when it arrives. */
+  private loadPhotos(members: ContactGroupMember[]): void {
+    for (const m of members) {
+      this.contactService.getPhoto(m.id).subscribe((url) => {
+        if (url) this.photos.update((p) => ({ ...p, [m.id]: url }));
+      });
+    }
+  }
+
+  initials(member: ContactGroupMember): string {
+    const parts = (member.displayName ?? '').split(/\s+/).filter(Boolean);
+    return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  }
+
+  tone(member: ContactGroupMember): { background: string; color: string } {
+    const name = member.displayName ?? '';
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    const [background, color] = AVATAR_TONES[h % AVATAR_TONES.length];
+    return { background, color };
+  }
+
+  /** "Austin, TX 78701", from whichever parts exist. */
+  place(member: ContactGroupMember): string {
+    const region = [member.state, member.postalCode].filter(Boolean).join(' ');
+    return [member.city, region].filter(Boolean).join(', ');
+  }
+
+  phoneHref(member: ContactGroupMember): string {
+    return 'tel:' + (member.phone ?? '').replace(/[^\d+]/g, '');
+  }
+
+  copy(email: string): void {
+    navigator.clipboard?.writeText(email).then(
+      () => {
+        this.copied.set(email);
+        setTimeout(() => this.copied.set(null), 1500);
+      },
+      () => undefined
+    );
   }
 }

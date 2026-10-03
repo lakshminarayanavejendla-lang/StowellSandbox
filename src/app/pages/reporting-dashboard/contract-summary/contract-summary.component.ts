@@ -6,29 +6,22 @@ import { ProjectCostCodeService } from '../../../core/services/project-cost-code
 import { CostCodeRecord, recJobNumber } from '../../../core/models/project-management/cost-code.model';
 import { ContractSummary } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of Components/Pages/ReportingDashboard/ContractSummary.razor + ContractSummaryBase.cs
- * (@page "/ContractSummary"). Job dropdown (GetAllUserJobs) feeds
- * ICostCodeService.GetContractSummaryData(jobNumber), already ported as
- * ProjectCostCodeService.getContractSummaryData.
+ * The Contract Summary (/ContractSummary in Blazor). Pick a job (GetAllUserJobs) to see its contract
+ * summary (getContractSummaryData).
  *
- * FLAG - three grid columns ("Balance With Tax", "Retained", "Net Due With Tax") are hardcoded
- * to "$0.00" literals in the Blazor source, not bound to any field on ContractSummary - there's
- * no server-computed tax/retention value coming back at all. Reproduced as static $0.00 cells
- * rather than inventing a computation; confirm with the backend whether these were meant to be
- * wired up or are dead/placeholder columns.
+ * In Blazor three columns, Balance With Tax, Retained and Net Due With Tax, are always "$0.00", not
+ * bound to any data, and the API returns nothing for them. The grid shows $0.00 too, rather than
+ * making up a calculation. Ask the backend team whether they should hold real values.
  *
- * FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
- * message - see report-export.util.ts's header comment.
- *
- * The Syncfusion Grid below still hardcodes "$0.00" for those same three columns (via a static
- * ng-template, not a bound field) - carried over unchanged, not fixed, per the task instructions.
+ * PDF, Excel and Word export work (see report-export.util.ts).
  */
 @Component({
   selector: 'app-contract-summary',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [SortService, PdfExportService, ExcelExportService],
   templateUrl: './contract-summary.component.html',
   styleUrl: './contract-summary.component.scss',

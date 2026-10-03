@@ -1,7 +1,6 @@
-// Mirrors StowellCoApp.DTO.Bids (DTO/BidInfoDto.cs) - the flat row shape used by
-// CurrentBids.razor's grid and by both grids in BidQueue.razor (via BidQueueDTO below).
-// Renamed from the C# class's plural "Bids" to the singular "Bid" to avoid an awkward
-// TypeScript identifier; the API route names (GetCurrentBidsUrl etc.) are unaffected.
+// Matches Bids in DTO/BidInfoDto.cs: one row in the Current Bids grid and both Bid Queue grids
+// (through BidQueueDTO below). Named Bid, not Bids, because a plural type name reads oddly in
+// TypeScript. The API routes don't change.
 export interface Bid {
   bidId: string;
   bidName: string;
@@ -10,7 +9,7 @@ export interface Bid {
   status: string;
 }
 
-// Mirrors StowellCoApp.DTO.BidQueueDTO, returned by GetBidQueueData (BidQueue.razor).
+// Matches BidQueueDTO, returned by GetBidQueueData.
 export interface BidQueueData {
   currentBids: Bid[];
   closedBids: Bid[];

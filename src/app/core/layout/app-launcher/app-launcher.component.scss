@@ -1,0 +1,100 @@
+@use '../../../shared/responsive/breakpoints' as bp;
+
+:host {
+  display: contents;
+}
+
+// Styled like the left sidebar: same background and edge, with each app as a rounded tile
+.right-bar {
+  width: 88px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--sh-side-line);
+  background-color: var(--sh-side-bg);
+  color: var(--sh-side-ink-2);
+  padding: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  overflow-y: auto;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0.625rem;
+    padding: 0.6rem 0.25rem;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    text-align: center;
+    transition: background 0.12s, color 0.12s;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--sh-side-hover);
+      color: var(--sh-side-ink);
+      outline: none;
+    }
+  }
+
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+
+  .text-xs {
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+}
+
+.rounded-circle {
+  border-radius: 10px !important;
+}
+
+// < 1280px: the launcher is an overlay instead of a permanent column
+@include bp.below(bp.$bp-desktop) {
+  .right-bar {
+    position: fixed;
+    top: 3.5rem;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.collapse-btn {
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.25rem;
+  color: var(--sh-side-ink-2);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--sh-side-ink);
+    background: var(--sh-side-hover);
+  }
+}
+
+// icons only
+.right-bar.collapsed {
+  width: 64px;
+
+  .text-xs {
+    display: none;
+  }
+
+  a {
+    margin: 0 0.5rem;
+  }
+}

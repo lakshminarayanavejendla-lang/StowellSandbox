@@ -52,13 +52,14 @@ import {
   Phase
 } from '../../../core/models/accounting/budget.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 
 @Component({
   selector: 'app-accounting-add-form',
   standalone: true,
 
-  imports: [
+  imports: [PageHeaderComponent, 
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -70,9 +71,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class AddFormComponent implements OnInit {
 
-  // ====================================================
-  // DEPENDENCY INJECTION
-  // ====================================================
+  // ---- Dependency injection ----
 
   private route = inject(ActivatedRoute);
 
@@ -90,9 +89,7 @@ export class AddFormComponent implements OnInit {
     inject(CostCodeService);
 private authService = inject(AuthService);
 
-  // ====================================================
-  // PAGE VARIABLES
-  // ====================================================
+  // ---- Page variables ----
 
   jobId = 0;
 
@@ -103,9 +100,7 @@ private authService = inject(AuthService);
   successMessage = '';
 
 
-  // ====================================================
-  // DROPDOWN DATA
-  // ====================================================
+  // ---- Dropdown data ----
 
   readonly jobPhases =
     ACCOUNTING_JOB_PHASES;
@@ -132,9 +127,7 @@ private authService = inject(AuthService);
   employeeOptions: ContractorClient[] = [];
 
 
-  // ====================================================
-  // MAIN FORM
-  // ====================================================
+  // ---- Main form ----
 
   form: FormGroup = this.fb.group({
 
@@ -228,9 +221,7 @@ private authService = inject(AuthService);
   });
 
 
-  // ====================================================
-  // ADD BID POPUP
-  // ====================================================
+  // ---- Add bid popup ----
 
   newBidAmount: {
     bidDate: string;
@@ -244,18 +235,14 @@ private authService = inject(AuthService);
   showBidPopup = false;
 
 
-  // ====================================================
-  // ADD PHASE
-  // ====================================================
+  // ---- Add phase ----
 
   newBidPhase = {
     phaseNum: ''
   };
 showPhasePopup = false;
 
-  // ====================================================
-  // ADD EMPLOYEE
-  // ====================================================
+  // ---- Add employee ----
 
 newEmployee: {
   role: string | null;
@@ -268,9 +255,7 @@ newEmployee: {
 showEmployeePopup = false;
 
 
-  // ====================================================
-  // FORM ARRAY GETTERS
-  // ====================================================
+  // ---- Form array getters ----
 
   get bidAmounts(): FormArray {
     return this.form.get('bidAmounts') as FormArray;
@@ -296,12 +281,9 @@ showEmployeePopup = false;
   }
 
 
-  // ====================================================
-  // INIT
-  // ====================================================
+  // ---- Init ----
 
   ngOnInit(): void {
-debugger;
     this.jobId =
       Number(
         this.route.snapshot.paramMap.get('jobId')
@@ -313,9 +295,7 @@ debugger;
     });
 
 
-    // ==================================================
-    // LOAD PHASES
-    // ==================================================
+    // ---- Load phases ----
 
     this.costCodeService
       .getAllPhases()
@@ -344,9 +324,7 @@ debugger;
       });
 
 
-    // ==================================================
-    // LOAD CONTRACTOR CLIENTS
-    // ==================================================
+    // ---- Load contractor clients ----
 
     // this.bidInfoService
     //   .getAllContractorClients()
@@ -395,10 +373,7 @@ this.bidInfoService.getAllContractorClients().subscribe({
   }
 });
 
-    // ==================================================
-    // LOAD EMPLOYEES
-    // ==================================================
-debugger;
+    // ---- Load employees ----
    this.bidInfoService.getAllEmployees().subscribe({
   next: (response: any) => {
 
@@ -417,9 +392,7 @@ debugger;
   }
 });
 
-    // ==================================================
-    // LOGGED USER
-    // ==================================================
+    // ---- Logged user ----
 
    
           this.form.patchValue({
@@ -431,16 +404,12 @@ debugger;
       String(this.jobId);
 
 
-    // ==================================================
-    // LOAD GRID DATA
-    // ==================================================
+    // ---- Load grid data ----
 
    this.reloadAllBidData()
 
 
-    // ==================================================
-    // LOAD BID DETAILS
-    // ==================================================
+    // ---- Load bid details ----
 
     this.bidInfoService
       .getBidDetails(this.jobId)
@@ -493,9 +462,7 @@ debugger;
 
   }
 
-// ====================================================
-// RELOAD ALL GRID DATA
-// ====================================================
+// ---- Reload all grid data ----
 
 private reloadAllBidData(): void {
 
@@ -507,9 +474,7 @@ private reloadAllBidData(): void {
   this.reloadBidPhases(jobIdStr);
   this.reloadBidEmployees(jobIdStr);
 }
-  // ====================================================
-  // DEPARTMENT
-  // ====================================================
+  // ---- Department ----
 
   onDepartmentChange(
     department: string
@@ -536,9 +501,7 @@ private reloadAllBidData(): void {
   }
 
 
-  // ====================================================
-  // DATE CONVERSION
-  // ====================================================
+  // ---- Date conversion ----
 
   convertToDateInput(
     date: string | null
@@ -570,9 +533,7 @@ private reloadAllBidData(): void {
   }
 
 
-  // ====================================================
-  // CLIENT
-  // ====================================================
+  // ---- Client ----
 
   onClientChange(
     clientId: number | string | null
@@ -636,9 +597,7 @@ private reloadAllBidData(): void {
   }
 
 
-  // ====================================================
-  // OPEN BID POPUP
-  // ====================================================
+  // ---- Open bid popup ----
 
   openBidPopup(): void {
 
@@ -670,9 +629,7 @@ private reloadAllBidData(): void {
   }
 
 
-  // ====================================================
-  // CLOSE BID POPUP
-  // ====================================================
+  // ---- Close bid popup ----
 
   closeBidPopup(): void {
 
@@ -695,9 +652,7 @@ private reloadAllBidData(): void {
   }
 
 
-  // ====================================================
-  // SAVE BID FROM POPUP
-  // ====================================================
+  // ---- Save bid from popup ----
 
 saveBidFromPopup(): void {
 
@@ -722,9 +677,7 @@ this.showBidPopup = false;
 }
  constructor(private cdr: ChangeDetectorRef) { }
 
-  // ====================================================
-  // ADD BID
-  // ====================================================
+  // ---- Add bid ----
 addBidAmount(): void {
 
   if (!this.newBidAmount.bidDate) {
@@ -795,9 +748,7 @@ addBidAmount(): void {
   
 }
 
-  // ====================================================
-  // DELETE BID
-  // ====================================================
+  // ---- Delete bid ----
 
 deleteBidAmount(item: BidAmount): void {
 
@@ -840,9 +791,7 @@ console.log('Deleting Bid Amount with ID:', item.id);
 }
 
 
-  // ====================================================
-  // ADD PHASE
-  // ====================================================
+  // ---- Add phase ----
 
 addBidPhase(): void {
 
@@ -928,9 +877,7 @@ addBidPhase(): void {
     });
 }
 
-  // ====================================================
-  // DELETE PHASE
-  // ====================================================
+  // ---- Delete phase ----
 
 deleteBidPhase(item: BidPhase): void {
 
@@ -969,9 +916,7 @@ deleteBidPhase(item: BidPhase): void {
     });
 }
 
-  // ====================================================
-  // ADD EMPLOYEE
-  // ====================================================
+  // ---- Add employee ----
 
 addEmployee(): void {
 
@@ -1057,9 +1002,7 @@ addEmployee(): void {
     });
 }
 
-  // ====================================================
-  // DELETE EMPLOYEE
-  // ====================================================
+  // ---- Delete employee ----
 
 deleteEmployee(item: BidEmployee): void {
 
@@ -1098,9 +1041,7 @@ deleteEmployee(item: BidEmployee): void {
     });
 }
 
-  // ====================================================
-  // SUBMIT BID
-  // ====================================================
+  // ---- Submit bid ----
 
     submitBid(): void {
 
@@ -1199,9 +1140,7 @@ convertDateForNewBid(
 
   return `${year}-${month}-${day}`;
 }
-  // ====================================================
-  // REJECT BID
-  // ====================================================
+  // ---- Reject bid ----
 
   rejectBid(): void {
 
@@ -1249,9 +1188,7 @@ convertDateForNewBid(
   }
 
 
-  // ====================================================
-  // RELOAD BID AMOUNTS
-  // ====================================================
+  // ---- Reload bid amounts ----
 
 private reloadBidAmounts(jobId: string): void {
 
@@ -1313,9 +1250,7 @@ this.cdr.detectChanges();
 
 
 
-  // ====================================================
-  // RELOAD BID PHASES
-  // ====================================================
+  // ---- Reload bid phases ----
 
 private reloadBidPhases(jobId: string): void {
 
@@ -1376,9 +1311,7 @@ private reloadBidPhases(jobId: string): void {
 }
 
 
-  // ====================================================
-  // RELOAD EMPLOYEES
-  // ====================================================
+  // ---- Reload employees ----
 
 private reloadBidEmployees(jobId: string): void {
 
@@ -1439,9 +1372,7 @@ private reloadBidEmployees(jobId: string): void {
 }
 
 
-  // ====================================================
-  // APPLY BID DETAILS
-  // ====================================================
+  // ---- Apply bid details ----
 
   private applyBidDetails(
     bid: BidInfoDto | null
@@ -1498,9 +1429,7 @@ private reloadBidEmployees(jobId: string): void {
     });
 
 
-    // ==================================================
-    // DEPARTMENT -> JOB TYPE
-    // ==================================================
+    // ---- Department to job type ----
 
     if (bid.department) {
 
@@ -1519,9 +1448,7 @@ private reloadBidEmployees(jobId: string): void {
     }
 
 
-    // ==================================================
-    // PROJECT LOCATION
-    // ==================================================
+    // ---- Project location ----
 
     if (bid.projectLocation) {
 
@@ -1550,9 +1477,7 @@ private reloadBidEmployees(jobId: string): void {
     }
 
 
-    // ==================================================
-    // CONTRACTOR
-    // ==================================================
+    // ---- Contractor ----
 console.log("contractor info:", bid.contractorInfo);
     if (bid.contractorInfo) {
 
@@ -1583,9 +1508,7 @@ console.log("contractor info:", bid.contractorInfo);
     }
 
 console.log("project info:", bid.projectInfo);
-    // ==================================================
-    // PROJECT INFORMATION
-    // ==================================================
+    // ---- Project information ----
 
     if (bid.projectInfo) {
 
@@ -1621,9 +1544,7 @@ this.convertToDateInput(
   }
 
 
-  // ====================================================
-  // BUILD DTO
-  // ====================================================
+  // ---- Build DTO ----
 convertDateFromApi(
   date: string | null | undefined
 ): string | undefined {

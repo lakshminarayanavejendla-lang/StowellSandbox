@@ -17,17 +17,12 @@ import { ContractorClient } from '../models/bids/contractor-client.model';
 import { ConvertBidResponse, NextDisplayBidIdResponse, SimpleResponse } from '../models/bids/simple-response.model';
 
 /**
- * Port of IBidService/BidService.cs's bid-record concerns: list (CurrentBids.razor),
- * queue (BidQueue.razor), single-record fetch/save/won/lost (BidOverview's tabs), new-bid
- * creation (NewBid.razor), and the two small lookups (bid-access employees, contractor client)
- * used by the Details tab. Bid Amounts and Bid Access are split out into their own services
- * (bid-amount.service.ts, bid-access.service.ts) since, despite living on the one IBidService
- * interface in the C# source, they're clearly separate sub-resource concerns.
+ * Bids, from BidService.cs: the bid list and queue, loading and saving one bid, marking it won or
+ * lost, creating a bid, and two lookups for the Details tab. Bid amounts and bid access have their
+ * own services (bid-amount.service.ts, bid-access.service.ts).
  *
- * Auth note: identical open question to Phase 1's JobService - CreatedBy/ModifiedBy audit
- * fields were resolved server-side in Blazor from the ClaimsPrincipal (GetUserEmail()). Until
- * StowellCoAPI resolves the user from the MSAL bearer token itself, callers here pass an empty/
- * placeholder value for those fields - confirm with the API team.
+ * In Blazor the server filled CreatedBy and ModifiedBy from the signed-in user. Until the API reads
+ * the user from the sign-in token, callers here pass an empty value. Confirm with the API team.
  */
 @Injectable({ providedIn: 'root' })
 export class BidService {
@@ -62,13 +57,10 @@ export class BidService {
     );
 }
 
-  // FIX (2026-09-24, Mike Smith - "When I save Bid the information on the details tab disappears"):
-  // the API serializes the General Contractor fields as gC_Address1 / gC_City / gC_State /
-  // gC_ZipCode / gC_SalesTaxDistrict (C# names GC_* + camelCase), but the app reads gcAddress1 /
-  // gcCity / ... - so every loaded bid had BLANK GC fields, and the Overview tab's Save Bid (which
-  // sends bidRecord.gc*) then wrote those blanks over the saved values. Also netTermsDate arrives as
-  // "2027-01-15T00:00:00", which an <input type="date"> can't show (and a re-save then sent it back
-  // empty). Normalise both once, here, so every tab sees the real values.
+  // The API sends the general contractor fields as gC_Address1, gC_City and so on, but the app reads
+  // gcAddress1, gcCity. Without this they loaded blank, and Save Bid wrote the blanks back over the
+  // saved values (Mike Smith, 2026-09-24). netTermsDate also comes as "2027-01-15T00:00:00", which a
+  // date input can't show. Both are fixed here, once, for every tab.
   private normalizeBid(raw: BidRecord): BidRecord {
     const r = raw as any;
     return {
@@ -121,8 +113,7 @@ export class BidService {
       .post<ConvertBidResponse>(`${this.base}${BidsEndpoints.ConvertBidToProjectUrl}`, request)
       .pipe(
         map((res) => ({ message: res?.message ?? '', newProjectID: res?.newProjectID ?? '' })),
-        // FIX (2026-09-23): was a bare 'Error', which told the user nothing. Surface the API's own
-        // reason (its 500 body carries Message/Details) so a failed conversion is understandable.
+        // Show the API's own reason (Message/Details in the error body) so the user knows why it failed.
         catchError((err) =>
           of({
             message:
@@ -143,8 +134,7 @@ export class BidService {
       );
   }
 
-  // The Blazor original passes GetUserEmail() (the signed-in user) as createdBy - see the
-  // class-level auth note. Callers pass '' until that identity source is wired up.
+  // Blazor passed the signed-in user as createdBy (see the note at the top). Callers pass '' for now.
   // getNextDisplayBidId(createdBy: string): Observable<string | null> {
   //   console.log('Fetching next display bid ID for createdBy:', createdBy); // Debugging line to check the createdBy value
   //   return this.http
@@ -188,7 +178,7 @@ getNextDisplayBidId(createdBy: string): Observable<string | null> {
       .pipe(catchError(() => of(null)));
   }
 
-  // Cross-module (Estimation) - see BidsEndpoints.GetAllContractorClientsUrl's comment.
+  // An Estimation route (see BidsEndpoints.GetAllContractorClientsUrl).
   getAllContractorClients(): Observable<ContractorClient[]> {
     return this.http
       .get<{ data: ContractorClient[] }>(`${this.base}${BidsEndpoints.GetAllContractorClientsUrl}`)

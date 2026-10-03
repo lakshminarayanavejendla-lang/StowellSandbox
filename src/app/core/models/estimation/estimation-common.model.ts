@@ -1,26 +1,22 @@
-// Mirrors StowellCoApp.DTO.SubmitToSageResponse (confirmed - despite living in
-// Services/AccountingService.cs rather than a DTO file, it's a plain response DTO returned
-// by EstimationService.SubmitBid/UpdateBid/InsertBid).
+// Matches SubmitToSageResponse, which SubmitBid, UpdateBid and InsertBid return. It's defined in
+// Services/AccountingService.cs, not a DTO file.
 export interface SubmitToSageResponse {
   success: boolean;
   message?: string;
   isExist: boolean;
 }
 
-// Mirrors StowellCoApp.DTO.EmployeeDetails (confirmed, DTO/BidInfoDto.cs). Returned by
-// IEstimationService.GetEmployees(jobId) (api/Estimation/GetEmployees/{jobId}) - ported for
-// interface completeness, but NOT actually called by AddBidBase/EditBidFormBase today (they
-// use GetAllEmployees/GetBidEmployees instead). Flagging as possibly dead code, or used by a
-// page outside this phase's scope.
+// Matches EmployeeDetails in DTO/BidInfoDto.cs, returned by GetEmployees(jobId)
+// (api/Estimation/GetEmployees/{jobId}). Add Bid and Edit Bid don't call it; they use
+// GetAllEmployees and GetBidEmployees. It may be unused.
 export interface EmployeeDetails {
   id: string;
   role: string;
   employee: string;
 }
 
-// Hardcoded division picklist from AddBidBase.cs/EditBidFormBase.cs's `divisions` list -
-// GUID-like values paired with display text. Not a service response; kept here as a typed
-// constant shape for the component to import.
+// The fixed division list from AddBidBase.cs and EditBidFormBase.cs: GUID-like values with display
+// text. Not from the API.
 export interface DivisionOption {
   value: string;
   text: string;

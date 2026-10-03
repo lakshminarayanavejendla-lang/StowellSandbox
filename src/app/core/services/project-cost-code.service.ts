@@ -18,16 +18,12 @@ import {
 import { CashFlowQueryInput } from '../models/project-management/cash-flow-query.model';
 
 /**
- * Port of Services/ICostCodeService.cs + CostCodeService.cs - the subset used by the Project
- * Management module's pages (Project Queue, Create/Modify Budget's job/phase pickers, the Cash
- * Flow Report, Cost Code Summary / Job Summary reports).
+ * The parts of CostCodeService.cs the Project Management pages use: the Project Queue, the job and
+ * phase pickers on Create/Modify Budget, the Cash Flow Report, and the Cost Code Summary and Job
+ * Summary reports.
  *
- * NAMING: named "ProjectCostCodeService" (not "CostCodeService") because the Accounting phase,
- * converted in parallel by another agent, already claimed core/services/cost-code.service.ts
- * for its own (smaller, Accounting-scoped) port of the same C# class. Both are partial,
- * independent ports of ICostCodeService/CostCodeService.cs from two different Angular modules -
- * worth reconciling into one shared service post-merge rather than keeping two divergent
- * partial ports of the same backend service alive long-term.
+ * It's called ProjectCostCodeService because cost-code.service.ts already holds Accounting's smaller
+ * port of the same C# class. Both cover only part of it; merge them into one service later.
  */
 @Injectable({ providedIn: 'root' })
 export class ProjectCostCodeService {
@@ -65,10 +61,9 @@ export class ProjectCostCodeService {
   }
 
   /**
-   * The C# version also resolves the caller's email server-side and appends it to the URL
-   * (`GetAllUserJobsUrl/{email}`) - same MSAL-vs-server-claims gap flagged in JobService.
-   * TODO: confirm whether StowellCoAPI still expects the email path segment once bearer-token
-   * auth is wired end to end, or whether it now resolves the user from the token instead.
+   * The C# version adds the user's email to the URL on the server (GetAllUserJobsUrl/{email}).
+   * TODO: once sign-in tokens reach the API, check whether it still needs the email in the path or
+   * reads the user from the token.
    */
   getAllUserJobs(email = 'placeholder@phoenixcanopyshades.com'): Observable<CostCodeRecord[]> {
     return this.http
@@ -91,7 +86,7 @@ export class ProjectCostCodeService {
       .pipe(catchError(() => of([])));
   }
 
-  /** Port of CostCodeService's own "V1" overload, used by the Cost Code Summary report page. */
+  /** CostCodeService's "V1" version, used by the Cost Code Summary report. */
   getCurrentCostSummaryViewModel(
     recnum = '',
     costCode?: string[],

@@ -1,19 +1,24 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavMenuComponent } from '../nav-menu/nav-menu.component';
-import { QuickShortcutComponent } from '../quick-shortcut/quick-shortcut.component';
+import { SidebarComponent } from '../../core/layout/sidebar/sidebar.component';
+import { TopbarComponent } from '../../core/layout/topbar/topbar.component';
+import { WorkspaceComponent } from '../../core/layout/workspace/workspace.component';
+import { AppLauncherComponent } from '../../core/layout/app-launcher/app-launcher.component';
 
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { ViewportService } from '../../shared/responsive/viewport.service';
+import { DensityService } from '../../shared/responsive/density.service';
+import { GridCardLabelsService } from '../../shared/responsive/grid-card-labels.service';
+import { FormLabelsService } from '../../shared/responsive/form-labels.service';
+import { SidebarStateService } from '../../core/layout/sidebar/sidebar-state.service';
+import { GridStatusPillsService } from '../../shared/responsive/grid-status-pills.service';
+import { GridColumnsService } from '../../shared/responsive/grid-columns.service';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    NavMenuComponent,
-    QuickShortcutComponent
-  ],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent, WorkspaceComponent, AppLauncherComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
 })
@@ -21,7 +26,35 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   private authService = inject(AuthService);
 
-  rightMenuOpen = true;
+  private viewport = inject(ViewportService);
+  /** The auto-hide setting: the sidebar is a drawer at every width. */
+  readonly sidebarState = inject(SidebarStateService);
+  /** Loads the user's saved density. The toggle itself is in the top bar. */
+  private readonly density = inject(DensityService);
+  /** Starts on its own and labels grid cells so rows can show as cards on phones. */
+  private gridCardLabels = inject(GridCardLabelsService);
+  private formLabels = inject(FormLabelsService);
+  /** Adds the Column Chooser to every data grid. */
+  private gridColumns = inject(GridColumnsService);
+  /** Shows every grid "... Status" column as a coloured pill. */
+  private gridStatusPills = inject(GridStatusPillsService);
+
+  // The app launcher on the right is a fixed column on wide screens but an overlay on smaller ones
+  // (see main-layout.component.scss), so there it starts closed instead of covering the page.
+  rightMenuOpen = !this.viewport.isCompactNavigation();
+
+  // The left navigation drawer, used below 1024px. Above that the sidebar is always shown.
+  navOpen = false;
+
+  constructor() {
+    // Behaviour only. The layout itself is CSS.
+    effect(() => {
+      if (!this.viewport.isDrawerNavigation() && !this.sidebarState.autoHide()) this.navOpen = false;
+    });
+    effect(() => {
+      if (this.viewport.isCompactNavigation()) this.rightMenuOpen = false;
+    });
+  }
 
   profileName = '';
   profileRole = '';
@@ -31,11 +64,12 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadUserProfile();
+    this.density.init(); // the user's saved density (profile), if any
+    this.gridColumns.start();
+    this.gridStatusPills.start();
+    this.formLabels.start();
   }
 
-  logout(): void {
-    this.authService.logout();
-  }
 
   private loadUserProfile(): void {
 
@@ -70,18 +104,18 @@ console.log('Profile photo loaded:', photo);
     }
   }
 
+  toggleNav(): void {
+    this.navOpen = !this.navOpen;
+  }
+
+  closeNav(): void {
+    this.navOpen = false;
+  }
+
+
   toggleRightMenu(): void {
     this.rightMenuOpen = !this.rightMenuOpen;
   }
 
-  goToPasswordPage(): void {
-    window.open(
-      'https://stowell.proserv360.tech/RDWeb/Pages/en-US/password.aspx',
-      '_blank'
-    );
-  }
 
-  emailSupport(): void {
-    window.location.href = 'mailto:support@proserv360.tech';
-  }
 }

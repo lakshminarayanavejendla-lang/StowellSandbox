@@ -1,10 +1,12 @@
-import { Component, OnInit, inject,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import {
+  BarSeriesService,
   CategoryService,
   ChartModule,
-  ColumnSeriesService,
+  DataLabelService,
   TooltipService,
 } from '@syncfusion/ej2-angular-charts';
+import { CHART_AREA, CHART_COLORS, DATA_LABEL, ROUNDED_END, TOOLTIP, categoryAxis, moneyAxis, onAxisLabel, onDataLabel, onTooltip, useChartTheme } from '../../../../shared/charts/chart-style';
 import { JobService } from '../../../../core/services/job.service';
 
 interface NetCashPoint {
@@ -12,24 +14,31 @@ interface NetCashPoint {
   value: number;
 }
 
-// Port of StackedBarChart.razor ("Net Cash Out"). Despite the original Blazor component's name
-// ("StackedBarChart"), the Angular ng2-charts version it replaced rendered a single, non-stacked
-// bar series (one dataset only, `indexAxis: 'x'`) - so this keeps that same single-series shape
-// but as a Syncfusion `Column` series rather than reaching for `StackedColumn` here; flag if the
-// original Radzen markup (not staged locally) actually stacked multiple series for this widget.
+// Net Cash Out, from StackedBarChart.razor. Despite that name it's one series, not stacked, so this
+// is a single set of horizontal bars ranked by size.
 @Component({
   selector: 'app-net-cash-chart',
   standalone: true,
   imports: [ChartModule],
-  providers: [ColumnSeriesService, CategoryService, TooltipService],
+  providers: [BarSeriesService, CategoryService, TooltipService, DataLabelService],
   templateUrl: './net-cash-chart.component.html',
 })
 export class NetCashChartComponent implements OnInit {
   private jobService = inject(JobService);
 
   chartData: NetCashPoint[] = [];
-  primaryXAxis = { valueType: 'Category' as const };
-  primaryYAxis = { labelFormat: '{value}' };
+  readonly chartTheme = useChartTheme();
+  readonly colors = CHART_COLORS;
+  readonly chartArea = CHART_AREA;
+  readonly tooltip = TOOLTIP;
+  readonly rounded = ROUNDED_END;
+  readonly marker = { dataLabel: DATA_LABEL('Outer') };
+  /** ranked horizontal bars: the biggest job is at the top */
+  readonly primaryXAxis = categoryAxis({ isInversed: true });
+  readonly primaryYAxis = moneyAxis({ minimum: 0 });
+  readonly onAxisLabel = onAxisLabel;
+  readonly onTooltip = onTooltip;
+  readonly onDataLabel = onDataLabel;
 
   ngOnInit(): void {
     this.jobService.getNetCashChart().subscribe((datasets) => {
@@ -37,7 +46,7 @@ export class NetCashChartComponent implements OnInit {
       if (!chart) return;
       const dataset = chart.datasets[0];
       const values = dataset?.data ?? [];
-      this.chartData = chart.labels.map((label, i) => ({ category: label, value: values[i] ?? 0 }));
+      this.chartData = chart.labels.map((label, i) => ({ category: label, value: values[i] ?? 0 })).sort((a, b) => b.value - a.value);
       this.cdr.detectChanges();
     });
   }

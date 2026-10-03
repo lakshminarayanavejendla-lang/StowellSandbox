@@ -1,20 +1,15 @@
-// Endpoint constants for the Project Management module. Kept separate from the shared
-// core/global-endpoints.ts (owned by Phase 1 / Dashboard) to avoid merge collisions with the
-// other phase-2 agents converting Bids/Estimation/Accounting in parallel.
+// API routes for Project Management. Kept apart from core/global-endpoints.ts so the modules
+// converted in parallel didn't collide.
 //
-// Two tiers of confidence here:
-//  1. Entries confirmed against StowellCoApp.Common.GlobalEndpoints (the C# constants class) -
-//     these are exact, centrally-defined routes.
-//  2. Entries NOT present in GlobalEndpoints.cs but found as inline string literals inside the
-//     C# service implementations (CostCodeService.cs, ProjectBudget.cs, ReportingServices.cs).
-//     These are real routes the Blazor app calls today, just not centralized on the backend -
-//     recommend adding them to GlobalEndpoints.cs server-side for consistency. Flagged inline.
-//  3. Two entries are INFERRED (not literally seen anywhere, C# only calls
-//     `_estimateservice.GetAllContractorClients()` / `.GetPhases(id)` via IEstimationService,
-//     whose implementation lives outside the files handed to this phase). Confirm with the
-//     Estimation-phase agent/backend before relying on these two.
+// Where each route comes from:
+//  1. StowellCoApp.Common.GlobalEndpoints, the C# constants class. These are exact.
+//  2. String literals inside the C# services (CostCodeService.cs, ProjectBudget.cs,
+//     ReportingServices.cs). The Blazor app calls them today, but they aren't in GlobalEndpoints.cs.
+//     It would be worth adding them there.
+//  3. Two routes that are guesses (GetAllContractorClients, GetPhases). The C# code reaches them
+//     through IEstimationService, whose source we don't have. Confirm before relying on them.
 export const ProjectManagementEndpoints = {
-  // --- Confirmed via StowellCoApp.Common.GlobalEndpoints ---
+  // --- From GlobalEndpoints ---
   GetCurrentCostSummaryViewModelUrl: 'api/ProjectOverview/GetCurrentCostSummaryViewModel',
   GetJobDetailsUrl: 'api/ProjectOverview/GetJobDetails',
   GetJobCostSummaryRecordsUrl: 'api/JobSummary/GetJobCostSummaryRecords',
@@ -23,12 +18,12 @@ export const ProjectManagementEndpoints = {
   GetAllUserJobsByStatusUrl: 'api/CostCode/GetAllUserJobsByStatus',
   GetCashFlowAllDataByPeriodUrl: 'api/CashFlow/CashFlowAllDataByPeriod',
   GetAllUserJobsUrl: 'api/CostCode/GetAllUserJobs',
-  // Typo ("Mulitple") preserved exactly as declared server-side in GlobalEndpoints.cs.
+  // "Mulitple" is spelled this way on the server too.
   CashFlowAllDataByMulitpleJobsAndPeriodUrl: 'api/CashFlow/CashFlowAllDataByMulitpleJobsAndPeriod',
   GetBidDetailsUrl: 'api/Estimation/GetBidDetails',
   GetEmployeesUrl: 'api/Estimation/GetEmployees',
 
-  // --- Not centralized in GlobalEndpoints.cs; ported from inline literals in the service .cs files ---
+  // --- From string literals in the C# services ---
   GetCostCodeRecordsUrl: 'api/CostCode/GetCostCodeRecords',
   GetBidsUrl: 'api/CostCode/GetBids',
   GetJobPhasesDataUrl: 'api/CostCode/GetJobPhasesData',
@@ -41,9 +36,8 @@ export const ProjectManagementEndpoints = {
   GetCostCodesForReportUrl: 'api/CostCodeSummary/GetCostCodesForReport',
   GetJobCodesForReportUrl: 'api/CostCodeSummary/GetJobCodesForReport',
   GetPhasesForReportUrl: 'api/CostCodeSummary/GetPhasesForReport',
-  // NB: distinct endpoint from GetCurrentCostSummaryViewModelUrl above - this is
-  // CostCodeService's own "V1" overload (query-string driven: recnum/costCode/phase/startDate/
-  // endDate) used by the Cost Code Summary report page, not the tab-overview one.
+  // Not the same as GetCurrentCostSummaryViewModelUrl above. This one is used by the Cost Code
+  // Summary report and takes recnum, costCode, phase, startDate and endDate in the query string.
   GetCurrentCostSummaryViewModel1Url: 'api/CostCodeSummary/GetCurrentCostSummaryViewModel1',
   GetProjectBudgetRecordsUrl: 'api/ProjectBudgetConfiguration/GetProjectBudgetRecords',
   SaveCreateBatchCostCodesUrl: 'api/ProjectBudgetConfiguration/SaveCreateBatchCostCodes',
@@ -52,19 +46,16 @@ export const ProjectManagementEndpoints = {
   UploadAddExcelUrl: 'api/ProjectBudgetConfiguration/UploadAddExcel',
   GetCashFlowForecastReportDataUrl: 'api/Reports/GetCashFlowForecastReportData',
 
-  // --- INFERRED, unconfirmed - see file header note ---
+  // --- Guesses, not confirmed (see the note at the top) ---
   GetAllContractorClientsUrl: 'api/Estimation/GetAllContractorClients',
   GetEstimationPhasesUrl: 'api/Estimation/GetPhases',
 
-  // --- NEW - Stowell PO Module (from the "Stowell PO Module" Moqups design spec, not a Blazor
-  // port). All 7 endpoints below are now real, implemented in PoQueueController.cs/
-  // CoQueueController.cs. Reads (GetPoQueueData/GetJobPoOverview/GetCoQueueData) cross-DB-join
-  // SAGESBQ into StowellSandbox.dbo.pchord/prmchg (real Sage PO/CO records). SavePoRequest/
-  // SaveCoRequest write only to new SAGESBQ-owned draft tables (safe/reversible - no Sage record
-  // created). SubmitPoRequest/SubmitCoRequest are the one operation that actually inserts a
-  // real, permanent, numbered PO/CO into StowellSandbox.dbo.pchord+pcorln / prmchg+sbcgln - see
-  // po_module_write_side.sql for the full design rationale and known gaps (vendor/cost-code are
-  // still free text on the Angular form, not real Sage lookups). ---
+  // --- PO module (built from the "Stowell PO Module" Moqups design, not ported from Blazor) ---
+  // All of these exist in PoQueueController.cs and CoQueueController.cs. The reads join SAGESBQ to
+  // the real Sage PO/CO tables in StowellSandbox (pchord, prmchg). Save writes only to draft tables
+  // in SAGESBQ, so nothing reaches Sage. Submit is the one call that creates a real, numbered PO or
+  // CO in StowellSandbox (pchord/pcorln, prmchg/sbcgln). po_module_write_side.sql has the design
+  // notes and known gaps; for example, vendor and cost code are still free text on the form.
   GetPoQueueDataUrl: 'api/PoQueue/GetPoQueueData',
   GetJobPoOverviewUrl: 'api/PoQueue/GetJobPoOverview',
   GetCoQueueDataUrl: 'api/CoQueue/GetCoQueueData',
@@ -80,27 +71,16 @@ export const ProjectManagementEndpoints = {
   DeleteCoDraftUrl: 'api/CoQueue/DeleteCoDraft',
   DeleteEmployeeUrl: 'api/Estimation/DeleteEmployee',
 
-  // --- NEW, NOT YET CONFIRMED - edit-on-click for an already-submitted PO/CO (Master Job PO/CO
-  // ID columns in po-queue/co-queue/po-tab are now links to an edit form). Unlike the 7 endpoints
-  // above, PoQueueController.cs/CoQueueController.cs do NOT implement these two pairs yet - no
-  // "get one existing Sage PO/CO record" or "update it" operation exists server-side. URLs below
-  // follow the same path-param convention as GetPoDraftUrl/GetCoDraftUrl (`{base}/{id}`) purely
-  // as a guess at what the real routes will look like - CONFIRM against the backend before
-  // relying on them; until then getPoById/getCoById resolve to null and updatePo/updateCo resolve
-  // to {saved:false} via the same catchError-to-null/false pattern used everywhere else in this
-  // file's services, so the edit form loads empty and Save reports failure rather than silently
-  // no-opping.
+  // --- Editing a PO or CO that was already submitted. Not on the server yet. ---
+  // Used when a Master Job PO/CO ID link in the queues opens the edit form
+  // (PoQueueController.GetPoById / UpdatePo, CoQueueController.GetCoById / UpdateCo).
   GetPoByIdUrl: 'api/PoQueue/GetPoById',
   UpdatePoUrl: 'api/PoQueue/UpdatePo',
   GetCoByIdUrl: 'api/CoQueue/GetCoById',
   UpdateCoUrl: 'api/CoQueue/UpdateCo',
 
-  // --- NEW - mockup update (client-updated Moqups, pages TAB-Invoices / FORM-PO Request
-  // Approval / FORM-CO Request Approval / FORM-CO Reallocation / FORM-CO Allocation). None of
-  // these 9 endpoints are backend-implemented yet (same "not confirmed" status as the
-  // GetPoById/UpdatePo/GetCoById/UpdateCo block above) - added here only so the Angular
-  // services/components have a real constant to call and a single place to update once the
-  // backend exists. See each service's header comment for the specific gap. ---
+  // --- From the updated Moqups (Invoices tab, PO/CO approval forms, CO allocation forms) ---
+  // Invoices (InvoicesController) and PO/CO approval (PoQueueController, CoQueueController).
   GetJobInvoicesUrl: 'api/Invoices/GetJobInvoices',
   GetPoRequestForApprovalUrl: 'api/PoQueue/GetPoRequestForApproval',
   ApprovePoRequestUrl: 'api/PoQueue/ApprovePoRequest',
@@ -108,30 +88,26 @@ export const ProjectManagementEndpoints = {
   GetCoRequestForApprovalUrl: 'api/CoQueue/GetCoRequestForApproval',
   ApproveCoRequestUrl: 'api/CoQueue/ApproveCoRequest',
   RejectCoRequestUrl: 'api/CoQueue/RejectCoRequest',
-  // Real backend routes (CoBudgetAllocationController) - cost codes for the Budget Update grid
-  // reuse PoQueueController.GetJobCostCodes instead of a dedicated endpoint (JobCostCodeService).
+  // These are real (CoBudgetAllocationController). The Budget Update grid gets its cost codes from
+  // PoQueueController.GetJobCostCodes (JobCostCodeService).
   SaveCoBudgetAllocationUrl: 'api/CoBudgetAllocation/Save',
   SubmitCoBudgetAllocationUrl: 'api/CoBudgetAllocation/Submit',
   GetCoBudgetAllocationByIdUrl: 'api/CoBudgetAllocation',
-  // NEW - live preview of the number Submit would auto-assign (see CO_SubmitBudgetReallocation's
-  // Prime="BC"+year+seq / Internal="CO"+year+seq rule); a preview only, not a reservation - the
-  // real number is still (re)computed under lock at actual Submit time.
+  // Previews the number Submit would give: Prime is "BC" + year + sequence, Internal is "CO" + year
+  // + sequence. It doesn't reserve it; Submit works the number out again under a lock.
   GetNextCoBudgetAllocationNumberUrl: 'api/CoBudgetAllocation/NextNumber',
-  // NEW (2026-09-20) - CO Reason / CO Status dropdown options straight from StowellSandbox, and
-  // the full cost code catalog for the Budget Update "Cost Code" picker. See
-  // CoBudgetAllocationController.GetLookups / GetAllCostCodes.
+  // CO Reason and CO Status options from StowellSandbox, and every cost code for the Budget Update
+  // picker (CoBudgetAllocationController.GetLookups / GetAllCostCodes). Added 2026-09-20.
   GetCoBudgetAllocationLookupsUrl: 'api/CoBudgetAllocation/Lookups',
   GetCoBudgetAllocationAllCostCodesUrl: 'api/CoBudgetAllocation/AllCostCodes',
-  // NEW (2026-09-24) - each cost code's budget per phase for a job; drives the form's pre-submit phase check.
+  // Each cost code's budget per phase for a job, used by the form's check before Submit. Added 2026-09-24.
   GetCoBudgetAllocationPhaseBudgetsUrl: 'api/CoBudgetAllocation/PhaseBudgets',
 
-  // NEW - client-updated Moqups (page TAB-Budget/Financials, the "Budget Log" table). Not
-  // backend-implemented yet - see budget-log.service.ts.
+  // The Budget Log table on the Budget tab. Not on the server yet (see budget-log.service.ts).
   GetBudgetLogUrl: 'api/ProjectBudgetConfiguration/GetBudgetLog',
 
-  // NEW - job access audit trail (not a Blazor port; not a Moqups page either - an un-navigated
-  // grid reachable only by direct URL). Real backend (JobAccessController) - see
-  // job-access-log.service.ts and job-access-log.component.ts.
+  // Who opened which job. Real (JobAccessController). It isn't in the menu, so you reach the page by
+  // URL or from Stowell Admin. See job-access-log.service.ts and job-access-log.component.ts.
   LogJobAccessUrl: 'api/JobAccess/LogAccess',
   GetJobAccessLogUrl: 'api/JobAccess/GetLog',
 } as const;

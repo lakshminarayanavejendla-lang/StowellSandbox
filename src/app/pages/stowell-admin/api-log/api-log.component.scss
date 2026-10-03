@@ -1,7 +1,7 @@
 $navy: #00355f;
 $ok: #2e7d32;
 $warn: #b26a00;
-$bad: #c0392b;
+$bad: #c2410c;
 
 .filters {
   margin-bottom: 14px;
@@ -14,10 +14,10 @@ $bad: #c0392b;
 
     button {
       padding: 6px 14px;
-      border: 1px solid #c7c7c7;
+      border: 1px solid var(--sh-line);
       border-radius: 16px;
-      background: #fff;
-      color: #333;
+      background: var(--sh-surface);
+      color: var(--sh-ink);
       cursor: pointer;
 
       &.on {
@@ -40,7 +40,7 @@ $bad: #c0392b;
     flex-direction: column;
     gap: 3px;
     font-weight: 600;
-    color: #555;
+    color: var(--sh-ink);
     font-size: 0.85rem;
 
     &.auto {
@@ -55,7 +55,7 @@ $bad: #c0392b;
   input[type='datetime-local'],
   select {
     padding: 6px 10px;
-    border: 1px solid #c7c7c7;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     font: inherit;
     min-width: 150px;
@@ -91,10 +91,10 @@ $bad: #c0392b;
     flex-direction: column;
     min-width: 170px;
     padding: 12px 16px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid var(--sh-line);
     border-left: 5px solid $navy;
     border-radius: 6px;
-    background: #fff;
+    background: var(--sh-surface);
     text-align: left;
     cursor: pointer;
 
@@ -113,11 +113,11 @@ $bad: #c0392b;
     .num {
       font-size: 1.6rem;
       font-weight: 700;
-      color: #212529;
+      color: var(--sh-ink);
     }
 
     .lbl {
-      color: #666;
+      color: var(--sh-ink-3);
       font-size: 0.85rem;
     }
   }
@@ -130,11 +130,13 @@ $bad: #c0392b;
   margin-bottom: 14px;
 
   .box {
-    flex: 1 1 320px;
-    border: 1px solid #e5e5e5;
+    flex: 1 1 min(100%, 320px);
+    min-width: 0;
+    overflow-x: auto;
+    border: 1px solid var(--sh-line);
     border-radius: 6px;
     padding: 8px 12px;
-    background: #fafafa;
+    background: var(--sh-surface-2);
 
     h4 {
       margin: 4px 0 6px;
@@ -150,14 +152,14 @@ $bad: #c0392b;
 
     td {
       padding: 3px 6px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--sh-line);
     }
 
     tr.click {
       cursor: pointer;
 
       &:hover {
-        background: #eef3f8;
+        background: var(--sh-surface-2);
       }
     }
 
@@ -178,20 +180,20 @@ $bad: #c0392b;
     }
 
     .when {
-      color: #777;
+      color: var(--sh-ink-3);
       white-space: nowrap;
     }
   }
 
   .none {
-    color: #777;
+    color: var(--sh-ink-3);
     margin: 6px 0;
   }
 }
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--sh-line);
   border-radius: 6px;
 
   &.busy {
@@ -214,7 +216,7 @@ table.calls {
 
   td {
     padding: 6px 10px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--sh-line);
     vertical-align: top;
   }
 
@@ -222,19 +224,19 @@ table.calls {
     cursor: pointer;
 
     &:hover {
-      background: #f2f6fa;
+      background: var(--sh-surface-2);
     }
 
     &.selected {
-      background: #e6eef6;
+      background: var(--sh-surface-2);
     }
 
     &.bad {
-      background-color: #fdf1ef;
+      background-color: var(--sh-surface-2);
     }
 
     &.warn {
-      background-color: #fff8ec;
+      background-color: var(--sh-surface-2);
     }
   }
 
@@ -249,7 +251,7 @@ table.calls {
     white-space: nowrap;
 
     .q {
-      color: #888;
+      color: var(--sh-ink-3);
     }
   }
 
@@ -263,7 +265,7 @@ table.calls {
 
   .empty {
     text-align: center;
-    color: #777;
+    color: var(--sh-ink-3);
     padding: 24px;
   }
 }
@@ -288,7 +290,7 @@ table.calls {
 }
 
 .detail-row td {
-  background: #f7f9fb;
+  background: var(--sh-surface-2);
 }
 
 .detail {
@@ -299,7 +301,7 @@ table.calls {
     flex-wrap: wrap;
     gap: 18px;
     margin-bottom: 6px;
-    color: #444;
+    color: var(--sh-ink);
 
     b {
       color: $navy;
@@ -312,8 +314,8 @@ table.calls {
     padding: 8px 10px;
     max-height: 260px;
     overflow: auto;
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--sh-surface);
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
     font-size: 0.8rem;
     white-space: pre-wrap;
@@ -322,12 +324,12 @@ table.calls {
 
   .ua {
     margin: 6px 0 0;
-    color: #888;
+    color: var(--sh-ink-3);
     font-size: 0.78rem;
   }
 
   .none {
-    color: #777;
+    color: var(--sh-ink-3);
     margin: 4px 0;
   }
 }
@@ -341,9 +343,9 @@ table.calls {
 
   button {
     padding: 5px 12px;
-    border: 1px solid #c7c7c7;
+    border: 1px solid var(--sh-line);
     border-radius: 4px;
-    background: #fff;
+    background: var(--sh-surface);
     cursor: pointer;
 
     &:disabled {
@@ -360,13 +362,13 @@ table.calls {
 
   .stamp {
     margin-left: auto;
-    color: #888;
+    color: var(--sh-ink-3);
     font-size: 0.82rem;
   }
 }
 
 .message.error {
-  background: #fdecea;
+  background: var(--sh-surface-2);
   color: #611a15;
   padding: 8px 12px;
   border-radius: 4px;

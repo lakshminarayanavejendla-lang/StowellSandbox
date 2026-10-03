@@ -1,8 +1,12 @@
 
-<nav class="nav-menu">
+<nav class="nav-menu" [class.expanded]="expandOnly()" [class.rail]="collapsed() && !expandOnly()">
   <ul>
 
     @for (item of menu; track item.key) {
+
+      @if (item.group) {
+        <li class="nav-group" aria-hidden="true">{{ item.group }}</li>
+      }
 
       <li
         [class.parent-active]="openMenu === item.key">
@@ -12,15 +16,15 @@
           @if (item.route) {
 
             <a
-              [routerLink]="item.route"
+              [routerLink]="item.route" [attr.title]="item.label" [attr.aria-label]="item.label"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{
                 exact: item.key === 'home'
               }">
 
               <span>
-                <i [class]="item.icon" [style.color]="item.color"></i>
-                {{ item.label }}
+                <i [class]="item.icon"></i>
+                <span class="nav-label">{{ item.label }}</span>
               </span>
 
             </a>
@@ -29,8 +33,8 @@
 
             <span class="disabled-link">
 
-              <i [class]="item.icon" [style.color]="item.color"></i>
-              {{ item.label }}
+              <i [class]="item.icon"></i>
+              <span class="nav-label">{{ item.label }}</span>
 
             </span>
 
@@ -41,19 +45,18 @@
           <!-- Parent menu -->
           <button
             type="button"
-            class="menu-toggle"
+            class="menu-toggle" [attr.title]="item.label" [attr.aria-label]="item.label"
             [class.active]="openMenu === item.key"
+            [class.current]="isCurrent(item)"
             (click)="toggleMenu(item)">
 
             <span>
 
-              <i [class]="item.icon" [style.color]="item.color"></i>
+              <i [class]="item.icon"></i>
 
-              {{ item.label }}
+              <span class="nav-label">{{ item.label }}</span>
 
-              <span class="menu-arrow arrow">
-                {{ openMenu === item.key ? '▲' : '▼' }}
-              </span>
+              <i class="bi bi-chevron-down menu-arrow arrow" [class.open]="openMenu === item.key" aria-hidden="true"></i>
 
             </span>
 
@@ -70,7 +73,7 @@
                 track child.label
               ) {
 
-                <li>
+                <li [class.lvl-1]="child.level === 1" [class.lvl-2]="child.level === 2">
 
                   @if (child.route) {
 

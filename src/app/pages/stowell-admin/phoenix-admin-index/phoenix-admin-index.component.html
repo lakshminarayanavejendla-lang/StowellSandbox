@@ -1,12 +1,8 @@
-<h3>Stowell Admin</h3>
-<hr />
-
+<app-page-header title="Stowell Admin"></app-page-header>
 <div class="tiles">
-  <!-- FLAG: source href is literally "/StowellAdmin" (self-link) for this tile - the
-       "Invoice Upload" feature has no real page/route in the material handed off to this phase
-       (only a dead demo modal, not ported - see component header comment). Left pointing at this
-       module's own landing route to avoid a dead link; confirm whether a real Invoice Upload
-       page/route exists elsewhere before wiring this to real functionality. -->
+  <!-- In Blazor this tile links to "/StowellAdmin", this same page. There's no Invoice Upload page,
+       only an unused demo popup (see the component header), so it links here too. Check whether a
+       real Invoice Upload page exists before wiring it up. -->
   <a routerLink="/stowell-admin" class="tile">
     <svg viewBox="0 0 384 512" width="40" height="40" fill="currentColor">
       <path
@@ -34,11 +30,8 @@
     <span>Sage Session Disconnect</span>
   </a>
 
-  <!-- NEW (2026-09-16, per user request) - Job Access Log (who accessed which project) already
-       existed as a standalone Project Management route (project-management/job-access-log,
-       see project-management.routes.ts's "job access audit trail" comment); just wasn't
-       reachable from the Stowell Admin landing page. Added as a tile here, pointing at that
-       same existing route rather than duplicating the component. -->
+  <!-- The Job Access Log (who opened which project), added here at the user's request (2026-09-16).
+       It links to the existing page at project-management/job-access-log. -->
   <a routerLink="/project-management/job-access-log" class="tile">
     <svg viewBox="0 0 512 512" width="40" height="40" fill="currentColor">
       <path
@@ -48,8 +41,8 @@
     <span>Job Access Log</span>
   </a>
 
-  <!-- NEW (2026-09-24) - every API call (all users) with successes and errors: who, when, status, time taken, and the reason
-       for a failure. Backed by dbo.ApiCallLog / ApiLogController. -->
+  <!-- Every API call from all users, successes and errors: who, when, status, time taken and why it
+       failed (2026-09-24). Comes from dbo.ApiCallLog through ApiLogController. -->
   <a routerLink="/stowell-admin/api-log" class="tile">
     <svg viewBox="0 0 512 512" width="40" height="40" fill="currentColor">
       <path

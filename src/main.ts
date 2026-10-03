@@ -27,4 +27,9 @@ registerLicense(
   // 'Ngo9BigBOggjGyl/VkJ+XU9Gf1RLVGpAY1J0WGBYb1xzflBPallYT3RfQFtjQX9Ud0FhWHtXdnxUR2tfVQ=='
 );
 
+// Column Chooser (user-selectable columns) is offered on every grid by GridColumnsService, so its modules are made available globally.
+// The grid library is large and the home page has no grid, so it is loaded in the background right after the app starts instead of
+// being part of the first download; a grid page asks for the same code anyway, so it is ready by the time one renders.
+import('@syncfusion/ej2-grids').then(({ Grid, Toolbar, ColumnChooser }) => Grid.Inject(Toolbar, ColumnChooser));
+
 bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));

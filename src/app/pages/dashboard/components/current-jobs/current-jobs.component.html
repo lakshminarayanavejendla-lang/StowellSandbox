@@ -1,34 +1,48 @@
 <div class="toolbar">
-  <div class="search-box">
-    <i class="bi bi-search"></i>
-    <input
-      type="text"
-      placeholder="Search jobs..."
-      [value]="searchTerm"
-      (input)="onSearchChange($any($event.target).value)"
-    />
-  </div>
+  <label class="search-box">
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <input type="text" placeholder="Search jobs" aria-label="Search jobs" [value]="searchTerm()" (input)="onSearch($any($event.target).value)" />
+  </label>
+  <a class="view-all" routerLink="/project-queue">View all</a>
 </div>
 
-<!-- Real Syncfusion Grid replacing the old plain <table>. `filteredJobs` (the existing
-     client-side search result) feeds [dataSource] directly; paging/sorting are the grid's own
-     built-in features (PageService/SortService registered in the component's providers). -->
-<ejs-grid
-class="black-grid"
-  [dataSource]="filteredJobs"
-  [allowPaging]="true"
-  [allowSorting]="true"
-  [pageSettings]="pageSettings"
-  height="360"
->
-  <e-columns>
-    <e-column field="jobID" headerText="Job ID" width="140">
-      <!-- Column template - Syncfusion's documented pattern for Angular Grid column templates
-           is `<ng-template #template let-data>` inside `<e-column>`; `data` is the row object. -->
-      <ng-template #template let-data>
-        <a [routerLink]="['/project-management/project-overview', data.jobID]" class="opportunity-link">{{ data.jobID }}</a>
-      </ng-template>
-    </e-column>
-    <e-column field="jobName" headerText="Job Name"></e-column>
-  </e-columns>
-</ejs-grid>
+<table class="jobs">
+  <thead>
+    <tr>
+      <th>Job</th>
+      <th>Status</th>
+      <th class="col-progress">Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (j of rows(); track j.jobID) {
+      <tr (click)="jobSelected.emit(j)" (keydown.enter)="jobSelected.emit(j)" tabindex="0">
+        <td>
+          <a [routerLink]="['/project-management/project-overview', j.jobID]" class="job-id" (click)="$event.stopPropagation()">{{ j.jobID }}</a>
+          <span class="job-name">{{ j.jobName }}</span>
+        </td>
+        <td>
+          <span class="pill" [class]="'pill ' + tone(j.status)">{{ j.status || 'No status' }}</span>
+        </td>
+        <td class="col-progress">
+          <div class="prog" role="progressbar" [attr.aria-valuenow]="progress(j)" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Progress ' + progress(j) + ' percent'">
+            <i [style.width.%]="progress(j)"></i>
+          </div>
+          <span class="prog-num">{{ progress(j) }}%</span>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="3" class="empty">{{ searchTerm() ? 'No jobs match your search.' : 'No current jobs.' }}</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+<div class="pager">
+  <span>{{ rangeLabel() }}</span>
+  <div>
+    <button type="button" aria-label="Previous page" [disabled]="page() === 0" (click)="go(-1)"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+    <button type="button" aria-label="Next page" [disabled]="page() >= pageCount() - 1" (click)="go(1)"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+  </div>
+</div>

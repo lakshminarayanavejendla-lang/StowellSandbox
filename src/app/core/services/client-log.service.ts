@@ -13,13 +13,14 @@ export interface ClientErrorReport {
 }
 
 /**
- * NEW (2026-09-24) - reports errors the API can't see on its own (a JavaScript error in the page, or an API call that never got a
- * response - network down, timeout, blocked) to POST api/ClientLog/Error, which stores them in dbo.ApiCallLog (Source = 'Client')
- * next to the server's own record of every API call. Failed calls that DID reach the API are already logged server-side, so they
- * are not reported again from here.
+ * Sends errors the API can't see to POST api/ClientLog/Error (2026-09-24): JavaScript errors in the
+ * page, and API calls that never got a response because the network was down, they timed out or
+ * were blocked. They're stored in dbo.ApiCallLog with Source = 'Client', next to the server's own
+ * log. Calls that reached the API are already logged there, so they aren't sent again.
  *
- * Uses HttpBackend directly so this request bypasses every interceptor (no auth token, and no risk of an error-reporting loop),
- * never throws, and is capped at 30 reports a minute so a broken page can't flood the log.
+ * It uses HttpBackend, so the request skips all interceptors (no token, and no error-reporting
+ * loop). It never throws, and it sends at most 30 reports a minute so a broken page can't flood
+ * the log.
  */
 @Injectable({ providedIn: 'root' })
 export class ClientLogService {
@@ -41,7 +42,7 @@ export class ClientLogService {
       try {
         userName = this.injector.get(AuthService).getLoggedInUserEmail();
       } catch {
-        /* auth not ready - log without a name */
+        /* sign-in not ready, so log without a name */
       }
 
       this.http

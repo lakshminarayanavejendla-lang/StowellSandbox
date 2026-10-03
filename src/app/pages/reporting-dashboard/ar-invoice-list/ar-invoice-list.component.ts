@@ -6,31 +6,22 @@ import { ProjectCostCodeService } from '../../../core/services/project-cost-code
 import { CostCodeRecord, recJobNumber } from '../../../core/models/project-management/cost-code.model';
 import { InvoicePayment } from '../../../core/models/project-management/cost-summary.model';
 import { exportGridPdf, exportGridExcel, exportWordTable } from '../../../core/utils/report-export.util';
+import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 
 /**
- * Port of Components/Pages/ReportingDashboard/ARInvoiceList.razor + ARInvoiceListBase.cs
- * (@page "/ARInvoiceList"). Job dropdown (ICostCodeService.GetAllUserJobs, no email in the
- * C# call signature - see ProjectCostCodeService.getAllUserJobs()'s own header note re: the
- * server resolving the email from ClaimsPrincipal) feeds ICostCodeService.GetARInvoice(jobNumber),
- * already ported as ProjectCostCodeService.getARInvoice.
+ * The AR Invoice List (/ARInvoiceList in Blazor). Pick a job (GetAllUserJobs) to see its invoices
+ * (getARInvoice).
  *
- * FIX - PDF/Excel/Word export: previously disabled with a stale "needs a client-side library"
- * message - see report-export.util.ts's header comment for why that was wrong (Syncfusion's
- * grid package already provides PDF/Excel export natively) and how Word export works here.
+ * PDF, Excel and Word export work (see report-export.util.ts).
  *
- * FLAG - likely source bug, reproduced as-is: the Blazor grid's "Invoice#" column is bound to
- * `item.JobName` and its "Job" column is bound to `item.InvNum` - the two look swapped versus
- * what their headers say. Reproduced exactly (same header/field pairing) rather than silently
- * "fixed", per this project's convention of flagging rather than correcting suspected upstream
- * bugs without confirmation - see HANDOFF.md's Bids module flags for the same pattern.
- * This swap carries over unchanged into the Syncfusion Grid below (still `field="jobName"` under
- * the "Invoice#" header, `field="invNum"` under "Job") - do NOT "fix" this while swapping grid
- * libraries, per the task instructions.
+ * Probably a bug in Blazor, kept as is: the "Invoice#" column shows JobName and the "Job" column
+ * shows InvNum, which look swapped. The grid keeps the same pairing (field="jobName" under Invoice#,
+ * field="invNum" under Job). Don't change it without confirming.
  */
 @Component({
   selector: 'app-ar-invoice-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, GridModule],
+  imports: [PageHeaderComponent, CommonModule, FormsModule, GridModule],
   providers: [SortService, PdfExportService, ExcelExportService],
   templateUrl: './ar-invoice-list.component.html',
   styleUrl: './ar-invoice-list.component.scss',

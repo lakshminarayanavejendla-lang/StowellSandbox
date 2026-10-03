@@ -7,7 +7,7 @@
     <label>Job Name</label>
     <input type="text" [value]="bidModel?.jobName" readonly />
   </div>
-  <!-- NEW (2026-09-23, Mike Smith): all phases together (default) or one phase at a time. -->
+  <!-- All phases together (the default) or one at a time (Mike Smith, 2026-09-23). -->
   <div class="field">
     <label>Phase</label>
     <select [ngModel]="selectedPhaseId" (ngModelChange)="onPhaseChange($event)">
@@ -68,8 +68,7 @@
         <e-column headerText="Project Name" width="180">
           <ng-template #template>{{ bidModel?.jobName }}</ng-template>
         </e-column>
-        <!-- FLAG: no "CO Type" field exists on CoDraftSummary - see co-tab.component.ts's header
-             comment. -->
+        <!-- There's no "CO Type" field in the data (see the component header). -->
         <e-column headerText="CO Type" width="120"></e-column>
         <e-column field="status" headerText="CO Status" width="110"></e-column>
         <e-column field="coReason" headerText="Description" width="220"></e-column>

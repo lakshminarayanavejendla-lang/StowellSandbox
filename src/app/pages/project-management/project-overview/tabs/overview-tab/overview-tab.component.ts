@@ -6,10 +6,9 @@ import { ProjectOverviewService } from '../../../../../core/services/project-ove
 import { CurrentCostSummaryViewModel } from '../../../../../core/models/project-management/cost-summary.model';
 import { BidInfoDto, BidPhase } from '../../../../../core/models/project-management/bid-info.model';
 import { FormsModule } from '@angular/forms';
-// Port of Components/Pages/ProjectManagement/OverviewTab.razor + OverviewTabBase.cs.
-// Read-only summary form (Job Id/Name/Division/Status/Address/dates/Contract Amount) plus a
-// "bid phases" grid - all fields are readonly in the source too (edits happen back in the
-// Estimation module's Edit Bid Form, linked to via the "Update" button).
+// The Overview tab, from OverviewTab.razor: a read-only summary (job id and name, division, status,
+// address, dates, contract amount) and a bid phases grid. Changes are made in the Edit Bid form
+// through the "Update" button, as in Blazor.
 @Component({
   selector: 'app-overview-tab',
   standalone: true,
@@ -30,23 +29,17 @@ export class OverviewTabComponent implements OnChanges {
   bidModel?: BidInfoDto;
   bidPhases: BidPhase[] = [];
 
-  // FLAG: the Blazor version reads this from IConfiguration ("ProjectFolderLibrary"), which
-  // has no direct Angular equivalent wired up yet. Hardcoded empty pending a decision on where
-  // SPA-side app config like this should live (environment.ts vs. an API-served settings call).
+  // Blazor read this from the ProjectFolderLibrary setting, which the app doesn't have yet. It's empty
+  // until we decide where settings like this go (environment.ts or an API call).
   projectFolderLibraryUrl = '';
 selectedDivision: string = 'selectDivision';
 selectedBidStatus: string = '';
   ngOnChanges(): void {
     if (!this.projectId) return;
-    // FIX - stuck on "Loading..." forever despite the data arriving correctly: the existing
-    // detectChanges() calls below run, but this app's MSAL interceptor/zone.js interaction means
-    // the HTTP response callback itself can execute outside Angular's zone, so the change
-    // detection this triggers doesn't reliably reach the DOM (confirmed live - the component's
-    // `model`/`bidModel` fields were both fully populated, but the template's `@if (!model)`
-    // never flipped until a detectChanges() was invoked from a fresh macrotask). Wrapping each
-    // subscribe body in ngZone.run() - the same fix admin-panel.component.ts already uses for
-    // this exact class of issue - forces the callback back into Angular's zone before
-    // detectChanges() runs, so the check-and-render actually commits.
+    // The tab stayed on "Loading..." even though the data arrived. The MSAL interceptor can run the
+    // response callback outside Angular's zone, so detectChanges() didn't update the page: `model`
+    // was filled in, but `@if (!model)` never changed. Each subscribe body runs inside ngZone.run(),
+    // as in admin-panel.component.ts, so the render goes through.
     this.overviewService.getCurrentCostSummaryViewModel(String(this.projectId)).subscribe((m) => {
       this.ngZone.run(() => {
         this.model = m;
